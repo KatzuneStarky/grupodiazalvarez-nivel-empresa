@@ -1,5 +1,7 @@
 "use client"
 
+import RootAbout from "@/modules/root/components/about";
+import RootHero from "@/modules/root/components/hero";
 import { useEffect, useRef } from "react";
 import { animate } from "animejs"
 
@@ -34,6 +36,8 @@ export default function Home() {
 
   return (
     <div ref={pageRef} className="min-h-screen">
+      <RootHero />
+      <RootAbout />
     </div>
   );
 }
