@@ -1,0 +1,58 @@
+export const vehicles = [
+    {
+      id: 1,
+      name: "Heavy-Duty Fuel Tanker",
+      image: "/placeholder.svg?height=300&width=400",
+      capacity: "40,000 Liters",
+      type: "Long-Distance Transport",
+      features: ["GPS Tracking", "Safety Sensors", "Emergency Systems", "Environmental Controls"],
+      specs: {
+        engine: "Cummins X15",
+        transmission: "Automated Manual",
+        safety: "ADR Certified",
+        year: "2022-2024",
+      },
+    },
+    {
+      id: 2,
+      name: "Medium Fuel Delivery Truck",
+      image: "/placeholder.svg?height=300&width=400",
+      capacity: "20,000 Liters",
+      type: "Regional Distribution",
+      features: ["Precision Metering", "Multi-Compartment", "Quick Connect", "Real-time Monitoring"],
+      specs: {
+        engine: "Caterpillar C13",
+        transmission: "Allison Automatic",
+        safety: "DOT Compliant",
+        year: "2021-2023",
+      },
+    },
+    {
+      id: 3,
+      name: "Compact Urban Delivery",
+      image: "/placeholder.svg?height=300&width=400",
+      capacity: "10,000 Liters",
+      type: "City & Local Delivery",
+      features: ["Compact Design", "Low Emissions", "Easy Maneuvering", "Efficient Loading"],
+      specs: {
+        engine: "Isuzu 6HK1",
+        transmission: "Manual 6-Speed",
+        safety: "City Certified",
+        year: "2020-2024",
+      },
+    },
+    {
+      id: 4,
+      name: "Emergency Response Unit",
+      image: "/placeholder.svg?height=300&width=400",
+      capacity: "15,000 Liters",
+      type: "24/7 Emergency Service",
+      features: ["Rapid Response", "All-Terrain", "Emergency Equipment", "Communication Systems"],
+      specs: {
+        engine: "Detroit DD13",
+        transmission: "DT12 Automated",
+        safety: "Emergency Certified",
+        year: "2023-2024",
+      },
+    },
+  ]

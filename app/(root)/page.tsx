@@ -1,5 +1,7 @@
 "use client"
 
+import RootServices from "@/modules/root/components/services";
+import RootFleet from "@/modules/root/components/fleet";
 import RootAbout from "@/modules/root/components/about";
 import RootHero from "@/modules/root/components/hero";
 import { useEffect, useRef } from "react";
@@ -38,6 +40,8 @@ export default function Home() {
     <div ref={pageRef} className="min-h-screen">
       <RootHero />
       <RootAbout />
+      <RootServices />
+      <RootFleet />
     </div>
   );
 }
