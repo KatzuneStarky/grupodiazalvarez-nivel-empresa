@@ -1,3 +1,4 @@
+import RootFooter from "@/modules/root/components/footer"
 import RootNavbar from "@/modules/root/components/navbar"
 
 const RootLayout = ({
@@ -9,6 +10,7 @@ const RootLayout = ({
         <div>
             <RootNavbar />
             {children}
+            <RootFooter />
         </div>
     )
 }

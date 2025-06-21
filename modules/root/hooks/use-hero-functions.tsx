@@ -102,8 +102,7 @@ export const useHeroFunctions = () => {
             easing: "easeOutQuart",
         })
 
-        // Scroll to appropriate section based on slide
-        const targetSections = ["#contact", "#contact", "#about", "#about"]
+        const targetSections = ["#contacto", "#contacto", "#acercade", "#flete"]
         const targetSection = targetSections[currentSlide]
         document.querySelector(targetSection)?.scrollIntoView({ behavior: "smooth" })
     }

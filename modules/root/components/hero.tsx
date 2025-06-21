@@ -17,7 +17,7 @@ const RootHero = () => {
 
     return (
         <section
-            id="home"
+            id="inicio"
             ref={heroRef}
             className={`relative min-h-screen flex items-center justify-center overflow-hidden transition-all duration-1000 ${currentSlideData.background}`}
         >

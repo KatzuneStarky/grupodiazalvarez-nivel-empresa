@@ -22,7 +22,7 @@ const DesktopNavbar = ({
                         <Truck className="w-6 h-6 text-white" />
                     </div>
                     <span className={`text-xl font-bold ${isScrolled ? "text-gray-900" : "text-white"}`}>
-                        FuelTransport BCS
+                        GRUPO DIAZ ALVAREZ
                     </span>
                 </div>
 
@@ -49,10 +49,10 @@ const DesktopNavbar = ({
                         <span></span>
                     </div>
                     <button
-                        onClick={() => handleNavClick("#contact")}
+                        onClick={() => handleNavClick("#contacto")}
                         className="nav-item opacity-0 bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200"
                     >
-                        Get Quote
+                        Contactanos
                     </button>
                 </div>
 

@@ -1,10 +1,10 @@
 "use client"
 
-import { Truck, Shield, Gauge, Users, Calendar, Award } from "lucide-react"
-import { useEffect, useRef, useState } from "react"
-import { animate } from "animejs"
 import { fleetStats } from "../constants/flet-status"
+import { Shield, Gauge, Award } from "lucide-react"
+import { useEffect, useRef, useState } from "react"
 import { vehicles } from "../constants/vehicles"
+import { animate } from "animejs"
 
 const RootFleet = () => {
     const [activeVehicle, setActiveVehicle] = useState(0)
@@ -71,13 +71,12 @@ const RootFleet = () => {
     }, [])
 
     return (
-        <section id="fleet" ref={fleetRef} className="py-20 bg-gradient-to-br from-gray-50 to-blue-50">
+        <section id="flete" ref={fleetRef} className="py-20 bg-gradient-to-br from-gray-50 to-blue-50">
             <div className="container mx-auto px-4">
                 <div className="text-center mb-16">
-                    <h2 className="animate-on-scroll text-4xl md:text-5xl font-bold text-gray-900 mb-6">Our Modern Fleet</h2>
+                    <h2 className="animate-on-scroll text-4xl md:text-5xl font-bold text-gray-900 mb-6">Nuestra flota moderna</h2>
                     <p className="animate-on-scroll text-xl text-gray-600 max-w-3xl mx-auto">
-                        State-of-the-art vehicles and equipment designed for safe, efficient, and reliable fuel transportation
-                        across Baja California Sur.
+                        Nuestra flota de vehículos modernos y eficientes está diseñada para satisfacer las necesidades de transporte de carga en todo el estado.
                     </p>
                 </div>
 
@@ -95,13 +94,13 @@ const RootFleet = () => {
 
                 <div className="grid lg:grid-cols-2 gap-12 items-start">
                     <div className="space-y-4">
-                        <h3 className="animate-on-scroll text-2xl font-bold text-gray-900 mb-6">Vehicle Types</h3>
+                        <h3 className="animate-on-scroll text-2xl font-bold text-gray-900 mb-6">Tipo de vehiculos</h3>
                         {vehicles.map((vehicle, index) => (
                             <div
                                 key={vehicle.id}
                                 className={`vehicle-card p-6 rounded-lg cursor-pointer transition-all duration-300 ${activeVehicle === index
-                                        ? "bg-blue-600 text-white shadow-lg"
-                                        : "bg-white text-gray-900 hover:shadow-md"
+                                    ? "bg-blue-600 text-white shadow-lg"
+                                    : "bg-white text-gray-900 hover:shadow-md"
                                     }`}
                             >
                                 <div className="flex items-center justify-between mb-3">
@@ -131,7 +130,7 @@ const RootFleet = () => {
                                             className={`text-xs px-2 py-1 rounded ${activeVehicle === index ? "bg-blue-500 text-white" : "bg-gray-100 text-gray-600"
                                                 }`}
                                         >
-                                            +{vehicle.features.length - 2} more
+                                            +{vehicle.features.length - 2} mas
                                         </span>
                                     )}
                                 </div>
@@ -159,7 +158,7 @@ const RootFleet = () => {
 
                                 {/* Features */}
                                 <div className="mb-6">
-                                    <h4 className="text-lg font-semibold text-gray-900 mb-3">Key Features</h4>
+                                    <h4 className="text-lg font-semibold text-gray-900 mb-3">Caracteristicas</h4>
                                     <div className="grid grid-cols-2 gap-2">
                                         {vehicles[activeVehicle].features.map((feature, index) => (
                                             <div key={index} className="flex items-center">
@@ -170,25 +169,20 @@ const RootFleet = () => {
                                     </div>
                                 </div>
 
-                                {/* Specifications */}
                                 <div>
-                                    <h4 className="text-lg font-semibold text-gray-900 mb-3">Specifications</h4>
+                                    <h4 className="text-lg font-semibold text-gray-900 mb-3">Especificaciones</h4>
                                     <div className="grid grid-cols-2 gap-4 text-sm">
                                         <div>
-                                            <span className="text-gray-600">Engine:</span>
-                                            <div className="font-medium">{vehicles[activeVehicle].specs.engine}</div>
+                                            <span className="text-gray-600">Serie:</span>
+                                            <div className="font-medium text-gray-400">{vehicles[activeVehicle].specs.serie}</div>
                                         </div>
                                         <div>
-                                            <span className="text-gray-600">Transmission:</span>
-                                            <div className="font-medium">{vehicles[activeVehicle].specs.transmission}</div>
+                                            <span className="text-gray-600">Placas:</span>
+                                            <div className="font-medium text-gray-400">{vehicles[activeVehicle].specs.placas}</div>
                                         </div>
                                         <div>
-                                            <span className="text-gray-600">Safety:</span>
-                                            <div className="font-medium">{vehicles[activeVehicle].specs.safety}</div>
-                                        </div>
-                                        <div>
-                                            <span className="text-gray-600">Model Year:</span>
-                                            <div className="font-medium">{vehicles[activeVehicle].specs.year}</div>
+                                            <span className="text-gray-600">Año:</span>
+                                            <div className="font-medium text-gray-400">{vehicles[activeVehicle].specs.year}</div>
                                         </div>
                                     </div>
                                 </div>
@@ -197,62 +191,74 @@ const RootFleet = () => {
                     </div>
                 </div>
 
-                {/* Safety & Maintenance Section */}
                 <div className="mt-16 grid md:grid-cols-2 gap-12">
                     <div className="animate-on-scroll">
-                        <h3 className="text-2xl font-bold text-gray-900 mb-6">Safety & Compliance</h3>
+                        <h3 className="text-2xl font-bold text-gray-900 mb-6">
+                            Seguridad y Calidad
+                        </h3>
                         <div className="space-y-4">
                             <div className="flex items-start">
                                 <Shield className="w-6 h-6 text-green-500 mr-3 mt-1" />
                                 <div>
-                                    <h4 className="font-semibold text-gray-900">DOT Certified</h4>
+                                    <h4 className="font-semibold text-gray-900">Certificado</h4>
                                     <p className="text-gray-600 text-sm">
-                                        All vehicles meet Department of Transportation safety standards
+                                        Todos los vehiculos son inspeccionados
+                                        regularmente por un equipo de expertos
+                                        en seguridad y cumplen con los estandares
+                                        de seguridad.
                                     </p>
                                 </div>
                             </div>
                             <div className="flex items-start">
                                 <Award className="w-6 h-6 text-green-500 mr-3 mt-1" />
                                 <div>
-                                    <h4 className="font-semibold text-gray-900">ISO 9001 Certified</h4>
+                                    <h4 className="font-semibold text-gray-900">Certificacion ISO 9001</h4>
                                     <p className="text-gray-600 text-sm">
-                                        Quality management system certification for consistent service
+                                        Nuestra flota cumple con los estandares
+                                        de calidad ISO 9001, lo que nos permite
+                                        ofrecer un servicio de alta calidad.
                                     </p>
                                 </div>
                             </div>
                             <div className="flex items-start">
                                 <Gauge className="w-6 h-6 text-green-500 mr-3 mt-1" />
                                 <div>
-                                    <h4 className="font-semibold text-gray-900">Regular Inspections</h4>
-                                    <p className="text-gray-600 text-sm">Monthly safety inspections and preventive maintenance</p>
+                                    <h4 className="font-semibold text-gray-900">
+                                        Inspecciones regulares
+                                    </h4>
+                                    <p className="text-gray-600 text-sm">
+                                        Nuestros vehiculos son inspeccionados
+                                        regularmente para garantizar su funcionamiento
+                                        y seguridad.
+                                    </p>
                                 </div>
                             </div>
                         </div>
                     </div>
 
                     <div className="animate-on-scroll">
-                        <h3 className="text-2xl font-bold text-gray-900 mb-6">Technology & Tracking</h3>
+                        <h3 className="text-2xl font-bold text-gray-900 mb-6">Tecnologia y sistema de seguimiento</h3>
                         <div className="bg-blue-50 p-6 rounded-lg">
                             <ul className="space-y-3">
                                 <li className="flex items-center">
                                     <div className="w-2 h-2 bg-blue-600 rounded-full mr-3"></div>
-                                    <span className="text-gray-700">Real-time GPS tracking on all vehicles</span>
+                                    <span className="text-gray-700">GPS en tiempo real monitoriando nuestros vehiculos</span>
                                 </li>
                                 <li className="flex items-center">
                                     <div className="w-2 h-2 bg-blue-600 rounded-full mr-3"></div>
-                                    <span className="text-gray-700">Electronic logging devices (ELD)</span>
+                                    <span className="text-gray-700">Dispositivo Electrónico de Registro</span>
                                 </li>
                                 <li className="flex items-center">
                                     <div className="w-2 h-2 bg-blue-600 rounded-full mr-3"></div>
-                                    <span className="text-gray-700">Temperature and pressure monitoring</span>
+                                    <span className="text-gray-700">Monitoreo de temperatura y presion</span>
                                 </li>
                                 <li className="flex items-center">
                                     <div className="w-2 h-2 bg-blue-600 rounded-full mr-3"></div>
-                                    <span className="text-gray-700">Automated delivery confirmations</span>
+                                    <span className="text-gray-700">Confirmaciones de entrega automatizadas</span>
                                 </li>
                                 <li className="flex items-center">
                                     <div className="w-2 h-2 bg-blue-600 rounded-full mr-3"></div>
-                                    <span className="text-gray-700">Emergency alert systems</span>
+                                    <span className="text-gray-700">Sistemas de emergencia</span>
                                 </li>
                             </ul>
                         </div>

@@ -2,6 +2,7 @@
 
 import RootServices from "@/modules/root/components/services";
 import RootCoverage from "@/modules/root/components/coverage";
+import RootContact from "@/modules/root/components/contact";
 import RootFleet from "@/modules/root/components/fleet";
 import RootAbout from "@/modules/root/components/about";
 import RootHero from "@/modules/root/components/hero";
@@ -44,6 +45,7 @@ export default function Home() {
       <RootServices />
       <RootFleet />
       <RootCoverage />
+      <RootContact />
     </div>
   );
 }

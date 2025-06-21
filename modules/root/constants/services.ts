@@ -3,32 +3,32 @@ import { Truck, MapPin, Clock, Shield, Fuel, Building2 } from "lucide-react"
 export const services = [
     {
         icon: Fuel,
-        title: "Fuel Delivery",
-        description: "Direct fuel delivery to gas stations with precise scheduling and quality assurance.",
+        title: "Transporte de combustible",
+        description: "Transporte de combustible a gasolineras con programación precisa y calidad.",
     },
     {
         icon: Building2,
-        title: "Industrial Supply",
-        description: "Specialized fuel transportation for industrial facilities and manufacturing plants.",
+        title: "Transporte industrial",
+        description: "Transporte de mercancías industriales a diferentes destinos.",
     },
     {
         icon: Truck,
-        title: "Commercial Transport",
-        description: "Reliable fuel transportation services for commercial businesses and fleet operations.",
+        title: "Transporte comercial",
+        description: "Transporte de mercancías comerciales a diferentes destinos.",
     },
     {
         icon: MapPin,
-        title: "Regional Coverage",
-        description: "Complete coverage across all municipalities in Baja California Sur.",
+        title: "Cobertura estatal",
+        description: "Cobertura en todo el estado de Baja California Sur.",
     },
     {
         icon: Clock,
-        title: "24/7 Emergency Service",
-        description: "Round-the-clock emergency fuel delivery when you need it most.",
+        title: "Servicio 24/7",
+        description: "Servicio de transporte de combustible a gasolineras 24/7.",
     },
     {
         icon: Shield,
-        title: "Safety & Compliance",
-        description: "Full compliance with safety regulations and environmental standards.",
+        title: "Seguridad y cumplimiento",
+        description: "Cumplimiento de normativas de seguridad.",
     },
 ]

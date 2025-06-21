@@ -4,13 +4,14 @@ import { services } from "../constants/services"
 
 const RootServices = () => {
     return (
-        <section id="services" className="py-20 bg-white">
+        <section id="servicios" className="py-20 bg-white">
             <div className="container mx-auto px-4">
                 <div className="text-center mb-16">
-                    <h2 className="animate-on-scroll text-4xl md:text-5xl font-bold text-gray-900 mb-6">Our Services</h2>
+                    <h2 className="animate-on-scroll text-4xl md:text-5xl font-bold text-gray-900 mb-6">Nuestros servicios</h2>
                     <p className="animate-on-scroll text-xl text-gray-600 max-w-3xl mx-auto">
-                        Comprehensive fuel transportation solutions tailored to meet the unique needs of businesses across Baja
-                        California Sur.
+                        Soluciones integrales de transporte de combustible 
+                        diseñadas para satisfacer las necesidades únicas 
+                        de las empresas en Baja California Sur.
                     </p>
                 </div>
 
