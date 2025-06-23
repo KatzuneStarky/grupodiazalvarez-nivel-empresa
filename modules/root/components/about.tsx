@@ -1,15 +1,17 @@
 "use client"
 
+import { useEstaciones } from "@/modules/cbs/hooks/bdd/use-estaciones"
 import { useAboutFunctions } from "../hooks/use-about-functions"
 import { Award, Clock, Shield, Users } from "lucide-react"
 
 const RootAbout = () => {
     const { aboutRef, counters } = useAboutFunctions()
+    const { estaciones } = useEstaciones()
 
     const years = counters.years = new Date().getFullYear() - 2000
     const liters = counters.liters = 1000
-    const clients = counters.clients = 500
-    const routes = counters.routes = 100
+    const clients = counters.clients = 50
+    const routes = counters.routes = estaciones.length
 
     return (
         <section id="acercade" ref={aboutRef} className="py-20 bg-gray-50">

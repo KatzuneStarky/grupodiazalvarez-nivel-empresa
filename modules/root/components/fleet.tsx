@@ -1,14 +1,23 @@
 "use client"
 
+import { useEquipos } from "@/modules/cbs/hooks/equipos/use-equipos"
+import { Shield, Gauge, Award, Truck } from "lucide-react"
 import { fleetStats } from "../constants/flet-status"
-import { Shield, Gauge, Award } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
-import { vehicles } from "../constants/vehicles"
 import { animate } from "animejs"
 
 const RootFleet = () => {
     const [activeVehicle, setActiveVehicle] = useState(0)
     const fleetRef = useRef<HTMLElement>(null)
+    const { equipos } = useEquipos()
+
+    const updatedStats = [
+        ...fleetStats.slice(0, 0),
+        { icon: Truck, label: "Vehiculos activos", value: `${equipos.length}+` },
+        ...fleetStats.slice(1)
+    ];
+
+    const hasEquipos = equipos && equipos.length > 0
 
     useEffect(() => {
         const vehicleCards = document.querySelectorAll(".vehicle-card")
@@ -33,8 +42,6 @@ const RootFleet = () => {
             })
 
             card.addEventListener("click", () => {
-                setActiveVehicle(index)
-
                 animate(card, {
                     scale: [1, 0.98, 1],
                     duration: 200,
@@ -81,7 +88,7 @@ const RootFleet = () => {
                 </div>
 
                 <div className="fleet-stats grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6 mb-16">
-                    {fleetStats.map((stat, index) => (
+                    {updatedStats.map((stat, index) => (
                         <div key={index} className="stat-item text-center opacity-0">
                             <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
                                 <stat.icon className="w-8 h-8 text-blue-600" />
@@ -95,28 +102,30 @@ const RootFleet = () => {
                 <div className="grid lg:grid-cols-2 gap-12 items-start">
                     <div className="space-y-4">
                         <h3 className="animate-on-scroll text-2xl font-bold text-gray-900 mb-6">Tipo de vehiculos</h3>
-                        {vehicles.map((vehicle, index) => (
+                        {hasEquipos && equipos.slice(0, 4).map((vehicle, index) => (
                             <div
                                 key={vehicle.id}
+                                onClick={() => setActiveVehicle(index)}
                                 className={`vehicle-card p-6 rounded-lg cursor-pointer transition-all duration-300 ${activeVehicle === index
                                     ? "bg-blue-600 text-white shadow-lg"
                                     : "bg-white text-gray-900 hover:shadow-md"
                                     }`}
                             >
                                 <div className="flex items-center justify-between mb-3">
-                                    <h4 className="text-lg font-bold">{vehicle.name}</h4>
+                                    <h4 className="text-lg font-bold">{vehicle.numEconomico}</h4>
                                     <span
                                         className={`text-sm px-3 py-1 rounded-full ${activeVehicle === index ? "bg-blue-500" : "bg-gray-100 text-gray-600"
                                             }`}
                                     >
-                                        {vehicle.capacity}
+                                        {vehicle.m3}
                                     </span>
                                 </div>
                                 <p className={`text-sm mb-3 ${activeVehicle === index ? "text-blue-100" : "text-gray-600"}`}>
-                                    {vehicle.type}
+                                    {vehicle.tipoTanque}
                                 </p>
                                 <div className="flex flex-wrap gap-2">
-                                    {vehicle.features.slice(0, 2).map((feature, featureIndex) => (
+                                    {/**
+                                     * {vehicle.features.slice(0, 2).map((feature, featureIndex) => (
                                         <span
                                             key={featureIndex}
                                             className={`text-xs px-2 py-1 rounded ${activeVehicle === index ? "bg-blue-500 text-white" : "bg-gray-100 text-gray-600"
@@ -133,31 +142,31 @@ const RootFleet = () => {
                                             +{vehicle.features.length - 2} mas
                                         </span>
                                     )}
+                                     */}
                                 </div>
                             </div>
                         ))}
                     </div>
 
-                    {/* Vehicle Details */}
                     <div className="animate-on-scroll">
                         <div className="bg-white rounded-lg shadow-lg overflow-hidden">
                             <div className="relative">
                                 <img
-                                    src={vehicles[activeVehicle].image || "/placeholder.svg"}
-                                    alt={vehicles[activeVehicle].name}
+                                    src={"/placeholder.svg"}
                                     className="w-full h-64 object-cover"
                                 />
                                 <div className="absolute top-4 right-4 bg-orange-500 text-white px-3 py-1 rounded-full text-sm font-semibold">
-                                    {vehicles[activeVehicle].capacity}
+                                    {hasEquipos && equipos[activeVehicle].m3}
+
                                 </div>
                             </div>
 
                             <div className="p-6">
-                                <h3 className="text-2xl font-bold text-gray-900 mb-2">{vehicles[activeVehicle].name}</h3>
-                                <p className="text-gray-600 mb-6">{vehicles[activeVehicle].type}</p>
+                                <h3 className="text-2xl font-bold text-gray-900 mb-2">{hasEquipos && equipos[activeVehicle].numEconomico}</h3>
+                                <p className="text-gray-600 mb-6">{hasEquipos && equipos[activeVehicle].tipoTanque}</p>
 
-                                {/* Features */}
-                                <div className="mb-6">
+                                {/**
+                                 * <div className="mb-6">
                                     <h4 className="text-lg font-semibold text-gray-900 mb-3">Caracteristicas</h4>
                                     <div className="grid grid-cols-2 gap-2">
                                         {vehicles[activeVehicle].features.map((feature, index) => (
@@ -168,21 +177,22 @@ const RootFleet = () => {
                                         ))}
                                     </div>
                                 </div>
+                                 */}
 
                                 <div>
                                     <h4 className="text-lg font-semibold text-gray-900 mb-3">Especificaciones</h4>
                                     <div className="grid grid-cols-2 gap-4 text-sm">
                                         <div>
                                             <span className="text-gray-600">Serie:</span>
-                                            <div className="font-medium text-gray-400">{vehicles[activeVehicle].specs.serie}</div>
+                                            <div className="font-medium text-gray-400">{hasEquipos && equipos[activeVehicle].serie}</div>
                                         </div>
                                         <div>
                                             <span className="text-gray-600">Placas:</span>
-                                            <div className="font-medium text-gray-400">{vehicles[activeVehicle].specs.placas}</div>
+                                            <div className="font-medium text-gray-400">{hasEquipos && equipos[activeVehicle].placas}</div>
                                         </div>
                                         <div>
                                             <span className="text-gray-600">Año:</span>
-                                            <div className="font-medium text-gray-400">{vehicles[activeVehicle].specs.year}</div>
+                                            <div className="font-medium text-gray-400">{hasEquipos && equipos[activeVehicle].year}</div>
                                         </div>
                                     </div>
                                 </div>
