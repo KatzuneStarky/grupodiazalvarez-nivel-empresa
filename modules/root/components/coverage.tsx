@@ -1,20 +1,9 @@
 "use client"
 
-import { locations } from "../constants/locations";
 import { CheckCircle, MapPin } from "lucide-react"
-import { useEffect } from 'react';
+import dynamic from "next/dynamic";
 
-import 'leaflet/dist/leaflet.css';
-import L from 'leaflet';
-
-const CENTER: [number, number] = [24.1426, -110.3128];
-const ZOOM_LEVEL = 7;
-
-const customIcon = new L.Icon({
-    iconUrl: '/estacion.png',
-    iconSize: [32, 32],
-    iconAnchor: [16, 32],
-});
+const Map = dynamic(() => import('../components/coverage/map'), { ssr: false });
 
 const RootCoverage = () => {
     const municipios = [
@@ -23,24 +12,6 @@ const RootCoverage = () => {
         "Mulegé",
         "Comondú"
     ]
-
-    useEffect(() => {
-        const map = L.map('map').setView(CENTER, ZOOM_LEVEL);
-
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; OpenStreetMap',
-        }).addTo(map);
-
-        locations.forEach(({ lat, lng, estacion }) => {
-            L.marker([lng, lat], { icon: customIcon })
-                .addTo(map)
-                .bindPopup(`<b>${estacion.nombre}</b>`);
-        });
-
-        return () => {
-            map.remove();
-        };
-    }, []);
 
     return (
         <section id="cobertura" className="py-20 bg-blue-50">
@@ -56,7 +27,7 @@ const RootCoverage = () => {
                     <div className="animate-on-scroll">
                         <h3 className="text-2xl font-bold text-gray-900 mb-8 flex items-center">
                             <MapPin className="w-6 h-6 text-blue-600 mr-3" />
-                            Cities We Serve
+                            Ciudades que ofrecemos servicio
                         </h3>
                         <div className="grid grid-cols-2 gap-4">
                             {municipios.map((city, index) => (
@@ -77,16 +48,16 @@ const RootCoverage = () => {
 
                     <div className="animate-on-scroll">
                         <div className="bg-white p-8 rounded-lg shadow-lg h-[700px]">
-                            <div id="map" style={{ width: '100%', height: '70%' }} className="rounded-lg mb-6" />
+                            <Map />
                             <div className="text-center">
                                 <h4 className="text-lg font-bold text-gray-900 mb-2">Cobertura completa en la peninsula</h4>
                                 <p className="text-gray-600">
-                                    Desde <b>Mulegé</b> hasta <b>Los cabos</b>, 
-                                    nuestra cobertura abarca todo el territorio 
+                                    Desde <b>Mulegé</b> hasta <b>Los cabos</b>,
+                                    nuestra cobertura abarca todo el territorio
                                     de Baja California Sur.
                                     <br />
-                                    Nuestro equipo de profesionales se asegurará 
-                                    de entregar el combustible a todas las partes 
+                                    Nuestro equipo de profesionales se asegurará
+                                    de entregar el combustible a todas las partes
                                     del estado.
                                 </p>
                             </div>
