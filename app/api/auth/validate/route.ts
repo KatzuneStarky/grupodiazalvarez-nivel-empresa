@@ -2,16 +2,24 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/firebase/server";
 
 export async function GET(req: NextRequest) {
-  const token = req.headers.get("Authorization")?.split("Bearer ")[1];
+  const authHeader = req.headers.get("Authorization");
 
-  if (!token) {
-    return NextResponse.json({ error: "No token provided" }, { status: 401 });
+  if (!authHeader?.startsWith("Bearer ")) {
+    return NextResponse.json({ error: "Invalid Authorization header" }, { status: 400 });
   }
+
+  const token = authHeader.replace("Bearer ", "");
 
   try {
     const decoded = await auth.verifyIdToken(token);
-    return NextResponse.json(decoded);
+
+    return NextResponse.json({
+      uid: decoded.uid,
+      email: decoded.email,
+      claims: decoded,
+    });
   } catch (error) {
+    console.error("Token verification failed:", error);
     return NextResponse.json({ error: "Invalid token" }, { status: 401 });
   }
 }
