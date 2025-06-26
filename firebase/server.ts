@@ -6,7 +6,7 @@ import admin from "firebase-admin"
 const serviceAccount = {
     "type": "service_account",
     "project_id": "grupo-diaz-alvarez-hermanos",
-    "private_key_id": process.env.FIREBASE_PRIVATE_KET_ID,
+    "private_key_id": process.env.FIREBASE_PRIVATE_KET_ID?.replace(/\\n/g, "\n"),
     "private_key": process.env.FIREBASE_PRIVATE_KEY,
     "client_email": process.env.FIREBASE_CLIENT_EMAIL,
     "client_id": process.env.FIREBASE_CLIENT_ID,

@@ -1,6 +1,6 @@
 import type { NextRequest } from 'next/server'
-import { NextResponse } from 'next/server'
 import { SubDomains } from './enum-sudomains'
+import { NextResponse } from 'next/server'
 
 export function middleware(request: NextRequest) {
   const hostname = request.headers.get("host") || ""
