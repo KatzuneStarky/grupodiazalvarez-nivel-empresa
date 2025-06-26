@@ -1,4 +1,4 @@
-import { tipoRegistroUsuario } from "../enum/tipo-registro-usuario";
+import { TipoRegistroUsuario } from "../enum/tipo-registro-usuario";
 import { estadoUsuario } from "../enum/estado-usuario";
 import { z } from "zod";
 
@@ -17,7 +17,7 @@ export const UserSchema = z.object({
         return date <= today && date >= minDate;
     }, "La fecha debe estar entre hoy y hace 100 años"),
     estado: z.nativeEnum(estadoUsuario).default(estadoUsuario.activo).optional(),
-    tipoRegistro: z.nativeEnum(tipoRegistroUsuario).default(tipoRegistroUsuario.google).optional(),
+    tipoRegistro: z.nativeEnum(TipoRegistroUsuario).default(TipoRegistroUsuario.google).optional(),
 });
 
 export type UserSchemaType = z.infer<typeof UserSchema>;

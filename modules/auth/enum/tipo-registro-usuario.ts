@@ -1,4 +1,4 @@
-export enum tipoRegistroUsuario {
+export enum TipoRegistroUsuario {
     google = "google",
     email = "email",
 }

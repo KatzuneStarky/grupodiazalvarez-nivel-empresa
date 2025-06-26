@@ -1,14 +1,16 @@
 "use client"
 
+import { TimeProvider } from "@/context/time-context"
+
 const UserLayout = ({
     children
 }: {
     children: React.ReactNode
 }) => {
     return (
-        <div>
+        <TimeProvider>
             {children}
-        </div>
+        </TimeProvider>
     )
 }
 
