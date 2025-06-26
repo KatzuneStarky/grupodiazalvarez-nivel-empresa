@@ -1,10 +1,12 @@
 "use client"
 
-import { createUserWithEmailAndPassword, GoogleAuthProvider, signInWithEmailAndPassword, signInWithPopup, User } from "firebase/auth"
+import { createUserWithEmailAndPassword, GoogleAuthProvider, ParsedToken, signInWithEmailAndPassword, signInWithPopup, User } from "firebase/auth"
 import { createContext, useContext, useEffect, useState } from "react"
+import { removeToken, setToken } from "@/modules/auth/actions/token"
 import { useRouter } from "next/navigation"
 import { auth } from "@/firebase/client"
 import { toast } from "sonner"
+import { FirebaseError } from "firebase/app"
 
 type AuthContextType = {
     currentUser: User | null,
@@ -12,6 +14,7 @@ type AuthContextType = {
     loginWithGoogle: () => Promise<void>,
     registerWithEmail: (email: string, password: string) => Promise<void>;
     loginWithEmail: (email: string, password: string) => Promise<void>;
+    customClaims: ParsedToken | null
     isLoading: boolean
 }
 
@@ -23,17 +26,51 @@ export const AuthProvider = ({
     children: React.ReactNode
 }) => {
     const [currentUser, setCurrentUser] = useState<User | null>(null)
+    const [customClaims, setCustomClaims] = useState<ParsedToken | null>(null)
     const [isLoading, setIsLoading] = useState<boolean>(false);
 
     const router = useRouter()
 
     useEffect(() => {
-        const unsubscribe = auth.onAuthStateChanged((user) => {
+        const unsubscribe = auth.onAuthStateChanged(async (user) => {
             setCurrentUser(user ?? null)
+            if (user) {
+                try {
+                    const token = await user.getIdToken();
+                    const refreshToken = user.refreshToken;
+
+                    const res = await fetch("/api/auth/validate", {
+                        method: "GET",
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                        },
+                    });
+
+                    if (res.ok) {
+                        const data = await res.json();
+                        const claims = data.claims;
+
+                        setCustomClaims(claims ?? null);
+
+                        if (token && refreshToken) {
+                            await setToken({ token, refreshToken });
+                        }
+                    } else {
+                        await removeToken();
+                        await auth.signOut();
+                    }
+                } catch (error) {
+                    console.error("Error al validar token:", error);
+                    await removeToken();
+                    await auth.signOut();
+                }
+            } else {
+                await removeToken();
+            }
         })
 
         return () => unsubscribe()
-    }, [currentUser])
+    }, [])
 
     const loginWithGoogle = async () => {
         setIsLoading(true);
@@ -50,12 +87,24 @@ export const AuthProvider = ({
                 duration: 5000,
             });
         } catch (error) {
-            let errorMessage = "No se pudo iniciar sesión con Google";
-            if (error instanceof Error) {
-                errorMessage = error.message;
+            let message
+            if (error instanceof FirebaseError) {
+                switch (error.code) {
+                    case "auth/wrong-password":
+                        message = "Contraseña incorrecta.";
+                        break;
+                    case "auth/user-not-found":
+                        message = "No existe una cuenta con ese correo.";
+                        break;
+                    case "auth/too-many-requests":
+                        message = "Demasiados intentos. Intenta más tarde.";
+                        break;
+                    default:
+                        message = error.message;
+                }
             }
             toast.error("Error", {
-                description: errorMessage
+                description: message
             });
         } finally {
             setIsLoading(false);
@@ -124,6 +173,7 @@ export const AuthProvider = ({
             loginWithGoogle,
             registerWithEmail,
             loginWithEmail,
+            customClaims,
             isLoading
         }}>
             {children}
@@ -131,4 +181,10 @@ export const AuthProvider = ({
     )
 }
 
-export const useAuth = () => useContext(AuthContext) 
+export const useAuth = () => {
+    const context = useContext(AuthContext);
+    if (!context) {
+        throw new Error("useAuth debe usarse dentro de AuthProvider");
+    }
+    return context;
+}
