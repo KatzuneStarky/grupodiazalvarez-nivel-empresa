@@ -21,14 +21,14 @@ let firestore: Firestore
 let auth: Auth
 const currentApps = getApps()
 
-if(!currentApps.length) {
+if (!currentApps.length) {
     const app = admin.initializeApp({
         credential: admin.credential.cert(serviceAccount as ServiceAccount)
     })
 
     firestore = getFirestore(app)
     auth = getAuth(app)
-}else {
+} else {
     const app = currentApps[0]
     firestore = getFirestore(app)
     auth = getAuth(app)

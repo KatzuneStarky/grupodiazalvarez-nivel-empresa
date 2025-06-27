@@ -15,6 +15,11 @@ const nextConfig: NextConfig = {
       },
     ]
   },
+  allowedDevOrigins: [
+    "http://admin.localtest.me:3000",
+    "http://cbs.localtest.me:3000",
+    "http://empleados.localtest.me:3000",
+  ],
 };
 
 export default nextConfig;

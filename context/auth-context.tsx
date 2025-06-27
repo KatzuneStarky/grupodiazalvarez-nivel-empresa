@@ -3,10 +3,10 @@
 import { createUserWithEmailAndPassword, GoogleAuthProvider, ParsedToken, signInWithEmailAndPassword, signInWithPopup, User } from "firebase/auth"
 import { createContext, useContext, useEffect, useState } from "react"
 import { removeToken, setToken } from "@/modules/auth/actions/token"
+import { FirebaseError } from "firebase/app"
 import { useRouter } from "next/navigation"
 import { auth } from "@/firebase/client"
 import { toast } from "sonner"
-import { FirebaseError } from "firebase/app"
 
 type AuthContextType = {
     currentUser: User | null,
@@ -33,44 +33,26 @@ export const AuthProvider = ({
 
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged(async (user) => {
-            setCurrentUser(user ?? null)
+            setCurrentUser(user ?? null);
             if (user) {
-                try {
-                    const token = await user.getIdToken();
-                    const refreshToken = user.refreshToken;
-
-                    const res = await fetch("/api/auth/validate", {
-                        method: "GET",
-                        headers: {
-                            Authorization: `Bearer ${token}`,
-                        },
+                const tokenResult = await user.getIdTokenResult();
+                const token = tokenResult.token;
+                const refreshToken = user.refreshToken;
+                const claims = tokenResult.claims;
+                setCustomClaims(claims ?? null);
+                if (token && refreshToken) {
+                    await setToken({
+                        token,
+                        refreshToken,
                     });
-
-                    if (res.ok) {
-                        const data = await res.json();
-                        const claims = data.claims;
-
-                        setCustomClaims(claims ?? null);
-
-                        if (token && refreshToken) {
-                            await setToken({ token, refreshToken });
-                        }
-                    } else {
-                        await removeToken();
-                        await auth.signOut();
-                    }
-                } catch (error) {
-                    console.error("Error al validar token:", error);
-                    await removeToken();
-                    await auth.signOut();
                 }
             } else {
                 await removeToken();
             }
-        })
+        });
 
-        return () => unsubscribe()
-    }, [])
+        return () => unsubscribe();
+    }, []);
 
     const loginWithGoogle = async () => {
         setIsLoading(true);

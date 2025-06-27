@@ -1,9 +1,6 @@
-import { Analytics, getAnalytics, isSupported as isAnalyticsSupported } from "firebase/analytics";
-import { isSupported as isMessagingSupported } from "firebase/messaging";
-import { getApps, initializeApp } from "firebase/app";
-import { getMessaging, getToken } from "@firebase/messaging";
-import { Firestore, getFirestore } from "firebase/firestore";
 import { FirebaseStorage, getStorage } from "firebase/storage";
+import { Firestore, getFirestore } from "firebase/firestore";
+import { getApps, initializeApp } from "firebase/app";
 import { Auth, getAuth } from "firebase/auth";
 
 const firebaseConfig = {
