@@ -1,3 +1,5 @@
+import { TipoEmpresaType } from "@/modules/administracion/enum/tipo-empresa";
+import { EstadoEmpresa } from "@/modules/administracion/enum/estado-empresa";
 import { SystemUser } from "./usuario";
 import { Area } from "./area";
 
@@ -9,13 +11,13 @@ export interface Empresa {
   email: string;
   telefono: string;
   usuarios: SystemUser[];
-  areas: Area[];
+  areas?: Area[] | null;
   fechaCreacion: Date;
   fechaActualizacion: Date;
   fechaCierre?: Date;
-  estado: "activa" | "cerrada" | "suspendida";
+  estado: EstadoEmpresa;
   logoUrl?: string;
   razonSocial?: string;
-  tipo?: "matriz" | "sucursal";
+  tipo?: TipoEmpresaType;
   empresaPadreId?: string;
 }
