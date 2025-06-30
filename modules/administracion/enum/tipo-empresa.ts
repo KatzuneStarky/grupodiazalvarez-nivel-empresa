@@ -1,7 +1,7 @@
-export const TipoEmpresa = {
-    Matriz: "matriz",
-    Sucursal: "sucursal"
-} as const;
+export enum TipoEmpresa {
+    Matriz = "matriz",
+    Sucursal = "sucursal"
+};
 
 export type TipoEmpresaType = keyof typeof TipoEmpresa;
 
