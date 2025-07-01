@@ -9,4 +9,5 @@ export interface CustomDatePickerProps<T extends FieldValues> extends DatePicker
   name: Path<T>;
   label: string;
   disabled?: boolean;
+  className?: string
 }

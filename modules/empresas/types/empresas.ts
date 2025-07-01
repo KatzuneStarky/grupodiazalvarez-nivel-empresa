@@ -1,5 +1,5 @@
-import { TipoEmpresa } from "@/modules/administracion/enum/tipo-empresa";
 import { EstadoEmpresa } from "@/modules/administracion/enum/estado-empresa";
+import { TipoEmpresa } from "@/modules/administracion/enum/tipo-empresa";
 import { SystemUser } from "@/types/usuario";
 import { ContactInfo } from "./contactos";
 import { Area } from "@/types/area";
@@ -21,9 +21,9 @@ export interface Empresa {
   estado: EstadoEmpresa;
   empresaPadreId?: string;
   fechaCierre?: Date;
-  areas?: Area[] | null;
+  areas?: Area[];
   contactos: ContactInfo[]
-  usuarios: SystemUser[];  
+  usuarios?: SystemUser[];  
   configuraciones: {
     notificacionesEmail: boolean;
     reportesAutomaticos: boolean;

@@ -23,6 +23,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
+import { cn } from "@/lib/utils"
 
 const meses = [
     "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
@@ -34,7 +35,8 @@ export const DatePickerForm = <T extends FieldValues>({
     endYear = getYear(new Date()) + 100,
     label,
     name,
-    disabled
+    disabled,
+    className
 }: CustomDatePickerProps<T>) => {
     const { control, watch, setValue } = useFormContext<T>();
     const selected = watch(name);
@@ -64,7 +66,7 @@ export const DatePickerForm = <T extends FieldValues>({
             control={control}
             name={name}
             render={({ field }) => (
-                <FormItem className="flex flex-col space-y-2">
+                <FormItem className={cn("flex flex-col space-y-2", className)}>
                     <FormLabel className="text-gray-700 dark:text-gray-300 font-medium">
                         {label}
                     </FormLabel>
