@@ -11,3 +11,5 @@ export interface Area {
   fechaActualizacion: Date;
   responsableId?: string;
 }
+
+export type AreaInput = Omit<Area, "id" | "empresaId" | "fechaCreacion" | "fechaActualizacion" | "usuarios">;

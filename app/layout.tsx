@@ -1,12 +1,9 @@
 import { ThemeProvider } from "@/providers/theme-provider";
-import { Inter } from "next/font/google";
-import type { Metadata } from "next";
-import "./globals.css";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/context/auth-context";
 import { Toaster } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-
-const inter = Inter({ subsets: ["latin"] })
+import type { Metadata } from "next";
+import "./globals.css";
 
 export const metadata: Metadata = {
   title: {
@@ -15,12 +12,6 @@ export const metadata: Metadata = {
   },
   description: "Sistema web para las empresas de Grupo Diaz Alvarez Hermanos",
   keywords: "sistema, empresas, Grupo Diaz Alvarez Hermanos",
-  viewport: {
-    width: "device-width",
-    initialScale: 1,
-    maximumScale: 2,
-    minimumScale: 1,
-  },
 };
 
 export default function RootLayout({
@@ -31,7 +22,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${inter.className} antialiased`}
+        className={`antialiased`}
       >
         <AuthProvider>
           <ThemeProvider

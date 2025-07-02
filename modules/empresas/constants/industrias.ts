@@ -1,0 +1,15 @@
+export const industrias = [
+    "Tecnología",
+    "Manufactura",
+    "Servicios Financieros",
+    "Retail",
+    "Salud",
+    "Educación",
+    "Construcción",
+    "Agricultura",
+    "Turismo",
+    "Transporte",
+    "Energía",
+    "Telecomunicaciones",
+    "Otros",
+]

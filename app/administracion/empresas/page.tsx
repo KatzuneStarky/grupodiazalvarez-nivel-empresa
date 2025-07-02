@@ -22,10 +22,12 @@ import { Switch } from "@/components/ui/switch"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
+import { es } from "date-fns/locale"
+import { format } from "date-fns"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
-import { format } from "date-fns"
-import { es } from "date-fns/locale"
+import { industrias } from "@/modules/empresas/constants/industrias"
+import { writeEmpresa } from "@/modules/empresas/actions/write"
 
 const EmpresasPage = () => {
     const [showPreview, setShowPreview] = useState<boolean>(false)
@@ -139,13 +141,13 @@ const EmpresasPage = () => {
     const getStatusColor = (estado: EstadoEmpresa) => {
         switch (estado) {
             case "activa":
-                return "bg-green-100 text-green-800 border-green-200"
+                return "bg-green-100 dark:bg-green-200 text-green-800 border-green-200"
             case "cerrada":
-                return "bg-red-100 text-red-800 border-red-200"
+                return "bg-red-100 dark:bg-red-200 text-red-800 border-red-200"
             case "suspendida":
-                return "bg-yellow-100 text-yellow-800 border-yellow-200"
+                return "bg-yellow-100 dark:bg-yellow-200 text-yellow-800 border-yellow-200"
             default:
-                return "bg-gray-100 text-gray-800 border-gray-200"
+                return "bg-gray-100 dark:bg-gray-200 text-gray-800 border-gray-200"
         }
     }
 
@@ -201,6 +203,58 @@ const EmpresasPage = () => {
     const onSubmit = (data: EmpresaSchemaType) => {
         try {
             setIsLoading(true)
+
+            toast.promise(
+                writeEmpresa({
+                    configuraciones: {
+                        accesoPublico: data.accesoPublico,
+                        notificacionesEmail: data.notificacionesEmail,
+                        reportesAutomaticos: data.reportesAutomaticos
+                    },
+                    contactos: data.contactos.map(contacto => ({
+                        nombre: contacto.nombre,
+                        email: contacto.email,
+                        telefono: contacto.telefono,
+                        cargo: contacto.cargo,
+                        principal: contacto.principal
+                    })),
+                    direccion: data.direccion,
+                    email: data.email,
+                    estado: data.estado,
+                    nombre: data.nombre,
+                    rfc: data.rfc,
+                    telefono: data.telefono,
+                    areas: data.areas.map(area => ({
+                        nombre: area.nombre,
+                        usuarios: [],
+                        correoContacto: "",
+                        descripcion: area.descripcion,
+                        responsableId: ""
+                    })),
+                    descripcion: data.descripcion,
+                    direccionWeb: data.direccionWeb,
+                    empresaPadreId: "",
+                    fechaCierre: new Date(),
+                    industria: data.industria,
+                    logoUrl: imageUrl,
+                    numeroEmpleados: data.numeroEmpleados,
+                    razonSocial: data.razonSocial,
+                    tipo: data.tipoEmpresa,
+                    usuarios: []
+                }), {
+                loading: "Creando empresa favor de esperar...",
+                success: (result) => {
+                    if (result.success) {
+                        return "Empresa registrada satisfactoriamente.";
+                    } else {
+                        throw new Error(result.message);
+                    }
+                },
+                error: (error) => {
+                    return error.message || "Error al registrar la empresa.";
+                },
+            })
+
         } catch (error) {
             console.log("Error al crear al usuario", error);
             toast.error("Error al crear al suario", {
@@ -210,6 +264,11 @@ const EmpresasPage = () => {
         } finally {
             setIsLoading(false)
         }
+    }
+
+    const resetForm = () => {
+        form.reset()
+        window.location.reload()
     }
 
     return (
@@ -556,19 +615,21 @@ const EmpresasPage = () => {
                                                         render={({ field }) => (
                                                             <FormItem className="space-y-2 cursor-not-allowed">
                                                                 <FormLabel className="text-sm font-medium">
-                                                                    Industria (datos de prueba)
+                                                                    Industria
                                                                     <span className="text-destructive ml-1">*</span>
                                                                 </FormLabel>
                                                                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                                                                     <FormControl>
                                                                         <SelectTrigger className="w-full">
-                                                                            <SelectValue placeholder="" />
+                                                                            <SelectValue placeholder="Tipo de industria de la empresa" />
                                                                         </SelectTrigger>
                                                                     </FormControl>
                                                                     <SelectContent>
-                                                                        <SelectItem value="m@example.com">m@example.com</SelectItem>
-                                                                        <SelectItem value="m@google.com">m@google.com</SelectItem>
-                                                                        <SelectItem value="m@support.com">m@support.com</SelectItem>
+                                                                        {industrias.map((i) => (
+                                                                            <SelectItem key={i} value={i}>
+                                                                                {i}
+                                                                            </SelectItem>
+                                                                        ))}
                                                                     </SelectContent>
                                                                 </Select>
                                                                 <FormMessage />
@@ -1011,7 +1072,7 @@ const EmpresasPage = () => {
                                             <div className="space-y-0.5 w-full">
                                                 <FormField
                                                     control={form.control}
-                                                    name={"notificacionesEmail"}
+                                                    name={"accesoPublico"}
                                                     render={({ field }) => (
                                                         <FormItem className="flex items-center justify-between">
                                                             <div className="space-y-0.5">
@@ -1036,8 +1097,8 @@ const EmpresasPage = () => {
                             </CardContent>
                         </Card>
 
-                        <div className="flex justify-between items-center bg-gray-50 dark:bg-gray-950 p-6 rounded-lg">
-                            <div className="text-sm text-gray-600">
+                        <div className="flex justify-between items-center bg-gray-50 dark:bg-card p-6 rounded-lg">
+                            <div className="text-sm text-gray-600 dark:text-white">
                                 <p>
                                     Paso {currentStep + 1} de {EmpresaFormSteps.length}
                                 </p>
@@ -1084,7 +1145,7 @@ const EmpresasPage = () => {
                             <Button
                                 type="button"
                                 variant="outline"
-                                onClick={() => { }}
+                                onClick={() => resetForm()}
                                 className="text-gray-500 dark:text-gray-300">
 
                                 Cancelar y Limpiar Formulario
@@ -1094,11 +1155,11 @@ const EmpresasPage = () => {
                 </Form>
 
                 {nombreEmpresa && (
-                    <Card className="border-2 border-blue-200 dark:border-blue-600 bg-gradient-to-br 
-                        from-blue-50 dark:from-red-800 dark:to-orange-800 to-indigo-50 shadow-lg transition-all duration-500 ease-in-out">
+                    <Card className="border-2 border-red-200 dark:border-red-600 bg-gradient-to-br 
+                        dark:bg-card shadow-lg transition-all duration-500 ease-in-out">
                         <CardHeader className="pb-4">
                             <CardTitle className="flex items-center gap-2 text-xl">
-                                <Eye className="h-6 w-6 text-blue-600 dark:text-black" />
+                                <Eye className="h-6 w-6 text-red-600 dark:text-white" />
                                 Vista Previa de la Empresa
                             </CardTitle>
                             <CardDescription className="dark:text-white">Así se verá la información de su empresa</CardDescription>
@@ -1115,14 +1176,14 @@ const EmpresasPage = () => {
                                                     className="w-24 h-24 rounded-xl object-cover border-2 border-gray-200 shadow-sm"
                                                 />
                                             ) : (
-                                                <div className="w-24 h-24 bg-gradient-to-br from-blue-100 to-blue-200 rounded-xl flex items-center justify-center border-2 border-blue-200">
-                                                    <Building className="h-12 w-12 text-blue-600" />
+                                                <div className="w-24 h-24 bg-gradient-to-br from-red-100 to-red-200 rounded-xl flex items-center justify-center border-2 border-red-200">
+                                                    <Building className="h-12 w-12 text-red-600" />
                                                 </div>
                                             )}
                                         </div>
                                         <div className="flex-1 space-y-4">
                                             <div>
-                                                <h2 className="text-3xl font-bold text-gray-900 mb-2">{nombreEmpresa}</h2>
+                                                <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-300 mb-2">{nombreEmpresa}</h2>
                                                 <div className="flex flex-wrap items-center gap-3">
                                                     <Badge className={`px-3 py-1 ${getStatusColor(form.watch("estado"))}`}>
                                                         <div className="flex items-center gap-1">
@@ -1149,20 +1210,20 @@ const EmpresasPage = () => {
 
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                                                 <div className="space-y-2">
-                                                    <div className="flex items-center gap-2 text-gray-600">
+                                                    <div className="flex items-center gap-2 text-gray-600 dark:text-gray-200">
                                                         <FileText className="h-4 w-4" />
                                                         <span className="font-medium">RFC:</span>
                                                         <span className="font-mono">{form.watch("rfc")}</span>
                                                     </div>
                                                     {form.watch("razonSocial") && (
-                                                        <div className="flex items-center gap-2 text-gray-600">
+                                                        <div className="flex items-center gap-2 text-gray-600 dark:text-gray-200">
                                                             <Building className="h-4 w-4" />
                                                             <span className="font-medium">Razón Social:</span>
                                                             <span>{form.watch("razonSocial")}</span>
                                                         </div>
                                                     )}
                                                     {form.watch("numeroEmpleados") && (
-                                                        <div className="flex items-center gap-2 text-gray-600">
+                                                        <div className="flex items-center gap-2 text-gray-600 dark:text-gray-200">
                                                             <Users className="h-4 w-4" />
                                                             <span className="font-medium">Empleados:</span>
                                                             <span>{form.watch("numeroEmpleados")}</span>
@@ -1170,13 +1231,13 @@ const EmpresasPage = () => {
                                                     )}
                                                 </div>
                                                 <div className="space-y-2">
-                                                    <div className="flex items-center gap-2 text-gray-600">
+                                                    <div className="flex items-center gap-2 text-gray-600 dark:text-gray-200">
                                                         <CalendarDays className="h-4 w-4" />
                                                         <span className="font-medium">Creada:</span>
                                                         <span>{format(new Date(), "PPP", { locale: es })}</span>
                                                     </div>
                                                     {form.watch("fechaCreacion") && (
-                                                        <div className="flex items-center gap-2 text-gray-600">
+                                                        <div className="flex items-center gap-2 text-gray-600 dark:text-gray-200">
                                                             <Clock className="h-4 w-4" />
                                                             <span className="font-medium">Fecha de Cierre:</span>
                                                             <span>{format(form.watch("fechaCreacion"), "PPP", { locale: es })}</span>
@@ -1189,40 +1250,48 @@ const EmpresasPage = () => {
                                 </div>
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <Card className="bg-white shadow-sm">
+                                    <Card className="bg-white dark:bg-background shadow-sm">
                                         <CardHeader className="pb-3">
                                             <CardTitle className="text-lg flex items-center gap-2">
-                                                <MapPinIcon className="h-5 w-5 text-blue-600" />
+                                                <MapPinIcon className="h-5 w-5 text-white" />
                                                 Información de Contacto
                                             </CardTitle>
                                         </CardHeader>
                                         <CardContent className="space-y-3">
                                             <div className="flex items-start gap-3">
-                                                <MapPin className="h-4 w-4 text-gray-400 mt-0.5 flex-shrink-0" />
+                                                <MapPin className="h-4 w-4 text-gray-400 dark:text-white mt-0.5 flex-shrink-0" />
                                                 <div>
-                                                    <p className="text-sm font-medium text-gray-900">Dirección</p>
-                                                    <p className="text-sm text-gray-600">{form.watch("direccion")}</p>
+                                                    <p className="text-sm font-medium text-gray-900 dark:text-gray-300">Dirección</p>
+                                                    <p className="text-sm text-gray-600 dark:text-gray-100">{form.watch("direccion")}</p>
                                                 </div>
                                             </div>
                                             <div className="flex items-center gap-3">
-                                                <Mail className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                                                <Mail className="h-4 w-4 text-gray-400 dark:text-white flex-shrink-0" />
                                                 <div>
-                                                    <p className="text-sm font-medium text-gray-900">Email</p>
-                                                    <p className="text-sm text-blue-600">{form.watch("email")}</p>
+                                                    <p className="text-sm font-medium text-gray-900 dark:text-gray-300">Email</p>
+                                                    <a
+                                                        href={`mailto:${form.watch("email")}`}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="text-sm text-blue-600 hover:underline flex items-center gap-1"
+                                                    >
+                                                        {form.watch("email")}
+                                                        <ExternalLink className="h-3 w-3" />
+                                                    </a>
                                                 </div>
                                             </div>
                                             <div className="flex items-center gap-3">
-                                                <Phone className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                                                <Phone className="h-4 w-4 text-gray-400 dark:text-white flex-shrink-0" />
                                                 <div>
-                                                    <p className="text-sm font-medium text-gray-900">Teléfono</p>
-                                                    <p className="text-sm text-gray-600">{form.watch("telefono")}</p>
+                                                    <p className="text-sm font-medium text-gray-900 dark:text-gray-300">Teléfono</p>
+                                                    <p className="text-sm text-gray-600 dark:text-gray-100">{form.watch("telefono")}</p>
                                                 </div>
                                             </div>
                                             {form.watch("direccionWeb") && (
                                                 <div className="flex items-center gap-3">
-                                                    <Globe className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                                                    <Globe className="h-4 w-4 text-gray-400 dark:text-white flex-shrink-0" />
                                                     <div>
-                                                        <p className="text-sm font-medium text-gray-900">Sitio Web</p>
+                                                        <p className="text-sm font-medium text-gray-900 dark:text-gray-300">Sitio Web</p>
                                                         <a
                                                             href={form.watch("direccionWeb")}
                                                             target="_blank"
@@ -1238,56 +1307,54 @@ const EmpresasPage = () => {
                                         </CardContent>
                                     </Card>
 
-                                    <Card className="bg-white shadow-sm">
+                                    <Card className="bg-white dark:bg-background shadow-sm">
                                         <CardHeader className="pb-3">
                                             <CardTitle className="text-lg flex items-center gap-2">
                                                 <TrendingUp className="h-5 w-5 text-green-600" />
                                                 Estadísticas
                                             </CardTitle>
                                         </CardHeader>
-                                        <CardContent className="space-y-4">
-                                            <div className="grid grid-cols-2 gap-4">
-                                                <div className="text-center p-3 bg-blue-50 rounded-lg">
+                                        <CardContent className="space-y-4 flex flex-col items-center justify-center w-full">
+                                            <div className="grid grid-cols-2 gap-4 w-full">
+                                                <div className="text-center p-3 bg-blue-50 dark:bg-blue-200 rounded-lg">
                                                     <div className="text-2xl font-bold text-blue-600">{form.watch("areas").length}</div>
                                                     <div className="text-xs text-gray-600">Áreas</div>
                                                 </div>
-                                                <div className="text-center p-3 bg-green-50 rounded-lg">
+                                                <div className="text-center p-3 bg-green-50 dark:bg-green-200 rounded-lg">
                                                     <div className="text-2xl font-bold text-green-600">{form.watch("contactos").length}</div>
                                                     <div className="text-xs text-gray-600">Contactos</div>
                                                 </div>
                                             </div>
-                                            <div className="space-y-2">
+                                            <div className="space-y-2 w-full">
                                                 <div className="flex justify-between items-center">
-                                                    <span className="text-sm text-gray-600">Completitud del perfil</span>
+                                                    <span className="text-sm text-gray-600 dark:text-gray-300">Completitud del perfil</span>
                                                     <span className="text-sm font-medium">{progress}%</span>
                                                 </div>
                                                 <Progress value={progress} className="h-2" />
-                                            </div>
-                                            <div className="flex items-center gap-2 text-sm">
-                                                <Shield className="h-4 w-4 text-green-500" />
-                                                <span className="text-gray-600">Perfil verificado</span>
                                             </div>
                                         </CardContent>
                                     </Card>
                                 </div>
 
                                 {form.watch("descripcion") && (
-                                    <Card className="bg-white shadow-sm">
-                                        <CardHeader className="pb-3">
+                                    <Card className="bg-white dark:bg-background shadow-sm">
+                                        <CardHeader>
                                             <CardTitle className="text-lg flex items-center gap-2">
-                                                <FileText className="h-5 w-5 text-purple-600" />
+                                                <FileText className="h-5 w-5 text-red-600" />
                                                 Descripción de la Empresa
                                             </CardTitle>
                                         </CardHeader>
                                         <CardContent>
-                                            <p className="text-gray-700 leading-relaxed">{form.watch("descripcion")}</p>
+                                            <p className="text-gray-700 dark:text-gray-400 leading-relaxed">{form.watch("descripcion")}</p>
                                         </CardContent>
                                     </Card>
                                 )}
 
                                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                                     {form.watch("areas").length > 0 && (
-                                        <Card className="bg-white shadow-sm">
+                                        <Card className={
+                                            cn("bg-white dark:bg-background shadow-sm", form.watch("contactos").length === 0 && "col-span-2")
+                                        }>
                                             <CardHeader className="pb-3">
                                                 <CardTitle className="text-lg flex items-center gap-2">
                                                     <Award className="h-5 w-5 text-orange-600" />
@@ -1311,38 +1378,43 @@ const EmpresasPage = () => {
                                     )}
 
                                     {form.watch("contactos").length > 0 && (
-                                        <Card className="bg-white shadow-sm">
-                                            <CardHeader className="pb-3">
+                                        <Card className={
+                                            cn("bg-white dark:bg-background shadow-sm", form.watch("areas").length === 0 && "col-span-2")
+                                        }>
+                                            <CardHeader>
                                                 <CardTitle className="text-lg flex items-center gap-2">
-                                                    <Users className="h-5 w-5 text-indigo-600" />
+                                                    <Users className="h-5 w-5 text-red-600" />
                                                     Contactos Principales
                                                 </CardTitle>
                                             </CardHeader>
                                             <CardContent>
-                                                <div className="space-y-4">
+                                                <div className="space-y-4 grid grid-cols-3 gap-6">
                                                     {form.watch("contactos").slice(0, 3).map((contact, index) => (
-                                                        <div key={index} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                                                            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-medium">
+                                                        <div key={index} className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-card rounded-lg">
+                                                            <div className="w-10 h-10 bg-gradient-to-br from-red-500 to-orange-600 rounded-full 
+                                                                flex items-center justify-center text-white font-medium">
                                                                 {contact.nombre.charAt(0).toUpperCase()}
                                                             </div>
                                                             <div className="flex-1">
                                                                 <div className="flex items-center gap-2">
-                                                                    <p className="font-medium text-gray-900">{contact.nombre}</p>
+                                                                    <p className="font-medium text-gray-900 dark:text-gray-300">{contact.nombre}</p>
                                                                     {contact.principal && (
                                                                         <Badge variant="secondary" className="text-xs">
                                                                             Principal
                                                                         </Badge>
                                                                     )}
                                                                 </div>
-                                                                <p className="text-sm text-gray-600">{contact.cargo}</p>
-                                                                <p className="text-xs text-gray-500">{contact.email}</p>
+                                                                <p className="text-sm text-gray-600 dark:text-gray-200">{contact.cargo}</p>
+                                                                <p className="text-xs text-gray-500 dark:text-gray-100">{contact.email}</p>
                                                             </div>
                                                         </div>
                                                     ))}
                                                     {form.watch("contactos").length > 3 && (
-                                                        <p className="text-sm text-gray-500 text-center">
-                                                            +{form.watch("contactos").length - 3} contactos más
-                                                        </p>
+                                                        <div className={`${form.watch("areas").length === 0 && "col-span-3"}`}>
+                                                            <p className="text-sm text-gray-500 text-center">
+                                                                +{form.watch("contactos").length - 3} contactos más
+                                                            </p>
+                                                        </div>
                                                     )}
                                                 </div>
                                             </CardContent>
@@ -1350,36 +1422,35 @@ const EmpresasPage = () => {
                                     )}
                                 </div>
 
-                                {/* Configuration Summary */}
-                                <Card className="bg-white shadow-sm">
-                                    <CardHeader className="pb-3">
+                                <Card className="bg-white dark:bg-background shadow-sm">
+                                    <CardHeader>
                                         <CardTitle className="text-lg flex items-center gap-2">
-                                            <Settings className="h-5 w-5 text-gray-600" />
+                                            <Settings className="h-5 w-5 text-gray-600 dark:text-white" />
                                             Configuraciones
                                         </CardTitle>
                                     </CardHeader>
                                     <CardContent>
-                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
                                             <div className="flex items-center gap-3">
                                                 <div
-                                                    className={`w-3 h-3 rounded-full ${true ? "bg-green-500" : "bg-gray-300"
+                                                    className={`w-3 h-3 rounded-full ${form.watch("notificacionesEmail") ? "bg-green-500" : "bg-gray-300"
                                                         }`}
                                                 ></div>
-                                                <span className="text-sm text-gray-700">Notificaciones Email</span>
+                                                <span className="text-sm text-gray-700 dark:text-white">Notificaciones Email</span>
                                             </div>
                                             <div className="flex items-center gap-3">
                                                 <div
-                                                    className={`w-3 h-3 rounded-full ${true ? "bg-green-500" : "bg-gray-300"
+                                                    className={`w-3 h-3 rounded-full ${form.watch("reportesAutomaticos") ? "bg-green-500" : "bg-gray-300"
                                                         }`}
                                                 ></div>
-                                                <span className="text-sm text-gray-700">Reportes Automáticos</span>
+                                                <span className="text-sm text-gray-700 dark:text-white">Reportes Automáticos</span>
                                             </div>
                                             <div className="flex items-center gap-3">
                                                 <div
-                                                    className={`w-3 h-3 rounded-full ${true ? "bg-green-500" : "bg-gray-300"
+                                                    className={`w-3 h-3 rounded-full ${form.watch("accesoPublico") ? "bg-green-500" : "bg-gray-300"
                                                         }`}
                                                 ></div>
-                                                <span className="text-sm text-gray-700">Acceso Público</span>
+                                                <span className="text-sm text-gray-700 dark:text-white">Acceso Público</span>
                                             </div>
                                         </div>
                                     </CardContent>

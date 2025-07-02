@@ -5,4 +5,7 @@ export interface ContactInfo {
     email: string
     telefono: string
     principal: boolean
+    empresaId?: string
 }
+
+export type ContactInfoInput = Omit<ContactInfo, "id" | "empresaId">;
