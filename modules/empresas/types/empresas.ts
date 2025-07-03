@@ -1,8 +1,8 @@
 import { EstadoEmpresa } from "@/modules/administracion/enum/estado-empresa";
 import { TipoEmpresa } from "@/modules/administracion/enum/tipo-empresa";
-import { ContactInfo, ContactInfoInput } from "./contactos";
-import { Area, AreaInput } from "@/types/area";
+import { ContactInfoInput } from "./contactos";
 import { SystemUser } from "@/types/usuario";
+import { AreaInput } from "@/types/area";
 
 export interface Empresa {
   id: string;

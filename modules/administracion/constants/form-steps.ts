@@ -1,4 +1,4 @@
-import { Building2, FileText, Settings, Users } from "lucide-react";
+import { Building2, CheckCircle, FileText, Layers, Settings, Users } from "lucide-react";
 
 export const EmpresaFormSteps = [
   {
@@ -14,6 +14,12 @@ export const EmpresaFormSteps = [
     icon: FileText,
   },
   {
+    id: "areas",
+    title: "Areas",
+    description: "Creacion de areas de la empresa",
+    icon: Layers,
+  },
+  {
     id: "contacts",
     title: "Contactos",
     description: "Personas de contacto principales",
@@ -25,4 +31,10 @@ export const EmpresaFormSteps = [
     description: "Preferencias y configuraciones",
     icon: Settings,
   },
+  {
+    id: "finish",
+    title: "Finalizar",
+    description: "Finalizar y guardar los datos",
+    icon: CheckCircle,
+  }
 ]
