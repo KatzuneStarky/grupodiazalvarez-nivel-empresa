@@ -4,6 +4,7 @@ import { AuthProvider } from "@/context/auth-context";
 import { Toaster } from "@/components/ui/sonner";
 import type { Metadata } from "next";
 import "./globals.css";
+import { YearProvider } from "@/context/year-context";
 
 export const metadata: Metadata = {
   title: {
@@ -31,10 +32,12 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
-            <TooltipProvider>
-              {children}
-              <Toaster />
-            </TooltipProvider>
+            <YearProvider>
+              <TooltipProvider>
+                {children}
+                <Toaster />
+              </TooltipProvider>
+            </YearProvider>
           </ThemeProvider>
         </AuthProvider>
       </body>
