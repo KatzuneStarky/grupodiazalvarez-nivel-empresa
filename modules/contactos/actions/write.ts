@@ -1,31 +1,39 @@
 import { WriteContactoResult } from "@/types/form-result/contacto-form-result";
+import { arrayUnion, doc, setDoc, updateDoc } from "firebase/firestore";
 import { ContactInfo } from "@/modules/empresas/types/contactos";
-import { doc, setDoc } from "firebase/firestore";
 import { db } from "@/firebase/client";
 import { v4 as uuidv4 } from "uuid";
 
-export async function WriteContacto(
+export async function writeContacto(
     empresaId: string,
-    conctatoData: Omit<ContactInfo, "id">
+    contactoData: Omit<ContactInfo, "id">
 ): Promise<WriteContactoResult> {
     try {
-        if (!conctatoData || Object.keys(conctatoData).length === 0) {
+        if (!contactoData || Object.keys(contactoData).length === 0) {
             throw new Error("Los datos del contacto no pueden estar vacíos.");
         }
 
-        const uid = uuidv4()
-        const contactoRef = doc(db, "contactos", uid)
+        const uid = uuidv4();
+        const contactoRef = doc(db, "empresas", empresaId, "contactos", uid);
+        const empresaRef = doc(db, "empresas", empresaId)
+
+        await updateDoc(empresaRef, {
+            contactos: arrayUnion({
+                ...contactoData,
+                id: uid,
+            }),
+        });
 
         await setDoc(contactoRef, {
-            ...conctatoData,
+            ...contactoData,
             id: uid,
-            empresaId: empresaId
-        })
+            empresaId: empresaId,
+        });
 
         return {
             success: true,
-            message: "Contacto registrado correctamente."
-        }
+            message: "Contacto registrado correctamente.",
+        };
     } catch (error) {
         console.error("Error al registrar el contacto:", error);
         return {

@@ -59,7 +59,7 @@ const EmpresaForm = () => {
             rfc: "",
             telefono: "",
             tipoEmpresa: TipoEmpresa.Matriz,
-            areas: []
+            areas: [],
         }
     })
 

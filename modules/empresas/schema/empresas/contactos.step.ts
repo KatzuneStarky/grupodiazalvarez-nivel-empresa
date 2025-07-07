@@ -6,8 +6,8 @@ export const ContactInfoSchema = z.object({
     email: z.string().email("Correo inválido"),
     telefono: z.string().min(7, "Teléfono inválido"),
     principal: z.boolean(),
+    empresaId: z.string().optional()
 });
-
 
 export const ContactosStep3 = z.object({
     contactos: z.array(ContactInfoSchema),

@@ -1,14 +1,15 @@
 "use client"
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { Empresa } from "../types/empresas"
-import Image from "next/image"
-import { Building2, Contact, Mail, Phone, Plus, User } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Button } from "@/components/ui/button"
+import { Building2, Contact, Mail, Phone, Plus, User } from "lucide-react"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Card } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { useRouter } from "next/navigation"
+import { Empresa } from "../types/empresas"
+import { Card } from "@/components/ui/card"
+import Image from "next/image"
 
 interface CompanyDetailsDialogProps {
     empresa: Empresa
@@ -19,6 +20,8 @@ const DetallesEmpresaDialogo = ({
     empresa,
     children
 }: CompanyDetailsDialogProps) => {
+    const router = useRouter()
+
     return (
         <Dialog>
             <DialogTrigger asChild>{children}</DialogTrigger>
@@ -60,7 +63,11 @@ const DetallesEmpresaDialogo = ({
                     <TabsContent value="contactos" className="mt-6">
                         <div className="flex items-center justify-between mb-4">
                             <h3 className="text-lg font-medium">Contactos de la Empresa</h3>
-                            <Button size="sm" variant="outline">
+                            <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => router.push(`/administracion/contactos/nuevo?empresaId=${empresa.id}`)}
+                            >
                                 <Plus className="h-4 w-4 mr-2" />
                                 Agregar Contacto
                             </Button>
