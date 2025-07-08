@@ -45,7 +45,7 @@ const NuevoContactoPage = () => {
             setIsLoading(true)
 
             toast.promise(
-                writeContacto(empresaId || "", data),
+                writeContacto(empresaId || data.empresaId || "", data),
                 {
                     loading: "Creando nuevo contacto, favor de esperar...",
                     success: (result) => {

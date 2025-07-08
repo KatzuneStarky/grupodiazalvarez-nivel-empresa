@@ -1,11 +1,11 @@
 "use client"
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { EstadoEmpresa } from "@/modules/administracion/enum/estado-empresa"
 import { Empresa } from "@/modules/empresas/types/empresas"
 import { Building2, Mail, Phone, User } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
 import ContactCard from "./contact-card"
 
 const CompanyContactCard = ({
@@ -64,12 +64,16 @@ const CompanyContactCard = ({
                 </CardContent>
             </Card>
 
-            <div className="space-y-2">
-                <h3 className="text-sm font-medium text-muted-foreground ml-4">Contactos ({empresa.contactos.length})</h3>
-                {empresa.contactos.map((contact, index) => (
-                    <ContactCard key={index} contacto={contact} />
-                ))}
-            </div>
+            {empresa.contactos.length > 0 ? (
+                <div className="space-y-2">
+                    <h3 className="text-sm font-medium text-muted-foreground ml-4">Contactos ({empresa.contactos.length})</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {empresa.contactos.map((contact, index) => (
+                            <ContactCard key={index} contacto={contact} empresaId={empresa.id} />
+                        ))}
+                    </div>
+                </div>
+            ) : null}
         </div>
     )
 }

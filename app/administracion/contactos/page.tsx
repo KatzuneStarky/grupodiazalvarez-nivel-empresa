@@ -1,18 +1,20 @@
 "use client"
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import CompanyContactCard from "@/modules/contactos/components/company-contact-card"
 import { useAllEmpreas } from "@/modules/empresas/hooks/use-all-empresas"
-import { Building2, Filter, Search } from "lucide-react"
+import { Building2, Contact, Filter, Search } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { useRouter } from "next/navigation"
 import { Card } from "@/components/ui/card"
 import { useMemo, useState } from "react"
-import CompanyContactCard from "@/modules/contactos/components/company-contact-card"
 
 const ContactosPage = () => {
     const [principalFilter, setPrincipalFilter] = useState<string>("all")
     const [industryFilter, setIndustryFilter] = useState<string>("all")
     const [searchTerm, setSearchTerm] = useState("")
+    const router = useRouter()
 
     const { empresas, loading, error } = useAllEmpreas()
 
@@ -23,6 +25,8 @@ const ContactosPage = () => {
     }, [empresas])
 
     const filteredEmpresas = useMemo(() => {
+        if (empresas.length === 0) return []
+
         return empresas
             .filter((empresa) => {
                 const companyNameMatch = empresa.nombre.toLowerCase().includes(searchTerm.toLowerCase())
@@ -58,7 +62,7 @@ const ContactosPage = () => {
                     return (contactNameMatch || companyNameMatch || searchTerm === "") && principalMatch
                 }),
             }))
-    }, [searchTerm, industryFilter, principalFilter])
+    }, [empresas, searchTerm, industryFilter, principalFilter])
 
     const clearFilters = () => {
         setSearchTerm("")
@@ -118,6 +122,14 @@ const ContactosPage = () => {
                         <Button variant="outline" onClick={clearFilters} className="whitespace-nowrap bg-transparent">
                             <Filter className="h-4 w-4 mr-2" />
                             Limpiar filtros
+                        </Button>
+
+                        <Button
+                            onClick={() => router.push("/administracion/contactos/nuevo")}
+                            className="whitespace-nowrap"
+                        >
+                            <Contact className="h-4 w-4 mr-2" />
+                            Nuevo contacto
                         </Button>
                     </div>
                 </div>
