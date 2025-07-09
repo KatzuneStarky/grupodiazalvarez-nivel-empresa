@@ -1,14 +1,14 @@
 "use client"
 
-import { EstadoEmpresa } from "@/modules/administracion/enum/estado-empresa"
-import { Empresa } from "../types/empresas"
-import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
-import Image from "next/image"
 import { Building2, Edit, Globe, Info, Mail, MapPin, Phone, Trash2, Users } from "lucide-react"
-import { Badge } from "@/components/ui/badge"
+import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
+import { EstadoEmpresa } from "@/modules/administracion/enum/estado-empresa"
+import DetallesEmpresaDialogo from "./detalles-empresa-dialogo"
 import { Separator } from "@/components/ui/separator"
 import { Button } from "@/components/ui/button"
-import DetallesEmpresaDialogo from "./detalles-empresa-dialogo"
+import { Badge } from "@/components/ui/badge"
+import { Empresa } from "../types/empresas"
+import Image from "next/image"
 
 interface CompanyCardProps {
     empresa: Empresa

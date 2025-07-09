@@ -17,9 +17,16 @@ export const menusAdministracion: AreaMenu[] = [
     },
     {
         id: "3",
+        name: "Areas",
+        icon: "material-symbols:home-work-rounded",
+        link: "/administracion/areas",
+        orden: 3,
+    },
+    {
+        id: "4",
         name: "Contactos",
         icon: "mdi:contacts",
         link: "/administracion/contactos",
-        orden: 3,
+        orden: 4,
     }
 ]

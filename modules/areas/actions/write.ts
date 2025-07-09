@@ -1,5 +1,6 @@
+import { arrayUnion, doc, setDoc, updateDoc } from "firebase/firestore";
 import { WriteAreaResult } from "@/types/form-result/area-form-result";
-import { doc, setDoc } from "firebase/firestore";
+import { AreaInput } from "@/types/area";
 import { db } from "@/firebase/client";
 import { Area } from "../types/areas";
 import { v4 as uuidv4 } from "uuid";
@@ -14,14 +15,21 @@ export async function writeArea(
         }
 
         const newId = uuidv4()
-        const areaRef = doc(db, "areas", newId);
+        const areaRef = doc(db, "empresas", empresaId, "areas", newId);
+        const empresaRef = doc(db, "empresas", empresaId)
+
+        await updateDoc(empresaRef, {
+            areas: arrayUnion({
+                ...areaData,
+                id: newId,
+            }),
+        });
+
         await setDoc(areaRef, {
             ...areaData,
             id: newId,
             empresaId: empresaId,
-            fechaCreacion: new Date().toISOString(),
-            fechaActualizacion: new Date().toISOString(),
-        })
+        });
 
         return {
             success: true,
@@ -35,4 +43,23 @@ export async function writeArea(
             error: error instanceof Error ? error : new Error("Error desconocido"),
         };
     }
+}
+
+export const updateArea = async(empresaId: string, area: AreaInput): Promise<{ success: boolean, message: string, error?: Error }> => {
+    try {
+        return {
+            success: true,
+            message: ""
+        }
+    } catch (error) {
+        return {
+            success: false,
+            message: "",
+            error: error instanceof Error ? error : new Error("Error desconocido")
+        }
+    }
+}
+
+export const deleteArea = async() => {
+
 }

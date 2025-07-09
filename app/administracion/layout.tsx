@@ -1,8 +1,8 @@
 "use client"
 
-import Navbar from "@/components/custom/navbar"
-import Sidebar from "@/components/custom/sidebar"
 import { AnimatePresence, motion } from "framer-motion"
+import Sidebar from "@/components/custom/sidebar"
+import Navbar from "@/components/custom/navbar"
 import { useEffect, useState } from "react"
 
 const AdminLayout = ({ children }: { children: React.ReactNode }) => {

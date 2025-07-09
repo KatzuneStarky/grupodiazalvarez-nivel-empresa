@@ -144,7 +144,7 @@ const DetallesEmpresaDialogo = ({
                     <TabsContent value="areas" className="mt-6">
                         <div className="flex items-center justify-between mb-4">
                             <h3 className="text-lg font-medium">Áreas de la Empresa</h3>
-                            <Button size="sm" variant="outline">
+                            <Button size="sm" variant="outline" onClick={() => router.push(`/administracion/areas/nuevo?empresaId=${empresa.id}`)}>
                                 <Plus className="h-4 w-4 mr-2" />
                                 Agregar Área
                             </Button>
