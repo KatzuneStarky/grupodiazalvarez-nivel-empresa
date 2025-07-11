@@ -1,6 +1,6 @@
 import { arrayUnion, collection, deleteDoc, doc, getDoc, getDocs, query, setDoc, updateDoc, where } from "firebase/firestore";
-import { WriteContactoResult } from "@/types/form-result/contacto-form-result";
 import { ContactInfo, ContactInfoInput } from "@/modules/empresas/types/contactos";
+import { WriteContactoResult } from "@/types/form-result/contacto-form-result";
 import { db } from "@/firebase/client";
 import { v4 as uuidv4 } from "uuid";
 

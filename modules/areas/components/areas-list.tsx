@@ -1,8 +1,8 @@
 "use client"
 
-import { Building2, Calendar, FileText, Filter, Globe, Mail, MapPin, Phone, Search, SortAsc, SortDesc, Users, X } from "lucide-react"
+import { Building2, Calendar, FileText, Filter, Globe, Mail, MapPin, Phone, Search, SortAsc, SortDesc, Trash, Users, X } from "lucide-react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { EstadoEmpresa } from "@/modules/administracion/enum/estado-empresa"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { TipoEmpresa } from "@/modules/administracion/enum/tipo-empresa"
@@ -17,6 +17,10 @@ import { useRouter } from "next/navigation"
 import { useMemo, useState } from "react"
 import { es } from "date-fns/locale"
 import { format } from "date-fns"
+import EditAreaModal from "./edit-area-modal"
+import { CustomAlertDialog } from "@/components/custom/custom-alert-dialog"
+import { toast } from "sonner"
+import { deleteAreaByEmail } from "../actions/write"
 
 
 interface CompanyAreasListProps {
@@ -138,6 +142,29 @@ const AreasList = ({
                 return "destructive"
             default:
                 return "outline"
+        }
+    }
+
+    const deleteArea = async (empresaId: string, email: string) => {
+        try {
+            toast.promise(
+                deleteAreaByEmail(empresaId, email), {
+                loading: "Eliminando el area, favor de esperar...",
+                success: (result) => {
+                    if (result.success) {
+                        return `Area eliminada satisfactoriamente.`;
+                    } else {
+                        throw new Error(result.message);
+                    }
+                },
+                error: (error) => {
+                    return error.message || "Error al eliminar el area.";
+                },
+            })
+
+            router.refresh()
+        } catch (error) {
+
         }
     }
 
@@ -361,6 +388,13 @@ const AreasList = ({
                 ) : (
                     filteredAndSortedEmpresas.map((empresa) => {
                         const fechaDeCreacion
+                            = empresa.fechaCreacion instanceof Timestamp
+                                ? empresa.fechaCreacion.toDate()
+                                : new Date(empresa.fechaCreacion || new Date());
+
+                        const fechaActualizacion = new Date(empresa.fechaActualizacion)
+
+                        const fechaDeCierre
                             = empresa.fechaCierre instanceof Timestamp
                                 ? empresa.fechaCierre.toDate()
                                 : new Date(empresa.fechaCierre || new Date());
@@ -464,22 +498,21 @@ const AreasList = ({
                                                     </div>
                                                     <div className="flex items-center gap-2 text-sm">
                                                         <Calendar className="h-4 w-4 text-muted-foreground" />
-                                                        <span>Creada: {format(fechaDeCreacion, "ppp", { locale: es })}</span>
+                                                        <span>Creada: {format(fechaDeCreacion, "dd/mm/yyyy", { locale: es })}</span>
                                                     </div>
                                                     <div className="flex items-center gap-2 text-sm">
                                                         <Calendar className="h-4 w-4 text-muted-foreground" />
-                                                        <span>Actualizada: {format(fechaDeCreacion, "ppp", { locale: es })}</span>
+                                                        <span>Actualizada: {format(fechaActualizacion, "dd/mm/yyyy", { locale: es })}</span>
                                                     </div>
                                                     {empresa.fechaCierre && (
                                                         <div className="flex items-center gap-2 text-sm text-destructive">
                                                             <Calendar className="h-4 w-4" />
-                                                            <span>Cerrada: {format(fechaDeCreacion, "ppp", { locale: es })}</span>
+                                                            <span>Cerrada: {format(fechaDeCierre, "dd/mm/yyyy", { locale: es })}</span>
                                                         </div>
                                                     )}
                                                 </div>
                                             </div>
 
-                                            {/* Configuration */}
                                             <div className="space-y-3">
                                                 <h4 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">
                                                     Configuración
@@ -509,9 +542,8 @@ const AreasList = ({
                                     </CardContent>
                                 </Card>
 
-                                {/* Areas Cards */}
                                 {empresa.areas && empresa.areas.length > 0 && (
-                                    <div className="ml-8">
+                                    <div>
                                         <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
                                             <div className="h-px bg-border flex-1" />
                                             <span className="px-3 bg-background">Áreas ({empresa.areas.length})</span>
@@ -534,8 +566,7 @@ const AreasList = ({
                                                             {area.descripcion && <p className="text-sm text-muted-foreground">{area.descripcion}</p>}
                                                         </CardHeader>
 
-                                                        <CardContent className="space-y-4">
-                                                            {/* Contact Information */}
+                                                        <CardContent className="space-y-4 flex-1">
                                                             {area.correoContacto && (
                                                                 <div className="flex items-center gap-2 text-sm">
                                                                     <Mail className="h-4 w-4 text-muted-foreground" />
@@ -594,15 +625,29 @@ const AreasList = ({
                                                                  */
                                                             }
                                                         </CardContent>
+
+                                                        <CardFooter className="flex items-center justify-end gap-2">
+                                                            <EditAreaModal area={area} empresaId={empresa.id} />
+
+                                                            <CustomAlertDialog
+                                                                action={() => deleteArea(empresa.id, area.correoContacto || "")}
+                                                                description="¿Estás seguro de querer eliminar esta area?"
+                                                                title="Eliminar area"
+                                                            >
+                                                                <Button variant={"destructive"}>
+                                                                    <Trash className="w-4 h-4 mr-2" />
+                                                                    Eliminar
+                                                                </Button>
+                                                            </CustomAlertDialog>
+                                                        </CardFooter>
                                                     </Card>
                                                 ))}
                                         </div>
                                     </div>
                                 )}
 
-                                {/* No areas message */}
                                 {(!empresa.areas || empresa.areas.length === 0) && (
-                                    <div className="ml-8">
+                                    <div>
                                         <Card className="border-dashed">
                                             <CardContent className="flex flex-col items-center justify-center py-8">
                                                 <Building2 className="h-8 w-8 text-muted-foreground mb-2" />

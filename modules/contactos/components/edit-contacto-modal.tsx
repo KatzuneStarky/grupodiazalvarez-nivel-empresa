@@ -6,8 +6,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ContactInfo, ContactInfoSchema } from "@/modules/empresas/schema/empresas/contactos.step"
 import { useAllEmpreas } from "@/modules/empresas/hooks/use-all-empresas"
 import { ContactInfoInput } from "@/modules/empresas/types/contactos"
-import { zodResolver } from "@hookform/resolvers/zod"
 import { CheckCircle2, Edit, Star } from "lucide-react"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { updateContacto } from "../actions/write"
 import { Button } from "@/components/ui/button"
 import { Switch } from "@/components/ui/switch"
 import { Input } from "@/components/ui/input"
@@ -15,7 +16,6 @@ import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { toast } from "sonner"
-import { updateContacto } from "../actions/write"
 
 interface EditContactModalProps {
     contacto: ContactInfoInput,
