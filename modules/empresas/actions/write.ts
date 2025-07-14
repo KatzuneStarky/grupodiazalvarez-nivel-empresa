@@ -1,5 +1,6 @@
+import { collection, deleteDoc, doc, getDocs, setDoc } from "firebase/firestore";
 import { WriteEmpresaResult } from "@/types/form-result/empresa-form-result";
-import { collection, doc, setDoc } from "firebase/firestore";
+import { deleteFolderContents } from "@/actions/folder/write";
 import { Empresa } from "../types/empresas";
 import { db } from "@/firebase/client";
 import { v4 as uuidv4 } from "uuid";
@@ -15,44 +16,50 @@ export async function writeEmpresa(
 
         const empresaId = uuidv4();
         const empresaRef = doc(db, "empresas", empresaId);
+        const now = new Date().toISOString();
 
         await setDoc(empresaRef, {
             ...empresaData,
-            fechaActualizacion: new Date().toISOString(),
-        })
+            fechaCreacion: now,
+            fechaActualizacion: now,
+        });
 
-        if (empresaData.contactos && empresaData.contactos.length > 0) {
-            for (const contacto of empresaData.contactos) {
+        if (empresaData.contactos?.length > 0) {
+            const contactoWrites = empresaData.contactos.map((contacto) => {
                 const contactoId = uuidv4();
                 const contactoRef = doc(
                     collection(db, `empresas/${empresaId}/contactos`),
                     contactoId
                 );
 
-                await setDoc(contactoRef, {
+                return setDoc(contactoRef, {
                     ...contacto,
                     id: contactoId,
                     empresaId,
                 });
-            }
+            });
+
+            await Promise.all(contactoWrites);
         }
 
-        if (empresaData.areas && empresaData.areas.length > 0) {
-            for (const area of empresaData.areas) {
+        if (empresaData.areas && empresaData.areas?.length > 0) {
+            const areaWrites = empresaData.areas.map((area) => {
                 const areaId = uuidv4();
                 const areaRef = doc(
                     collection(db, `empresas/${empresaId}/areas`),
                     areaId
                 );
 
-                await setDoc(areaRef, {
+                return setDoc(areaRef, {
                     ...area,
                     id: areaId,
-                    empresaId: empresaId,
-                    fechaCreacion: new Date().toISOString(),
-                    fechaActualizacion: new Date().toISOString(),
+                    empresaId,
+                    fechaCreacion: now,
+                    fechaActualizacion: now,
                 });
-            }
+            });
+
+            await Promise.all(areaWrites);
         }
 
         return {
@@ -64,6 +71,42 @@ export async function writeEmpresa(
         return {
             success: false,
             message: "Error al registrar la empresa.",
+            error: error instanceof Error ? error : new Error("Error desconocido"),
+        };
+    }
+}
+
+export const deleteEmpresaById = async (empresaId: string, empresaName: string):
+    Promise<{ success: boolean, message: string, error?: Error }> => {
+    try {
+        const empresaRef = doc(db, "empresas", empresaId);
+        const areasRef = collection(empresaRef, "areas");
+        const contactosRef = collection(empresaRef, "contactos");
+
+        const areasSnapshot = await getDocs(areasRef);
+        const areaDeletes = areasSnapshot.docs.map((areaDoc) =>
+            deleteDoc(areaDoc.ref)
+        );
+        await Promise.all(areaDeletes);
+
+        const contactosSnapshot = await getDocs(contactosRef);
+        const contactoDeletes = contactosSnapshot.docs.map((contactoDoc) =>
+            deleteDoc(contactoDoc.ref)
+        );
+        await Promise.all(contactoDeletes);
+
+        await deleteFolderContents(`/empresas/${empresaName}`)
+        await deleteDoc(empresaRef);
+
+        return {
+            success: false,
+            message: "Empresa eliminada correctamente."
+        };
+    } catch (error) {
+        console.error("Error al eliminar la empresa:", error);
+        return {
+            success: false,
+            message: "Error al eliminar la empresa.",
             error: error instanceof Error ? error : new Error("Error desconocido"),
         };
     }

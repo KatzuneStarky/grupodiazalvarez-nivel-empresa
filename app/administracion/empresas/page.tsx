@@ -8,6 +8,8 @@ import { Building2, Plus, Search } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useEffect, useState } from "react"
+import { toast } from "sonner"
+import { deleteEmpresaById } from "@/modules/empresas/actions/write"
 
 const EmpresasPage = () => {
     const [filteredEmpresas, setFilderesEmpresas] = useState<Empresa[]>([])
@@ -37,6 +39,29 @@ const EmpresasPage = () => {
                 </div>
             </div>
         )
+    }
+
+    const deleteEmpresa = async (id: string, nombre: string) => {
+        try {
+            toast.promise(
+                deleteEmpresaById(id, nombre), {
+                loading: "Eliminando el area, favor de esperar...",
+                success: (result) => {
+                    if (result.success) {
+                        return `Area eliminada satisfactoriamente.`;
+                    } else {
+                        throw new Error(result.message);
+                    }
+                },
+                error: (error) => {
+                    return error.message || "Error al eliminar la empresa.";
+                },
+            })
+        } catch (error) {
+            toast.error(`Error al eliminar la empresa ${nombre}`, {
+                description: `${error}`
+            })
+        }
     }
 
     return (
@@ -98,7 +123,12 @@ const EmpresasPage = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {empresas.map((empresa, index) => (
                         <div>
-                            <EmpresaCard key={index} empresa={empresa} onDelete={() => { }} onEdit={() => { }} />
+                            <EmpresaCard
+                                key={index}
+                                empresa={empresa}
+                                onDelete={() => deleteEmpresa(empresa.id, empresa.nombre)}
+                                onEdit={() => { }}
+                            />
                         </div>
                     ))}
                 </div>

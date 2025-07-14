@@ -5,11 +5,11 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Edit, Mail, Phone, Star, Trash } from "lucide-react"
 import { deleteContactoByEmail } from "../actions/write"
+import EditContactModal from "./edit-contacto-modal"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
-import EditContactModal from "./edit-contacto-modal"
 
 const ContactCard = ({
     contacto,
@@ -80,7 +80,12 @@ const ContactCard = ({
                 </div>
             </CardContent>
             <CardFooter className="flex items-center justify-end gap-2">
-                <EditContactModal contacto={contacto} empresaId={empresaId} />
+                <EditContactModal contacto={contacto} empresaId={empresaId}>
+                    <Button>
+                        <Edit className="w-4 h-4 mr-2" />
+                        Editar
+                    </Button>
+                </EditContactModal>
 
                 <CustomAlertDialog
                     action={() => deleteContact(empresaId, contacto.email)}

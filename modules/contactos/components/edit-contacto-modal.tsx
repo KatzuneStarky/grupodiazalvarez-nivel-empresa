@@ -19,12 +19,14 @@ import { toast } from "sonner"
 
 interface EditContactModalProps {
     contacto: ContactInfoInput,
-    empresaId: string
+    empresaId: string,
+    children: React.ReactNode
 }
 
 const EditContactModal = ({
     contacto,
-    empresaId
+    empresaId,
+    children
 }: EditContactModalProps) => {
     const [isLoading, setIsLoading] = useState<boolean>(false)
 
@@ -89,10 +91,7 @@ const EditContactModal = ({
     return (
         <Dialog>
             <DialogTrigger asChild>
-                <Button>
-                    <Edit className="w-4 h-4 mr-2" />
-                    Editar
-                </Button>
+                {children}
             </DialogTrigger>
             <DialogContent className="max-w-xl">
                 <DialogHeader>

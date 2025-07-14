@@ -1,8 +1,13 @@
 "use client"
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import EditContactModal from "@/modules/contactos/components/edit-contacto-modal"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { CustomAlertDialog } from "@/components/custom/custom-alert-dialog"
 import { Building2, Contact, Mail, Phone, Plus, User } from "lucide-react"
+import { deleteContactoByEmail } from "@/modules/contactos/actions/write"
+import EditAreaModal from "@/modules/areas/components/edit-area-modal"
+import { deleteAreaByEmail } from "@/modules/areas/actions/write"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -10,6 +15,7 @@ import { useRouter } from "next/navigation"
 import { Empresa } from "../types/empresas"
 import { Card } from "@/components/ui/card"
 import Image from "next/image"
+import { toast } from "sonner"
 
 interface CompanyDetailsDialogProps {
     empresa: Empresa
@@ -21,6 +27,45 @@ const DetallesEmpresaDialogo = ({
     children
 }: CompanyDetailsDialogProps) => {
     const router = useRouter()
+
+    const deleteContact = async (empresaId: string, email: string) => {
+        try {
+            await deleteContactoByEmail(empresaId, email)
+            console.log(empresaId);
+
+
+            toast.success("El contacto se eliminó correctamente")
+            router.refresh()
+        } catch (error) {
+            console.log(error);
+            toast.error("Hubo un error al eliminar el contacto", {
+                description: `${error}`
+            })
+        }
+    }
+
+    const deleteArea = async (empresaId: string, email: string) => {
+        try {
+            toast.promise(
+                deleteAreaByEmail(empresaId, email), {
+                loading: "Eliminando el area, favor de esperar...",
+                success: (result) => {
+                    if (result.success) {
+                        return `Area eliminada satisfactoriamente.`;
+                    } else {
+                        throw new Error(result.message);
+                    }
+                },
+                error: (error) => {
+                    return error.message || "Error al eliminar el area.";
+                },
+            })
+
+            router.refresh()
+        } catch (error) {
+
+        }
+    }
 
     return (
         <Dialog>
@@ -114,12 +159,21 @@ const DetallesEmpresaDialogo = ({
                                                 </div>
 
                                                 <div className="flex gap-1">
-                                                    <Button variant="ghost" size="sm">
-                                                        Editar
-                                                    </Button>
-                                                    <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive">
-                                                        Eliminar
-                                                    </Button>
+                                                    <EditContactModal contacto={contacto} empresaId={empresa.id}>
+                                                        <Button variant="ghost" size="sm">
+                                                            Editar
+                                                        </Button>
+                                                    </EditContactModal>
+
+                                                    <CustomAlertDialog
+                                                        action={() => deleteContact(empresa.id, contacto.email)}
+                                                        description="¿Estás seguro de querer eliminar este contacto?"
+                                                        title="Eliminar contacto"
+                                                    >
+                                                        <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive">
+                                                            Eliminar
+                                                        </Button>
+                                                    </CustomAlertDialog>
                                                 </div>
                                             </div>
                                         </Card>
@@ -180,12 +234,21 @@ const DetallesEmpresaDialogo = ({
                                                 </div>
 
                                                 <div className="flex gap-1">
-                                                    <Button variant="ghost" size="sm">
-                                                        Editar
-                                                    </Button>
-                                                    <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive">
-                                                        Eliminar
-                                                    </Button>
+                                                    <EditAreaModal area={area} empresaId={empresa.id}>
+                                                        <Button variant="ghost" size="sm">
+                                                            Editar
+                                                        </Button>
+                                                    </EditAreaModal>
+
+                                                    <CustomAlertDialog
+                                                        action={() => deleteArea(empresa.id, area.correoContacto || "")}
+                                                        description="¿Estás seguro de querer eliminar esta area?"
+                                                        title="Eliminar area"
+                                                    >
+                                                        <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive">
+                                                            Eliminar
+                                                        </Button>
+                                                    </CustomAlertDialog>
                                                 </div>
                                             </div>
                                         </Card>

@@ -24,9 +24,10 @@ import { Switch } from "@/components/ui/switch"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
+import { useRouter } from "next/navigation"
 import { es } from "date-fns/locale"
 import { format } from "date-fns"
-import {v4 as uuidV4} from "uuid"
+import { v4 as uuidV4 } from "uuid"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 
@@ -37,9 +38,10 @@ const EmpresaForm = () => {
     const [imageUrl, setImageUrl] = useState<string>("")
     const [useCamera, setUseCamera] = useState(false)
 
+    const router = useRouter()
+
     const form = useForm<EmpresaSchemaType>({
         resolver: zodResolver(EmpresaSchema),
-        mode: "onTouched",
         defaultValues: {
             accesoPublico: false,
             contactos: [],
@@ -203,6 +205,8 @@ const EmpresaForm = () => {
         try {
             setIsLoading(true)
 
+            console.log(data)            
+
             toast.promise(
                 writeEmpresa({
                     configuraciones: {
@@ -255,7 +259,7 @@ const EmpresaForm = () => {
             })
 
             form.reset()
-            window.location.reload()
+            router.back()
         } catch (error) {
             console.log("Error al crear al usuario", error);
             toast.error("Error al crear al suario", {

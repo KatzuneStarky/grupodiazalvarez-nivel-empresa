@@ -1,6 +1,6 @@
 "use client"
 
-import { Building2, Calendar, FileText, Filter, Globe, Mail, MapPin, Phone, Search, SortAsc, SortDesc, Trash, Users, X } from "lucide-react"
+import { Building2, Calendar, Edit, FileText, Filter, Globe, Mail, MapPin, Phone, Search, SortAsc, SortDesc, Trash, Users, X } from "lucide-react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { EstadoEmpresa } from "@/modules/administracion/enum/estado-empresa"
@@ -627,7 +627,12 @@ const AreasList = ({
                                                         </CardContent>
 
                                                         <CardFooter className="flex items-center justify-end gap-2">
-                                                            <EditAreaModal area={area} empresaId={empresa.id} />
+                                                            <EditAreaModal area={area} empresaId={empresa.id}>
+                                                                <Button>
+                                                                    <Edit className="w-4 h-4 mr-2" />
+                                                                    Editar
+                                                                </Button>
+                                                            </EditAreaModal>
 
                                                             <CustomAlertDialog
                                                                 action={() => deleteArea(empresa.id, area.correoContacto || "")}

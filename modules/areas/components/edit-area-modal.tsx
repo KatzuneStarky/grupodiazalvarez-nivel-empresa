@@ -17,10 +17,12 @@ import { toast } from "sonner"
 
 const EditAreaModal = ({
     empresaId,
-    area
+    area,
+    children
 }: {
     empresaId: string,
-    area: AreaInput
+    area: AreaInput,
+    children: React.ReactNode
 }) => {
     const [isLoading, setIsLoading] = useState<boolean>(false)
     const router = useRouter()
@@ -84,10 +86,7 @@ const EditAreaModal = ({
     return (
         <Dialog>
             <DialogTrigger asChild>
-                <Button>
-                    <Edit className="w-4 h-4 mr-2" />
-                    Editar
-                </Button>
+                {children}
             </DialogTrigger>
             <DialogContent className="max-w-xl">
                 <DialogHeader>

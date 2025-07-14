@@ -13,7 +13,7 @@ import Image from "next/image"
 interface CompanyCardProps {
     empresa: Empresa
     onEdit: (empresa: Empresa) => void
-    onDelete: (id: string) => void
+    onDelete: (id: string, nombre: string) => void
 }
 
 const EmpresaCard = ({
@@ -151,7 +151,7 @@ const EmpresaCard = ({
                     <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => onDelete(empresa.id)}
+                        onClick={() => onDelete(empresa.id, empresa.nombre)}
                         className="flex-1 text-destructive hover:text-destructive"
                     >
                         <Trash2 className="h-4 w-4 mr-2" />
