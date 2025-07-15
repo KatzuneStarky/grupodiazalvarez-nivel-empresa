@@ -201,11 +201,9 @@ const EmpresaForm = () => {
         setImageUrl(url)
     }
 
-    const onSubmit = (data: EmpresaSchemaType) => {
+    const onSubmit = async(data: EmpresaSchemaType) => {
         try {
             setIsLoading(true)
-
-            console.log(data)            
 
             toast.promise(
                 writeEmpresa({
@@ -239,7 +237,7 @@ const EmpresaForm = () => {
                     empresaPadreId: "",
                     fechaCierre: new Date(),
                     industria: data.industria,
-                    logoUrl: imageUrl,
+                    logoUrl: imageUrl || "",
                     numeroEmpleados: data.numeroEmpleados,
                     razonSocial: data.razonSocial,
                     tipo: data.tipoEmpresa,
@@ -259,7 +257,7 @@ const EmpresaForm = () => {
             })
 
             form.reset()
-            router.back()
+            router.replace("/administracion/empresas")
         } catch (error) {
             console.log("Error al crear al usuario", error);
             toast.error("Error al crear al suario", {

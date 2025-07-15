@@ -3,20 +3,22 @@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useAllEmpreas } from "@/modules/empresas/hooks/use-all-empresas"
 import EmpresaCard from "@/modules/empresas/components/empresa-card"
+import { deleteEmpresaById } from "@/modules/empresas/actions/write"
 import { Empresa } from "@/modules/empresas/types/empresas"
 import { Building2, Plus, Search } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
-import { deleteEmpresaById } from "@/modules/empresas/actions/write"
+import { useRouter } from "next/navigation"
 
 const EmpresasPage = () => {
     const [filteredEmpresas, setFilderesEmpresas] = useState<Empresa[]>([])
-    const [industryFilter, setIndustryFilter] = useState<string>("")
+    const [industryFilter, setIndustryFilter] = useState<string>("all")
     const [searchTerm, setSearchTerm] = useState<string>("")
 
     const { empresas, loading, error } = useAllEmpreas()
+    const router = useRouter()
 
     const industries = Array.from(new Set(empresas.map((e) => e.industria).filter(Boolean)))
 
@@ -26,7 +28,7 @@ const EmpresasPage = () => {
                 empresa.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 empresa.rfc.toLowerCase().includes(searchTerm.toLowerCase()),
         ))
-    }, [searchTerm])
+    }, [empresas, searchTerm, industryFilter])
 
     if (loading) {
         return (
@@ -102,7 +104,7 @@ const EmpresasPage = () => {
                 </Select>
             </div>
 
-            {empresas.length === 0 ? (
+            {filteredEmpresas.length === 0 ? (
                 <div className="text-center py-12">
                     <Building2 className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
                     <h3 className="text-lg font-medium mb-2">No se encontraron empresas</h3>
@@ -121,13 +123,13 @@ const EmpresasPage = () => {
                 </div>
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {empresas.map((empresa, index) => (
+                    {filteredEmpresas.map((empresa, index) => (
                         <div>
                             <EmpresaCard
                                 key={index}
                                 empresa={empresa}
                                 onDelete={() => deleteEmpresa(empresa.id, empresa.nombre)}
-                                onEdit={() => { }}
+                                onEdit={() => router.push(`/administracion/empresas/editar/${empresa.id}`)}
                             />
                         </div>
                     ))}
