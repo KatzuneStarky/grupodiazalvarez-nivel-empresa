@@ -28,5 +28,12 @@ export const menusAdministracion: AreaMenu[] = [
         icon: "mdi:contacts",
         link: "/administracion/contactos",
         orden: 4,
+    },
+    {
+        id: "5",
+        name: "Usuarios",
+        icon: "mdi:users",
+        link: "/administracion/usuarios",
+        orden: 5,
     }
 ]

@@ -69,6 +69,75 @@ const UserCards = ({
         return email?.charAt(0).toUpperCase() || "U"
     }
 
+    if (variant === "list") {
+        return (
+            <div className="space-y-2">
+                {users.map((user) => (
+                    <Card
+                        key={user.id}
+                        className={`hover:shadow-md transition-shadow ${selectedUserIds.has(user.id) ? "bg-muted/50 border-primary" : ""}`}
+                    >
+                        <CardContent className="p-4">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center space-x-4">
+                                    <Checkbox
+                                        checked={selectedUserIds.has(user.id)}
+                                        onCheckedChange={(checked) => onSelectUser(user.id, checked as boolean)}
+                                    />
+                                    <Avatar className="h-10 w-10">
+                                        <AvatarImage src={user.avatarUrl || "/placeholder.svg"} alt={user.nombre || user.email} />
+                                        <AvatarFallback>{getInitials(user.nombre, user.email)}</AvatarFallback>
+                                    </Avatar>
+                                    <div className="flex-1 min-w-0">
+                                        <h3 className="font-medium text-sm">
+                                            {user.nombre ? `${user.nombre}` : user.nombre || user.email}
+                                        </h3>
+                                        <p className="text-xs text-muted-foreground">{user.email}</p>
+                                        {user.id && <p className="text-xs text-muted-foreground font-mono">{user.id}</p>}
+                                    </div>
+                                </div>
+
+                                <div className="flex items-center gap-4">
+                                    <div className="flex gap-2">
+                                        {getStatusBadge(user.estado)}
+                                        {getRegistrationTypeBadge(user.tipoRegistro)}
+                                    </div>
+
+                                    <div className="text-right">
+                                        <p className="text-xs text-muted-foreground">Registrado</p>
+                                        <p className="text-xs">{format(user.creadoEn, "dd MMMM yyyy", { locale: es })}</p>
+                                    </div>
+
+                                    <DropdownMenu>
+                                        <DropdownMenuTrigger asChild>
+                                            <Button variant="ghost" className="h-8 w-8 p-0">
+                                                <MoreHorizontal className="h-4 w-4" />
+                                            </Button>
+                                        </DropdownMenuTrigger>
+                                        <DropdownMenuContent align="end">
+                                            <DropdownMenuItem onClick={() => onViewUser(user)}>
+                                                <Eye className="mr-2 h-4 w-4" />
+                                                Ver detalles
+                                            </DropdownMenuItem>
+                                            <DropdownMenuItem onClick={() => onEditUser(user)}>
+                                                <Edit className="mr-2 h-4 w-4" />
+                                                Editar
+                                            </DropdownMenuItem>
+                                            <DropdownMenuItem onClick={() => onSuspendUser(user)} className="text-destructive">
+                                                <UserX className="mr-2 h-4 w-4" />
+                                                Suspender
+                                            </DropdownMenuItem>
+                                        </DropdownMenuContent>
+                                    </DropdownMenu>
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+                ))}
+            </div>
+        )
+    }
+
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {users.map((user) => (

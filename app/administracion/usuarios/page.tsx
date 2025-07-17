@@ -1,18 +1,17 @@
 "use client"
 
+import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useUsuariosDashboard } from "@/modules/usuarios/hooks/use-usuarios-dashboard"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ArrowUpDown, LayoutGrid, List, Table2 } from "lucide-react"
 import UserFilters from "@/modules/usuarios/components/user-filters"
 import { useUsuarios } from "@/modules/usuarios/hooks/use-usuarios"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import UserTable from "@/modules/usuarios/components/user-table"
+import UserCards from "@/modules/usuarios/components/user-card"
 import { Card, CardContent } from "@/components/ui/card"
 import { ViewMode } from "@/modules/usuarios/types/user"
 import { Button } from "@/components/ui/button"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination"
-import UserTable from "@/modules/usuarios/components/user-table"
-import UserCards from "@/modules/usuarios/components/user-card"
-
 
 const UsuariosPage = () => {
     const { usuarios, loading, error } = useUsuarios()
@@ -55,7 +54,7 @@ const UsuariosPage = () => {
                     onClearFilters={handleClearFilters}
                     onExportUsers={() => { }}
                     onImportUsers={() => { }}
-                    onCreateUser={() => { }}
+                    onCreateUser={() => {}}
                     totalUsers={usuarios.length}
                     filteredUsers={filteredAndSortedUsers.length}
                 />
@@ -138,8 +137,8 @@ const UsuariosPage = () => {
                                     selectedUserIds={selectedUserIds}
                                     onSelectUser={handleSelectUser}
                                     onViewUser={handleViewUser}
-                                    onEditUser={() => {}}
-                                    onSuspendUser={() => {}}
+                                    onEditUser={() => { }}
+                                    onSuspendUser={() => { }}
                                 />
                             </TabsContent>
 
@@ -149,8 +148,8 @@ const UsuariosPage = () => {
                                     selectedUserIds={selectedUserIds}
                                     onSelectUser={handleSelectUser}
                                     onViewUser={handleViewUser}
-                                    onEditUser={() => {}}
-                                    onSuspendUser={() => {}}
+                                    onEditUser={() => { }}
+                                    onSuspendUser={() => { }}
                                     variant="list"
                                 />
                             </TabsContent>

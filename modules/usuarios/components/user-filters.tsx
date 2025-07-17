@@ -1,17 +1,18 @@
 "use client"
 
-import { CalendarIcon, ChevronDown, Download, Filter, Search, Upload, UserPlus, X } from "lucide-react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
+import { CalendarIcon, ChevronDown, Download, Filter, Search, Upload, X } from "lucide-react"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { useUsuariosFilters } from "../hooks/use-usuarios-filters"
+import GenerateUserDialog from "./generate-user-dialog"
 import { Calendar } from "@/components/ui/calendar"
 import { type UserFilters } from "../types/user"
 import { Button } from "@/components/ui/button"
+import { ArrayRoles } from "@/enum/user-roles"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { format } from "date-fns"
-import { ArrayRoles } from "@/enum/user-roles"
 
 interface EnhancedUserFiltersProps {
     filters: UserFilters
@@ -66,10 +67,7 @@ const UserFilters = ({
                         <Download className="h-4 w-4" />
                         Exportar
                     </Button>
-                    <Button onClick={onCreateUser} className="flex items-center gap-2">
-                        <UserPlus className="h-4 w-4" />
-                        Agregar usuario
-                    </Button>
+                    <GenerateUserDialog />
                 </div>
             </div>
 
