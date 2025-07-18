@@ -2,15 +2,18 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { getAuth, isSignInWithEmailLink, signInWithEmailLink } from "firebase/auth"
+import { ArrowRight, CheckCircle, Loader2, Mail, XCircle } from "lucide-react"
+import type { StepOptions, PopperPlacement } from 'shepherd.js'
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { useRouter, useSearchParams } from "next/navigation"
-import { ArrowRight, CheckCircle, Loader2, Mail } from "lucide-react"
+import { useTour } from "@/context/tour-context"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
 import { z } from "zod"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import { v4 } from "uuid"
 
 type AuthMode =
     | "signIn"
@@ -40,6 +43,7 @@ const AccionesUsuario = () => {
     const auth = getAuth();
     const params = useSearchParams()
     const router = useRouter()
+    const { startTour, initTour } = useTour()
 
     useEffect(() => {
         try {
@@ -62,6 +66,49 @@ const AccionesUsuario = () => {
         }
     }, [params])
 
+    useEffect(() => {
+        setTimeout(() => {
+            const tourId = v4()
+            const tour = initTour(tourId)
+
+            if (!tour) return
+
+            const steps: StepOptions[] = [
+                {
+                    id: 'step-1',
+                    attachTo: { element: '.input-email', on: 'right' as PopperPlacement },
+                    title: 'Ingresa tu correo',
+                    text: 'Aquí puedes crear un nuevo elemento.',
+                    buttons: [
+                        {
+                            text: 'Siguiente',
+                            action: () => tour?.next(),
+                        },
+                    ],
+                },
+                {
+                    id: 'step-2',
+                    attachTo: { element: '.sidebar', on: 'bottom' as PopperPlacement },
+                    title: 'Menú lateral',
+                    text: 'Este es el menú lateral donde puedes navegar.',
+                    buttons: [
+                        {
+                            text: 'Anterior',
+                            action: () => tour.back(),
+                        },
+                        {
+                            text: 'Finalizar',
+                            action: () => tour.complete(),
+                        },
+                    ],
+                },
+            ];
+
+            steps.forEach((step) => tour.addStep(step));
+            startTour();
+        }, 2000);
+    }, []);
+
     if (loading) {
         return (
             <div className="min-h-screen flex items-center justify-center">
@@ -81,36 +128,49 @@ const AccionesUsuario = () => {
 
     const verifyEmail = async (email: string) => {
         if (mode === "signIn") {
-            setStatus("validating")
             try {
+                setStatus("validating")
                 setLoading(true)
                 const url = window.location.href;
 
                 if (!email) {
-
+                    setStatus("error");
+                    toast.error("Debes ingresar un correo electrónico");
+                    setTimeout(() => {
+                        setStatus("idle")
+                    }, 2000)
                 }
 
-                if (isValid.success) {
-                    if (isSignInWithEmailLink(auth, url)) {
-                        const result = await signInWithEmailLink(auth, email, url)
-                        setStatus("success")
-                        toast.success("Verificación exitosa", {
-                            description: "Tu correo electrónico ha sido verificado con éxito."
-                        })
+                if (!isValid.success) {
+                    setStatus("error");
+                    toast.error("El correo electrónico es inválido");
+                    setTimeout(() => {
+                        setStatus("idle")
+                    }, 2000)
+                }
 
-                        router.push(continueUrl)
-                    } else {
-                        throw new Error("El enlace no es válido o ha expirado.");
-                    }
-                } else if (isValid.error) {
-                    toast.error("El correo electronico es invalido")
+                if (email && isSignInWithEmailLink(auth, url)) {
+                    await signInWithEmailLink(auth, email, url);
+                    setStatus("success");
+                    toast.success("Verificación exitosa", {
+                        description: "Tu correo electrónico ha sido verificado con éxito.",
+                    });
 
+                    setTimeout(() => {
+                        setStatus("idle");
+                        router.push(continueUrl);
+                    }, 1500);
+                } else {
+                    throw new Error("El enlace no es válido o ha expirado.");
                 }
             } catch (error) {
                 console.error("❌ Error en autenticación:", error);
                 setError(`${error}` || "Error desconocido");
                 setStatus("error");
                 setLoading(false)
+                setTimeout(() => {
+                    setStatus("idle")
+                }, 2000)
             } finally {
                 setLoading(false)
             }
@@ -145,19 +205,25 @@ const AccionesUsuario = () => {
                             </Label>
                             <Input
                                 id="email"
+                                className="input-email"
                                 placeholder="Correo electrónico"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                                 disabled={loading}
                             />
                             <Button
-                                className="w-full bg-transparent"
-                                variant="outline"
+                                className="w-full bg-transparent sidebar"
+                                variant={status === "error" ? "destructive" : "outline"}
                                 onClick={() => verifyEmail(email)}
+                                disabled={status === "validating" || status === "error" || loading}
                             >
-                                Continuar
-                                <ArrowRight className="w-4 h-4" />
+                                {status === "validating" && <Loader2 className="w-4 h-4 animate-spin" />}
+                                {status === "success" && <CheckCircle className="w-4 h-4" />}
+                                {status === "error" && <XCircle className="w-4 h-4" />}
+                                {status === "validating" ? "Validando..." : "Continuar"}
+                                {status === "idle" && <ArrowRight className="w-4 h-4" />}
                             </Button>
+                            {status}
                         </CardContent>
                     </Card>
                 )

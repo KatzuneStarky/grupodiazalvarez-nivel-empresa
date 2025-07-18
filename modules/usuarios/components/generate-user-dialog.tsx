@@ -9,11 +9,6 @@ import { useState } from "react"
 import { toast } from "sonner";
 import { z } from "zod";
 
-const actionCodeSettings = {
-    url: 'https://grupodiazalvarez.com/entrar',
-    handleCodeInApp: true
-};
-
 const newUserSchema = z.object({
     email: z.string().email({ message: "Correo electrónico inválido" })
 })
@@ -23,6 +18,11 @@ const GenerateUserDialog = () => {
     const [loading, setLoading] = useState<boolean>(false)
 
     const auth = getAuth();
+
+    const actionCodeSettings = {
+        url: `https://grupodiazalvarez.com/entrar?email=${userEmail}`,
+        handleCodeInApp: true
+    };
 
     const generateNewUser = (email: string) => {
         const isValid = newUserSchema.safeParse({
