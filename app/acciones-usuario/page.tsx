@@ -78,7 +78,7 @@ const AccionesUsuario = () => {
                     id: 'step-1',
                     attachTo: { element: '.input-email', on: 'right' as PopperPlacement },
                     title: 'Ingresa tu correo',
-                    text: 'Aquí puedes crear un nuevo elemento.',
+                    text: 'En este paso ingresaras tu correo electrónico.',
                     buttons: [
                         {
                             text: 'Siguiente',
@@ -88,9 +88,9 @@ const AccionesUsuario = () => {
                 },
                 {
                     id: 'step-2',
-                    attachTo: { element: '.sidebar', on: 'bottom' as PopperPlacement },
-                    title: 'Menú lateral',
-                    text: 'Este es el menú lateral donde puedes navegar.',
+                    attachTo: { element: '.button-continue', on: 'bottom' as PopperPlacement },
+                    title: 'Continuar',
+                    text: 'En este paso continuaras con el proceso y te redirigiremos a iniciar sesion.',
                     buttons: [
                         {
                             text: 'Anterior',
@@ -196,7 +196,8 @@ const AccionesUsuario = () => {
                             <Alert className="border-2 border-red-500">
                                 <CheckCircle className="h-4 w-4" />
                                 <AlertDescription>
-                                    Your email verification is in progress. You can close this window once completed.
+                                    Verificaremos el correo ingresado para confirmar tu identidad.
+                                    Una vez verificado te redirigiremos a iniciar sesion
                                 </AlertDescription>
                             </Alert>
 
@@ -212,7 +213,7 @@ const AccionesUsuario = () => {
                                 disabled={loading}
                             />
                             <Button
-                                className="w-full bg-transparent sidebar"
+                                className="w-full bg-transparent button-continue"
                                 variant={status === "error" ? "destructive" : "outline"}
                                 onClick={() => verifyEmail(email)}
                                 disabled={status === "validating" || status === "error" || loading}

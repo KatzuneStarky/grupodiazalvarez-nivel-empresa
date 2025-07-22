@@ -1,7 +1,7 @@
 import { Firestore, getFirestore } from "firebase-admin/firestore"
-import { getApps, ServiceAccount } from "firebase-admin/app"
+import { cert, getApps, ServiceAccount } from "firebase-admin/app"
 import { Auth, getAuth } from "firebase-admin/auth"
-import admin from "firebase-admin"
+import admin, { initializeApp } from "firebase-admin"
 
 const serviceAccount = {
     "type": "service_account",
@@ -21,6 +21,10 @@ let firestore: Firestore
 let auth: Auth
 const currentApps = getApps()
 
+if (!process.env.FIREBASE_PRIVATE_KEY) {
+    throw new Error("Missing Firebase private key.");
+}
+
 if (!currentApps.length) {
     const app = admin.initializeApp({
         credential: admin.credential.cert(serviceAccount as ServiceAccount)
@@ -33,5 +37,9 @@ if (!currentApps.length) {
     firestore = getFirestore(app)
     auth = getAuth(app)
 }
+
+export const adminApp = getApps().length === 0
+    ? initializeApp({ credential: cert(serviceAccount as ServiceAccount) })
+    : getApps()[0];
 
 export { firestore, auth }

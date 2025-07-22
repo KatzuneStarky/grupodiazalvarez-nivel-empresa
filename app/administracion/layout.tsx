@@ -2,6 +2,7 @@
 
 import { AnimatePresence, motion } from "framer-motion"
 import Sidebar from "@/components/custom/sidebar"
+import { useAuth } from "@/context/auth-context"
 import Navbar from "@/components/custom/navbar"
 import { useEffect, useState } from "react"
 
@@ -9,6 +10,7 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
     const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(true)
     const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(false)
     const [isMobile, setIsMobile] = useState<boolean>(false)
+    const { currentUser, rol } = useAuth()
 
     useEffect(() => {
         const checkMobile = () => {

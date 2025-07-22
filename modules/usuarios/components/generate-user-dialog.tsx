@@ -1,9 +1,10 @@
 "use client"
 
-import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
 import { getAuth, sendSignInLinkToEmail } from "firebase/auth";
+import { inviteNewUser } from "@/actions/invitaciones/write";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Link, UserPlus } from "lucide-react";
 import { useState } from "react"
 import { toast } from "sonner";
@@ -16,40 +17,45 @@ const newUserSchema = z.object({
 const GenerateUserDialog = () => {
     const [userEmail, setUserEmail] = useState<string>("")
     const [loading, setLoading] = useState<boolean>(false)
-
     const auth = getAuth();
 
-    const actionCodeSettings = {
-        url: `https://grupodiazalvarez.com/entrar?email=${userEmail}`,
-        handleCodeInApp: true
-    };
+    const generateNewUser = async (email: string) => {
+        const isValid = newUserSchema.safeParse({ email })
 
-    const generateNewUser = (email: string) => {
-        const isValid = newUserSchema.safeParse({
-            email
-        })
-        if (isValid.success) {
-            sendSignInLinkToEmail(auth, email, actionCodeSettings)
-                .then(() => {
-                    setLoading(true)
-                    window.localStorage.setItem('emailForSignIn', email);
-                    toast.success("Link de invitación enviado")
+        if (!isValid.success) {
+            toast.error("Email inválido");
+            return;
+        }
 
-                    setUserEmail("")
-                })
-                .catch((error) => {
-                    setLoading(false)
-                    const errorCode = error.code;
-                    const errorMessage = error.message;
-                    toast.error(errorCode, {
-                        description: errorMessage
-                    })
+        setLoading(true)
+        try {
+            await sendSignInLinkToEmail(auth, email, {
+                url: `https://grupodiazalvarez.com/entrar?email=${email}`,
+                handleCodeInApp: true,
+            });
 
-                    setUserEmail("")
-                }).finally(() => {
-                    setLoading(false)
-                    setUserEmail("")
-                });
+            toast.promise(
+                inviteNewUser(email),
+                {
+                    loading: "Enviando invitación, favor de esperar...",
+                    success: (result) => {
+                        if (result.success) {
+                            return `Invitación enviada a ${email}.`;
+                        } else {
+                            throw new Error(result.message);
+                        }
+                    },
+                    error: (error) => error.message || "Error al enviar la invitación.",
+                }
+            );
+
+            setUserEmail("");
+        } catch (error: any) {
+            toast.error("Error al enviar invitación", {
+                description: error?.message || String(error),
+            });
+        } finally {
+            setLoading(false);
         }
     }
 

@@ -54,11 +54,17 @@ const UsuarioPage = () => {
             estado: estadoUsuario.activo,
             fechaNacimiento: new Date(),
             avatarUrl: imageUrl || auth?.currentUser?.photoURL || "",
+            rol: RolUsuario.usuario
         }
     });
 
     const onSubmit = async (data: UserSchemaType) => {
         try {
+            if (!auth?.currentUser?.uid) {
+                toast.error("No se encontró el UID del usuario.");
+                return;
+            }
+
             setIsLoading(true);
 
             toast.promise(
@@ -72,11 +78,26 @@ const UsuarioPage = () => {
                     empleadoId: "",
                     empresaId: "",
                     nombre: data.nombre,
-                    rol: RolUsuario.usuario,
-                }), {
+                }, defaultEmail || ""), {
                 loading: "Registrando usuario...",
-                success: (result) => {
+                success: async (result) => {
                     if (result.success) {
+                        const response = await fetch("/api/auth/setCustomClaims", {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json",
+                            },
+                            body: JSON.stringify({
+                                uid: auth?.currentUser?.uid,
+                                rol: result.rol,
+                            }),
+                        });
+
+                        if (!response.ok) {
+                            throw new Error("No se pudieron establecer los custom claims.");
+                        }
+
+                        router.push("/");
                         return "Usuario registrado correctamente.";
                     } else {
                         throw new Error(result.message);
@@ -85,9 +106,7 @@ const UsuarioPage = () => {
                 error: (error) => {
                     return error.message || "Error al registrar el usuario.";
                 },
-            })
-
-            router.push("/");
+            })            
         } catch (error) {
             toast.error("error", {
                 description: "No se pudo crear el usuario"

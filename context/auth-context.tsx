@@ -1,12 +1,13 @@
 "use client"
 
-import { createUserWithEmailAndPassword, GoogleAuthProvider, ParsedToken, signInWithEmailAndPassword, signInWithPopup, User } from "firebase/auth"
+import { createUserWithEmailAndPassword, getIdTokenResult, GoogleAuthProvider, onAuthStateChanged, ParsedToken, signInWithEmailAndPassword, signInWithPopup, User } from "firebase/auth"
 import { createContext, useContext, useEffect, useState } from "react"
 import { removeToken, setToken } from "@/modules/auth/actions/token"
 import { FirebaseError } from "firebase/app"
 import { useRouter } from "next/navigation"
 import { auth } from "@/firebase/client"
 import { toast } from "sonner"
+import { RolUsuario } from "@/enum/user-roles"
 
 type AuthContextType = {
     currentUser: User | null,
@@ -15,6 +16,9 @@ type AuthContextType = {
     registerWithEmail: (email: string, password: string) => Promise<void>;
     loginWithEmail: (email: string, password: string) => Promise<void>;
     customClaims: ParsedToken | null
+    lastSignInTime: string | null
+    emailVerified: boolean
+    rol: RolUsuario | null;
     isLoading: boolean
 }
 
@@ -27,28 +31,39 @@ export const AuthProvider = ({
 }) => {
     const [currentUser, setCurrentUser] = useState<User | null>(null)
     const [customClaims, setCustomClaims] = useState<ParsedToken | null>(null)
+    const [lastSignInTime, setLastSignInTime] = useState<string | null>(null)
     const [isLoading, setIsLoading] = useState<boolean>(false);
+    const [emailVerified, setEmailVerified] = useState<boolean>(false)
+    const [userRol, setUserRol] = useState<RolUsuario | null>(null);
 
     const router = useRouter()
 
     useEffect(() => {
-        const unsubscribe = auth.onAuthStateChanged(async (user) => {
-            setCurrentUser(user ?? null);
+        const unsubscribe = onAuthStateChanged(auth, async (user) => {
+            setIsLoading(true);
             if (user) {
-                const tokenResult = await user.getIdTokenResult();
-                const token = tokenResult.token;
-                const refreshToken = user.refreshToken;
-                const claims = tokenResult.claims;
-                setCustomClaims(claims ?? null);
-                if (token && refreshToken) {
-                    await setToken({
-                        token,
-                        refreshToken,
-                    });
+                setCurrentUser(user);
+                setEmailVerified(user.emailVerified);
+
+                try {
+                    const tokenResult = await getIdTokenResult(user, true);
+                    const claims = tokenResult.claims;
+
+                    setCustomClaims(claims ?? null);
+                    setUserRol(claims?.rol as RolUsuario ?? null);
+                    setLastSignInTime(
+                        user.metadata?.lastSignInTime || new Date().toISOString()
+                    );
+                } catch (error) {
+                    console.error("Error al obtener custom claims:", error);
                 }
             } else {
-                await removeToken();
+                setCurrentUser(null);
+                setCustomClaims(null);
+                setUserRol(null);
+                setLastSignInTime(null);
             }
+            setIsLoading(false);
         });
 
         return () => unsubscribe();
@@ -156,6 +171,9 @@ export const AuthProvider = ({
             registerWithEmail,
             loginWithEmail,
             customClaims,
+            lastSignInTime,
+            emailVerified,
+            rol: userRol,
             isLoading
         }}>
             {children}
