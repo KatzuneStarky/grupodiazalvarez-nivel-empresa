@@ -24,7 +24,7 @@ const LoginSchema = z.object({
 })
 
 const LoginPage = () => {
-    const auth = useAuth();
+    const { currentUser, loginWithGoogle, loginWithEmail, isLoading } = useAuth();
     const [forgotPasswordOpen, setForgotPasswordOpen] = useState(false)
     const [showPassword, setShowPassword] = useState(false)
     const [rememberMe, setRememberMe] = useState(false)
@@ -46,21 +46,20 @@ const LoginPage = () => {
     }
 
     const handleSocialLogin = (provider: SocialProvider) => {
-        console.log(`Social login with ${provider}`)
         if (provider === "google") {
-            auth?.loginWithGoogle()
+            loginWithGoogle()
         }
     }
 
     const onSubmit = async (data: z.infer<typeof LoginSchema>) => {
-        await auth?.loginWithEmail(data.email, data.password);
+        await loginWithEmail(data.email, data.password);
     };
 
     return (
         <div className="flex min-h-screen flex-col-reverse md:flex-row">
             <div className="absolute flex gap-2 top-2 right-2">
                 <AnimatedToggleMode />
-                {auth?.currentUser ? <LogoutButton /> : null}
+                {currentUser ? <LogoutButton /> : null}
             </div>
             <div className="h-[30vh] md:h-auto md:w-1/2 relative bg-blue-50">
                 <Image src="/background.jpg" alt="Decorative" fill className="object-cover" priority />
@@ -86,7 +85,7 @@ const LoginPage = () => {
                                         aria-invalid={!!form.formState.errors.email}
                                         aria-describedby={form.formState.errors.email ? "email-error" : undefined}
                                         className="transition-all duration-200"
-                                        disabled={auth?.isLoading}
+                                        disabled={isLoading}
                                     />
                                     {form.formState.errors.email && (
                                         <p id="email-error" className="text-sm text-red-500">
@@ -116,7 +115,7 @@ const LoginPage = () => {
                                             aria-invalid={!!form.formState.errors.password}
                                             aria-describedby={form.formState.errors.password ? "password-error" : undefined}
                                             className="transition-all duration-200"
-                                            disabled={auth?.isLoading}
+                                            disabled={isLoading}
                                         />
                                         <button
                                             type="button"
@@ -150,12 +149,12 @@ const LoginPage = () => {
                                 type="submit"
                                 className="w-full bg-red-600 hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-800 
                             transition-colors cursor-pointer dark:text-white"
-                                disabled={auth?.isLoading}
+                                disabled={isLoading}
                             >
-                                {auth?.isLoading ? "Iniciando sesión..." : "Iniciar sesión"}
+                                {isLoading ? "Iniciando sesión..." : "Iniciar sesión"}
                             </Button>
 
-                            <SocialLoginButtons isLoading={auth?.isLoading || false} onSocialLogin={handleSocialLogin} />
+                            <SocialLoginButtons isLoading={isLoading || false} onSocialLogin={handleSocialLogin} />
 
                             <div className="text-center text-sm">
                                 <span className="text-gray-500">¿No tienes una cuenta?</span>{" "}
@@ -186,8 +185,8 @@ const LoginPage = () => {
                             <Button type="button" variant="outline" onClick={() => setForgotPasswordOpen(false)}>
                                 Cancelar
                             </Button>
-                            <Button type="submit" disabled={auth?.isLoading}>
-                                {auth?.isLoading ? "Enviando..." : "Enviar enlace de restablecimiento"}
+                            <Button type="submit" disabled={isLoading}>
+                                {isLoading ? "Enviando..." : "Enviar enlace de restablecimiento"}
                             </Button>
                         </DialogFooter>
                     </form>
