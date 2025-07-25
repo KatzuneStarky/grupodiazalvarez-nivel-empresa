@@ -2,12 +2,11 @@
 
 import { createUserWithEmailAndPassword, getIdTokenResult, GoogleAuthProvider, onAuthStateChanged, ParsedToken, signInWithEmailAndPassword, signInWithPopup, User } from "firebase/auth"
 import { createContext, useContext, useEffect, useState } from "react"
-import { removeToken, setToken } from "@/modules/auth/actions/token"
+import { RolUsuario } from "@/enum/user-roles"
 import { FirebaseError } from "firebase/app"
 import { useRouter } from "next/navigation"
 import { auth } from "@/firebase/client"
 import { toast } from "sonner"
-import { RolUsuario } from "@/enum/user-roles"
 
 type AuthContextType = {
     currentUser: User | null,
@@ -19,6 +18,7 @@ type AuthContextType = {
     lastSignInTime: string | null
     emailVerified: boolean
     rol: RolUsuario | null;
+    refreshCustomClaims: () => void
     isLoading: boolean
 }
 
@@ -163,6 +163,16 @@ export const AuthProvider = ({
         }
     }
 
+    const refreshCustomClaims = async () => {
+        if (!auth.currentUser) return;
+
+        const tokenResult = await getIdTokenResult(auth.currentUser, true);
+        const claims = tokenResult.claims;
+
+        setCustomClaims(claims);
+        setUserRol(claims?.rol as RolUsuario ?? null);
+    };
+
     return (
         <AuthContext.Provider value={{
             currentUser,
@@ -174,6 +184,7 @@ export const AuthProvider = ({
             lastSignInTime,
             emailVerified,
             rol: userRol,
+            refreshCustomClaims,
             isLoading
         }}>
             {children}

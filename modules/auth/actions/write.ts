@@ -46,3 +46,40 @@ export async function writeUser(
         };
     }
 }
+
+export const updateRolUsuario = async (uid: string, rol: RolUsuario):
+    Promise<{ success: boolean, message: string, nuevoRol?: RolUsuario, error?: Error }> => {
+    try {
+        if (!uid) {
+            throw new Error("El uid no puede estar vacio.");
+        }
+
+        const userRef = doc(db, "usuarios", uid);
+        const userSnap = await getDoc(userRef);
+
+        if (!userSnap.exists()) {
+            return {
+                success: false,
+                message: "No se encontró el usuario.",
+            };
+        }
+
+        await updateDoc(userRef, {
+            rol: rol,
+            actualizadoEn: new Date().toISOString(),
+        });
+
+        return {
+            success: true,
+            message: "Rol de usuario modificado satisfactoriamente",
+            nuevoRol: rol,
+        };
+    } catch (error) {
+        console.error("Error al modificar el rol de usuario:", error);
+        return {
+            success: false,
+            message: "Error al modificar el rol de usuario.",
+            error: error instanceof Error ? error : new Error("Error desconocido"),
+        };
+    }
+}
