@@ -1,19 +1,17 @@
+"use client"
+
 import { EmpresaProvider } from '@/context/empresa-context';
-import React from 'react'
+import React, { use } from 'react'
 
-type Params = {
-  nombre: string | Promise<string>;
-};
-
-const EmpresaLayout = async({
+const EmpresaLayout = ({
     children,
     params,
 }: {
     children: React.ReactNode;
-    params: Params;
+    params: Promise<{ nombre: string }>;
 }) => {
-    const nombre = await params.nombre;
-    const decodedName = decodeURIComponent(nombre || "");
+    const { nombre } = use(params);
+    const decodedName = nombre ? decodeURIComponent(nombre) : '';
 
     return (
         <EmpresaProvider empresaName={decodedName}>
