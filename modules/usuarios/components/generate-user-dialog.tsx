@@ -30,7 +30,7 @@ const GenerateUserDialog = () => {
         setLoading(true)
         try {
             await sendSignInLinkToEmail(auth, email, {
-                url: `https://grupodiazalvarez.com/entrar?email=${email}`,
+                url: `https://grupodiazalvarez.com/registro?email=${email}`,
                 handleCodeInApp: true,
             });
 

@@ -2,10 +2,12 @@
 
 import { createUserWithEmailAndPassword, getIdTokenResult, GoogleAuthProvider, onAuthStateChanged, ParsedToken, signInWithEmailAndPassword, signInWithPopup, User } from "firebase/auth"
 import { createContext, useContext, useEffect, useState } from "react"
+import { doc, getDoc } from "firebase/firestore"
 import { RolUsuario } from "@/enum/user-roles"
 import { FirebaseError } from "firebase/app"
+import { SystemUser } from "@/types/usuario"
+import { auth, db } from "@/firebase/client"
 import { useRouter } from "next/navigation"
-import { auth } from "@/firebase/client"
 import { toast } from "sonner"
 
 type AuthContextType = {
@@ -19,6 +21,7 @@ type AuthContextType = {
     emailVerified: boolean
     rol: RolUsuario | null;
     refreshCustomClaims: () => void
+    userBdd: SystemUser | null
     isLoading: boolean
 }
 
@@ -30,6 +33,7 @@ export const AuthProvider = ({
     children: React.ReactNode
 }) => {
     const [currentUser, setCurrentUser] = useState<User | null>(null)
+    const [userBdd, setUserBdd] = useState<SystemUser | null>(null)
     const [customClaims, setCustomClaims] = useState<ParsedToken | null>(null)
     const [lastSignInTime, setLastSignInTime] = useState<string | null>(null)
     const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -68,6 +72,19 @@ export const AuthProvider = ({
 
         return () => unsubscribe();
     }, []);
+
+    useEffect(() => {
+        if (!currentUser) return
+        const getUser = async () => {
+            const userRef = doc(db, "usuarios", currentUser.uid);
+            const userSnap = await getDoc(userRef);
+            const userData = userSnap.data();
+
+            setUserBdd(userData as SystemUser)
+        }
+
+        getUser()
+    }, [currentUser])
 
     const loginWithGoogle = async () => {
         setIsLoading(true);
@@ -185,6 +202,7 @@ export const AuthProvider = ({
             emailVerified,
             rol: userRol,
             refreshCustomClaims,
+            userBdd,
             isLoading
         }}>
             {children}
