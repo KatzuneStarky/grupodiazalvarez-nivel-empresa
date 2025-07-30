@@ -1,14 +1,19 @@
 import { EmpresaProvider } from '@/context/empresa-context';
 import React from 'react'
 
+type Params = {
+  nombre: string | Promise<string>;
+};
+
 const EmpresaLayout = async({
     children,
     params,
 }: {
     children: React.ReactNode;
-    params: { nombre: string };
+    params: Params;
 }) => {
-    const decodedName = decodeURIComponent(params.nombre || "");
+    const nombre = await params.nombre;
+    const decodedName = decodeURIComponent(nombre || "");
 
     return (
         <EmpresaProvider empresaName={decodedName}>
