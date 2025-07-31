@@ -3,12 +3,13 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { AnimatedToggleMode } from '@/components/global/animated-toggle-mode';
 import { ContactInfoInput } from '@/modules/empresas/types/contactos';
+import { LoadingState } from '@/components/skeleton/loading-state';
 import { Clock, Home, Mail, Phone, Shield } from 'lucide-react';
 import { useEmpresa } from '@/context/empresa-context';
 import React, { useEffect, useState } from 'react'
 import { useAuth } from '@/context/auth-context';
-import { RolUsuario } from '@/enum/user-roles';
 import { Button } from '@/components/ui/button';
+import { RolUsuario } from '@/enum/user-roles';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
@@ -22,6 +23,7 @@ const MainPage = () => {
     const { rol } = useAuth()
     const router = useRouter()
 
+    const isPublic = empresa?.configuraciones.accesoPublico
     useEffect(() => {
         if (!loading) {
             setIsValidUser(rol === RolUsuario.Super_Admin);
@@ -63,10 +65,7 @@ const MainPage = () => {
     }
     const { hours, minutes, seconds } = formatTime(elapsedTime)
 
-    if (loading) {
-        return <p></p>;
-    }
-
+    if (loading) return <LoadingState message='Verificando permisos' />
     if(isAdmin) return router.push(`/${empresa?.nombre}/${empresa?.areas?.[0].nombre}`)
 
     return (
