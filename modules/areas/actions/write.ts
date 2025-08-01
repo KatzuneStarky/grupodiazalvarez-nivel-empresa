@@ -1,4 +1,5 @@
 import { arrayUnion, collection, deleteDoc, doc, getDoc, getDocs, query, setDoc, updateDoc, where } from "firebase/firestore";
+import { createDefaultAreaMenus } from "@/modules/menus/functions/generate-defaul-menus";
 import { WriteAreaResult } from "@/types/form-result/area-form-result";
 import { AreaInput } from "@/types/area";
 import { db } from "@/firebase/client";
@@ -7,7 +8,8 @@ import { v4 as uuidv4 } from "uuid";
 
 export async function writeArea(
     empresaId: string,
-    areaData: Omit<Area, "id" | "fechaCreacion" | "fechaActualizacion">
+    empresaNombre: string,
+    areaData: Omit<Area, "id" | "fechaCreacion" | "fechaActualizacion" | "menus">
 ): Promise<WriteAreaResult> {
     try {
         if (!areaData || Object.keys(areaData).length === 0) {
@@ -18,18 +20,37 @@ export async function writeArea(
         const areaRef = doc(db, "empresas", empresaId, "areas", newId);
         const empresaRef = doc(db, "empresas", empresaId)
 
+        const now = new Date();
+        const defaultMenus = createDefaultAreaMenus(empresaNombre, newId, areaData.nombre);
+
         await updateDoc(empresaRef, {
             areas: arrayUnion({
-                ...areaData,
                 id: newId,
+                nombre: areaData.nombre,
+                descripcion: areaData.descripcion || "",
+                correoContacto: areaData.correoContacto || "",
+                responsableId: areaData.responsableId || "",
+                empresaId: empresaId,
+                fechaCreacion: now,
+                fechaActualizacion: now,
+                menus: defaultMenus
             }),
         });
 
-        await setDoc(areaRef, {
+        const areaDoc = {
             ...areaData,
             id: newId,
-            empresaId: empresaId,
-        });
+            empresaId,
+            fechaCreacion: now,
+            fechaActualizacion: now,
+        };
+
+        await setDoc(areaRef, areaDoc);
+
+        for (const menu of defaultMenus) {
+            const menuRef = doc(db, "empresas", empresaId, "areas", newId, "menus", menu.id);
+            await setDoc(menuRef, menu);
+        }
 
         return {
             success: true,

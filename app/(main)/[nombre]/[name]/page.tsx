@@ -1,14 +1,8 @@
 "use client"
 
-import { use } from "react";
-
-const AreaPage = ({ params }: { params: Promise<{ name: string }> }) => {
-    const { name } = use(params);
-    const decodedName = name ? decodeURIComponent(name) : '';
-
+const AreaPage = () => {
     return (
         <div>
-            {decodedName}
         </div>
     )
 }

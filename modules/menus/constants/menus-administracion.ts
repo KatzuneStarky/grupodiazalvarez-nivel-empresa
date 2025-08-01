@@ -1,4 +1,4 @@
-import { AreaMenu, BaseMenu } from "../types/menu";
+import { AreaMenu } from "../types/menu";
 
 export const menusAdministracion: AreaMenu[] = [
     {

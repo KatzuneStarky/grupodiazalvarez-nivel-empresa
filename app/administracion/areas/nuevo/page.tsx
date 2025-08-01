@@ -19,18 +19,16 @@ import { toast } from "sonner"
 
 const NuevaAreaPage = () => {
     const [isLoading, setIsLoading] = useState<boolean>(false)
-
     const searchParams = useSearchParams()
     const empresaId = searchParams.get("empresaId")
     const router = useRouter()
 
-    const { empresas } = useAllEmpreas()
-    const { empresa } = useEmpresaById(empresaId || "")
+    const { empresas } = useAllEmpreas()    
 
     const form = useForm<AreaSchemaType>({
         resolver: zodResolver(AreaSchema),
         defaultValues: {
-            empresaId: empresaId || "" || empresa?.id || "",
+            empresaId: empresaId || "",
             correoContacto: "",
             descripcion: "",
             nombre: "",
@@ -38,12 +36,15 @@ const NuevaAreaPage = () => {
         }
     })
 
+    const watchEmpresaId = form.watch("empresaId")
+    const { empresa } = useEmpresaById(empresaId || watchEmpresaId)
+
     const onSubmit = async (data: AreaSchemaType) => {
         try {
             setIsLoading(true)
 
             toast.promise(
-                writeArea(empresaId ? empresaId : data.empresaId, data),
+                writeArea(empresaId ? empresaId : data.empresaId, empresa?.nombre || "", data),
                 {
                     loading: "Creando nueva area, favor de esperar...",
                     success: (result) => {
@@ -57,8 +58,6 @@ const NuevaAreaPage = () => {
                         return error.message || "Error al registrar la empresa.";
                     },
                 })
-
-            console.log(data);
 
             form.reset()
             router.push("/administracion/areas")

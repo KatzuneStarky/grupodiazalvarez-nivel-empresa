@@ -1,0 +1,191 @@
+"use client"
+
+import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarHeader, SidebarMenu, SidebarMenuAction, SidebarMenuButton, SidebarMenuItem, SidebarMenuSub, SidebarMenuSubButton, SidebarMenuSubItem, SidebarRail } from "@/components/ui/sidebar"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
+import { Building2, ChevronDown, ChevronRight, Cog, ExternalLink, LogOut, UserCircle } from "lucide-react"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { useMenusByArea } from "@/modules/menus/hooks/use-menus-by-area"
+import { filterMenusByRole } from "@/modules/menus/actions/read"
+import { useEmpresa } from "@/context/empresa-context"
+import { Separator } from "@/components/ui/separator"
+import { useArea } from "@/context/area-context"
+import { useAuth } from "@/context/auth-context"
+import { Button } from "@/components/ui/button"
+import { RolUsuario } from "@/enum/user-roles"
+import Icon from "@/components/global/icon"
+import { useState } from "react"
+
+const AreaSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
+    const { userBdd, logout } = useAuth()
+    const { area, loading } = useArea()
+    const { empresa } = useEmpresa()
+    const { menus, loading: loadingMenus } = useMenusByArea(area?.id)
+    const filteredMenus = filterMenusByRole(menus, userBdd?.rol as RolUsuario)
+
+    {/** const [selectedArea, setSelectedArea] = useState(area[0]) */ }
+
+    return (
+        <Sidebar collapsible="icon" {...props}>
+            <SidebarHeader>
+                <SidebarMenu>
+                    <SidebarMenuItem>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <SidebarMenuButton
+                                    size="lg"
+                                    className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+                                >
+                                    <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
+                                        <Building2 className="size-4" />
+                                    </div>
+                                    <div className="grid flex-1 text-left text-sm leading-tight">
+                                        <span className="truncate font-semibold">{area?.nombre}</span>
+                                        <span className="truncate text-xs">{area?.correoContacto}</span>
+                                    </div>
+                                    <ChevronDown className="ml-auto" />
+                                </SidebarMenuButton>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent
+                                className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
+                                align="start"
+                                side="bottom"
+                                sideOffset={4}
+                            >
+                                <DropdownMenuLabel className="text-xs text-muted-foreground">Areas de {empresa?.nombre}</DropdownMenuLabel>
+                                {/**
+                                 * {companyAreas.map((area) => (
+                                    <DropdownMenuItem key={area.id} onClick={() => setSelectedArea(area)} className="gap-2 p-2">
+                                        <div className="flex size-6 items-center justify-center rounded-sm border">
+                                            <Building2 className="size-4 shrink-0" />
+                                        </div>
+                                        <div className="grid flex-1 text-left text-sm leading-tight">
+                                            <span className="truncate font-medium">{area.name}</span>
+                                            <span className="truncate text-xs text-muted-foreground">{area.location}</span>
+                                        </div>
+                                    </DropdownMenuItem>
+                                ))}
+                                 */}
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    </SidebarMenuItem>
+                </SidebarMenu>
+            </SidebarHeader>
+
+            <Separator className="mb-4" />
+
+            <SidebarContent>
+                <SidebarGroup>
+                    <SidebarGroupContent>
+                        <SidebarMenu>
+                            {filteredMenus.map((item) => (
+                                <Collapsible
+                                    key={item.title}
+                                    asChild
+                                    defaultOpen={item.title === "Dashboard"}
+                                    className="group/collapsible"
+                                >
+                                    <SidebarMenuItem>
+                                        <CollapsibleTrigger asChild>
+                                            <SidebarMenuButton tooltip={item.title}>
+                                                {item.icon && <Icon iconName={item.icon} />}
+                                                <span className="capitalize">{item.title}</span>
+                                                {item.subMenus && item.subMenus?.length > 0 && <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />}
+                                            </SidebarMenuButton>
+                                        </CollapsibleTrigger>
+                                        <SidebarMenuAction className="data-[state=open]:rotate-90" asChild>
+                                            <Button variant="ghost" size="icon" className="h-6 w-6" asChild>
+                                                <a href={item.path}>
+                                                    <ExternalLink className="h-3 w-3" />
+                                                    <span className="sr-only">Go to {item.title}</span>
+                                                </a>
+                                            </Button>
+                                        </SidebarMenuAction>
+                                        {item.subMenus?.length ? (
+                                            <CollapsibleContent>
+                                                <SidebarMenuSub>
+                                                    {item.subMenus.map((subItem) => (
+                                                        <SidebarMenuSubItem key={subItem.title}>
+                                                            <SidebarMenuSubButton asChild>
+                                                                <a href={subItem.path}>
+                                                                    <span>{subItem.title}</span>
+                                                                </a>
+                                                            </SidebarMenuSubButton>
+                                                        </SidebarMenuSubItem>
+                                                    ))}
+                                                </SidebarMenuSub>
+                                            </CollapsibleContent>
+                                        ) : null}
+                                    </SidebarMenuItem>
+                                </Collapsible>
+                            ))}
+                        </SidebarMenu>
+                    </SidebarGroupContent>
+                </SidebarGroup>
+            </SidebarContent>
+
+            <Separator className="mt-4" />
+
+            <SidebarFooter>
+                <SidebarMenu>
+                    <SidebarMenuItem>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <SidebarMenuButton
+                                    size="lg"
+                                    className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+                                >
+                                    <Avatar className="h-8 w-8 rounded-lg">
+                                        <AvatarImage src={userBdd?.avatarUrl} alt="User" />
+                                        <AvatarFallback className="rounded-lg">{userBdd?.nombre?.charAt(0)}</AvatarFallback>
+                                    </Avatar>
+                                    <div className="grid flex-1 text-left text-sm leading-tight">
+                                        <span className="truncate font-semibold">{userBdd?.nombre}</span>
+                                        <span className="truncate text-xs">{userBdd?.email}</span>
+                                    </div>
+                                    <ChevronDown className="ml-auto size-4" />
+                                </SidebarMenuButton>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent
+                                className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
+                                side="bottom"
+                                align="end"
+                                sideOffset={4}
+                            >
+                                <DropdownMenuLabel className="p-0 font-normal">
+                                    <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
+                                        <Avatar className="h-8 w-8 rounded-lg">
+                                            <AvatarImage src={userBdd?.avatarUrl} alt="User" />
+                                            <AvatarFallback className="rounded-lg">{userBdd?.nombre?.charAt(0)}</AvatarFallback>
+                                        </Avatar>
+                                        <div className="grid flex-1 text-left text-sm leading-tight">
+                                            <span className="truncate font-semibold">{userBdd?.nombre}</span>
+                                            <span className="truncate text-xs">{userBdd?.email}</span>
+                                        </div>
+                                    </div>
+                                </DropdownMenuLabel>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem>
+                                    <UserCircle className="mr-2 h-4 w-4" />
+                                    Perfil
+                                </DropdownMenuItem>
+                                <DropdownMenuItem>
+                                    <Cog className="mr-2 h-4 w-4" />
+                                    Configuracion
+                                </DropdownMenuItem>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem onClick={() => logout()}>
+                                    <LogOut className="mr-2 h-4 w-4" />
+                                    Salir
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    </SidebarMenuItem>
+                </SidebarMenu>
+            </SidebarFooter>
+            <SidebarRail />
+        </Sidebar>
+    )
+}
+
+export default AreaSidebar

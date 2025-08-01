@@ -26,8 +26,8 @@ import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { useRouter } from "next/navigation"
 import { es } from "date-fns/locale"
-import { format } from "date-fns"
 import { v4 as uuidV4 } from "uuid"
+import { format } from "date-fns"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 
@@ -178,7 +178,7 @@ const EmpresaForm = () => {
         if (nombreEmpresa) {
             form.setValue(
                 "direccionWeb",
-                `https://grupodiazalvarez/empresa/${nombreEmpresa}`
+                `https://grupodiazalvarez.com/${nombreEmpresa}`
             );
         } else {
             form.setValue("direccionWeb", "Generando...");
