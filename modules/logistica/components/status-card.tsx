@@ -1,6 +1,7 @@
 "use client"
 
 import { Card, CardContent } from "@/components/ui/card"
+import Icon from "@/components/global/icon"
 import CountUp from "react-countup"
 
 interface StatusCardProps {
@@ -12,20 +13,26 @@ interface StatusCardProps {
 }
 
 const StatusCard = ({
-    icon: Icon,
+    icon,
     label,
     title,
     value,
     color
 }: StatusCardProps) => {
+    const IconComponent = icon
+
     return (
-        <Card className={`border-0 shadow-sm bg-gradient-to-br from-${color}-50 to-${color}-100`}>
+        <Card>
             <CardContent className="p-4 text-center">
-                <Icon className={`h-8 w-8 text-${color}-600 mx-auto mb-2`} />
+                {
+                    typeof icon === "string"
+                        ? <Icon iconName={icon} className={`h-8 w-8 text-${color}-600 mx-auto mb-2`} />
+                        : <IconComponent className={`h-8 w-8 text-${color}-600 mx-auto mb-2`} />
+                }
                 <p className={`text-2xl font-bold text-${color}-700`}>
                     <CountUp startVal={0} end={value} duration={2} />
                 </p>
-                <p className={`text-xs text-${color}-600 font-medium`}>{title}</p>
+                <p className={`text-xl text-${color}-600 font-medium`}>{title}</p>
                 <p className={`text-xs text-${color}-500`}>{label}</p>
             </CardContent>
         </Card>

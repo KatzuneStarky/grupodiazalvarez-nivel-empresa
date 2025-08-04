@@ -1,9 +1,7 @@
-"use client"
-
-import { Estaciones } from "../../types/estaciones/estaciones";
+import { db } from "@/firebase/client";
 import { collection, onSnapshot } from "firebase/firestore";
 import { useEffect, useState } from "react";
-import { db } from "@/firebase/client";
+import { Estaciones } from "../types/estaciones";
 
 export const useEstaciones = () => {
     const [estaciones, setEstaciones] = useState<Estaciones[]>([]);

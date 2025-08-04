@@ -1,6 +1,6 @@
 "use client"
 
-import { useEquipos } from "@/modules/cbs/hooks/equipos/use-equipos"
+import { Equipo } from "@/modules/logistica/bdd/equipos/types/equipos"
 import { Shield, Gauge, Award, Truck } from "lucide-react"
 import { fleetStats } from "../constants/flet-status"
 import { useEffect, useRef, useState } from "react"
@@ -9,7 +9,7 @@ import { animate } from "animejs"
 const RootFleet = () => {
     const [activeVehicle, setActiveVehicle] = useState(0)
     const fleetRef = useRef<HTMLElement>(null)
-    const { equipos } = useEquipos()
+    const equipos: Equipo[] = []
 
     const updatedStats = [
         ...fleetStats.slice(0, 0),

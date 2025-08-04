@@ -1,6 +1,6 @@
 export interface MetricCardProps {
     title: string
-    value: string
+    value: string | number
     change?: string
     changeType?: "positive" | "negative"
     icon: React.ElementType

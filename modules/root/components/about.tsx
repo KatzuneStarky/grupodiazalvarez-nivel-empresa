@@ -1,6 +1,6 @@
 "use client"
 
-import { useEstaciones } from "@/modules/cbs/hooks/bdd/use-estaciones"
+import { useEstaciones } from "@/modules/logistica/bdd/estaciones/hooks/use-estaciones"
 import { useAboutFunctions } from "../hooks/use-about-functions"
 import { Award, Clock, Shield, Users } from "lucide-react"
 

@@ -1,9 +1,9 @@
 "use client"
 
 import { collection, getDocs, onSnapshot, query, where } from "firebase/firestore";
-import { Tanque } from "../../types/equipos/tanque";
-import { Equipo } from "../../types/bdd/equipos";
 import { useEffect, useState } from "react";
+import { Equipo } from "../types/equipos";
+import { Tanque } from "../types/tanque";
 import { db } from "@/firebase/client";
 
 export const useEquipos = () => {

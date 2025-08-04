@@ -18,6 +18,8 @@ const MetricCard = ({
     additional,
     className = "",
 }: MetricCardProps) => {
+    const valueFormatted = typeof value === "number" ? value.toFixed(2) : value
+
     return (
         <Card
             className={`relative overflow-hidden border-0 shadow-sm ${className}`}
@@ -25,11 +27,11 @@ const MetricCard = ({
             <CardContent className="p-5">
                 <div className="flex items-start justify-between mb-3">
                     <div className="space-y-1">
-                        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{title}</p>
-                        <p className="text-2xl font-bold text-gray-900">{value}</p>
+                        <p className="text-xs font-semibold text-muted-foreground dark:text-white uppercase tracking-wider">{title}</p>
+                        <p className="text-2xl font-bold text-gray-900 dark:text-gray-200">{valueFormatted}</p>
                     </div>
-                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500/10 to-blue-600/10 border border-blue-200/50">
-                        <Icon className="h-6 w-6 text-blue-600" />
+                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-card border border-blue-200/50">
+                        <Icon className="h-6 w-6 text-red-600" />
                     </div>
                 </div>
 
@@ -43,18 +45,18 @@ const MetricCard = ({
                         <span className={`text-sm font-semibold ${changeType === "positive" ? "text-green-600" : "text-red-600"}`}>
                             {change}
                         </span>
-                        <span className="text-xs text-muted-foreground">vs last period</span>
+                        <span className="text-xs text-muted-foreground">vs último período</span>
                     </div>
                 )}
 
                 {progress !== undefined && (
                     <div className="space-y-2 mb-3">
                         <div className="flex justify-between text-xs">
-                            <span className="text-muted-foreground">Progress to target</span>
+                            <span className="text-muted-foreground">Progresso hacia el objetivo</span>
                             <span className="font-medium">{progress}%</span>
                         </div>
                         <Progress value={progress} className="h-2" />
-                        {target && <p className="text-xs text-muted-foreground">Target: {target}</p>}
+                        {target && <p className="text-xs text-muted-foreground">Objetivo: {target}</p>}
                     </div>
                 )}
 
