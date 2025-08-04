@@ -1,5 +1,5 @@
 import { FileType } from "@/types/file-types";
-import { Equipo } from "../bdd/equipos";
+import { Equipo } from "./equipos";
 
 export interface Certificado {
     id: string;

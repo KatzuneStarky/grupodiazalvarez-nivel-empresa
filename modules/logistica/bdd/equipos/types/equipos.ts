@@ -1,10 +1,8 @@
-import { ArchivosVencimiento } from "../equipos/archivos-vencimiento";
-import { Mantenimiento } from "../mantenimiento/mantenimiento";
-import { EstadoEquipos } from "../../enum/estado-equipos";
-import { Certificado } from "../equipos/certificados";
-import { Revisiones } from "../revisiones/revisiones";
-import { Archivo } from "../equipos/archivos";
-import { Tanque } from "../equipos/tanque";
+import { EstadoEquipos } from "../enum/estado-equipos";
+import { Archivo } from "./archivos";
+import { ArchivosVencimiento } from "./archivos-vencimiento";
+import { Certificado } from "./certificados";
+import { Tanque } from "./tanque";
 
 export interface Equipo {
     id: string;
@@ -20,8 +18,8 @@ export interface Equipo {
     estado: EstadoEquipos;
     archivos: Archivo[];
     tanque: Tanque[];
-    mantenimiento: Mantenimiento[];
-    Revisiones: Revisiones[];
+    //mantenimiento: Mantenimiento[];
+    //Revisiones: Revisiones[];
     createAt: Date;
     updateAt: Date;
     Certificado: Certificado[];
@@ -30,5 +28,5 @@ export interface Equipo {
 
 export interface EquipoRevision {
     equipo: Equipo;
-    revision: Revisiones;
+    //revision: Revisiones;
 }

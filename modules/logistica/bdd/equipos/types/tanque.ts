@@ -1,4 +1,4 @@
-import { Equipo } from "../bdd/equipos";
+import { Equipo } from "./equipos";
 
 export interface Tanque {
     id: string;
