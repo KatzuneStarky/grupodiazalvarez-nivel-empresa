@@ -1,7 +1,8 @@
 "use client"
 
 import MetricCard from "./components/metric-card"
-import { Activity, DollarSign, Fuel, Gauge } from "lucide-react"
+import { Activity, CheckCircle, DollarSign, Fuel, Gauge, Truck } from "lucide-react"
+import StatusCard from "./components/status-card"
 
 const MainDashboardLogistica = () => {
     return (
@@ -59,6 +60,32 @@ const MainDashboardLogistica = () => {
                         { label: "Completed", value: "148" },
                         { label: "In Transit", value: "8" },
                     ]}
+                />
+            </div>
+
+            <div className="grid gap-4 grid-cols-2 md:grid-cols-4 lg:grid-cols-6">
+                <StatusCard
+                    icon={Truck}
+                    title="Equipos activos"
+                    label="+2 nuevos en la ultima semana"
+                    value={156}
+                    color="green"
+                />
+
+                <StatusCard
+                    icon={CheckCircle}
+                    title="Operadores activos"
+                    label="+2 nuevos en la ultima semana"
+                    value={100}
+                    color="red"
+                />
+
+                <StatusCard
+                    icon={CheckCircle}
+                    title="Operadores activos"
+                    label="+2 nuevos en la ultima semana"
+                    value={100}
+                    color="yellow"
                 />
             </div>
         </div>

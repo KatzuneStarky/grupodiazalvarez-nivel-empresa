@@ -1,10 +1,10 @@
 "use client"
 
+import { ArrowDownRight, ArrowUpRight } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { MetricCardProps } from '../types/metric-card'
-import React from 'react'
-import { ArrowDownRight, ArrowUpRight } from 'lucide-react'
 import { Progress } from '@/components/ui/progress'
+import React from 'react'
 
 const MetricCard = ({
     title,
