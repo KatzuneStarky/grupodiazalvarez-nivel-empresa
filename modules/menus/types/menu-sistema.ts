@@ -17,7 +17,9 @@ export interface SubMenu {
   title: string;
   path: string;
   order: number;
+  icon?: string;
   visible: boolean;
   areaId: string;
+  menuId: string
   rolesAllowed?: RolUsuario[];
 }

@@ -51,7 +51,8 @@ const AreasList = ({
         return Array.from(uniqueIndustries)
     }, [empresas])
 
-    const responsibleUsers = useMemo(() => {
+    {/**
+        const responsibleUsers = useMemo(() => {
         const users = new Set<string>()
         empresas.forEach((empresa) => {
             empresa.areas?.forEach((area) => {
@@ -61,7 +62,7 @@ const AreasList = ({
             })
         })
         return Array.from(users)
-    }, [empresas])
+    }, [empresas]) */}
 
     const estados = Object.values(EstadoEmpresa)
     const tipos = Object.values(TipoEmpresa)
@@ -317,11 +318,13 @@ const AreasList = ({
                                 </SelectTrigger>
                                 <SelectContent>
                                     <SelectItem value="all">Todos</SelectItem>
-                                    {responsibleUsers.map((user) => (
+                                    {/**
+                                     * {responsibleUsers.map((user) => (
                                         <SelectItem key={user} value={user} className="capitalize">
                                             {user}
                                         </SelectItem>
                                     ))}
+                                     */}
                                 </SelectContent>
                             </Select>
                         </div>

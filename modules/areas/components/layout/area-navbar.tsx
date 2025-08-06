@@ -1,13 +1,14 @@
 "use client"
 
-import { AnimatedToggleMode } from "@/components/global/animated-toggle-mode"
-import { Badge } from "@/components/ui/badge"
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
-import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { Separator } from "@/components/ui/separator"
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
+import { AnimatedToggleMode } from "@/components/global/animated-toggle-mode"
 import { SidebarTrigger } from "@/components/ui/sidebar"
+import { Separator } from "@/components/ui/separator"
+import { Button } from "@/components/ui/button"
 import { Bell, Building2 } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
+import YearCombobox from "@/components/global/year-combobox"
 
 interface AppNavbarProps {
     companyName?: string
@@ -53,6 +54,8 @@ const AreaNavbar = ({ companyName }: AppNavbarProps) => {
             </div>
 
             <div className="flex items-center gap-2">
+                <YearCombobox />
+
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <Button variant="ghost" size="icon" className="relative">

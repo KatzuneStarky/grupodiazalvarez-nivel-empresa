@@ -14,16 +14,13 @@ import { useAuth } from "@/context/auth-context"
 import { Button } from "@/components/ui/button"
 import { RolUsuario } from "@/enum/user-roles"
 import Icon from "@/components/global/icon"
-import { useState } from "react"
 
 const AreaSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
     const { userBdd, logout } = useAuth()
     const { area, loading } = useArea()
     const { empresa } = useEmpresa()
-    const { menus, loading: loadingMenus } = useMenusByArea(area?.id)
+    const { menus } = useMenusByArea(area?.id)
     const filteredMenus = filterMenusByRole(menus, userBdd?.rol as RolUsuario)
-
-    {/** const [selectedArea, setSelectedArea] = useState(area[0]) */ }
 
     return (
         <Sidebar collapsible="icon" {...props}>
@@ -108,7 +105,8 @@ const AreaSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
                                                         <SidebarMenuSubItem key={subItem.title}>
                                                             <SidebarMenuSubButton asChild>
                                                                 <a href={subItem.path}>
-                                                                    <span>{subItem.title}</span>
+                                                                    {subItem.icon && <Icon iconName={subItem.icon} />}
+                                                                    <span className="capitalize">{subItem.title}</span>
                                                                 </a>
                                                             </SidebarMenuSubButton>
                                                         </SidebarMenuSubItem>

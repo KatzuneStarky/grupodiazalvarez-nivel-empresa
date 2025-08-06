@@ -1,3 +1,4 @@
+import { createDefaultAreaMenus } from "@/modules/menus/functions/generate-defaul-menus";
 import { collection, deleteDoc, doc, getDocs, setDoc } from "firebase/firestore";
 import { WriteEmpresaResult } from "@/types/form-result/empresa-form-result";
 import { deleteFolderContents } from "@/actions/folder/write";
@@ -16,12 +17,13 @@ export async function writeEmpresa(
 
         const empresaId = uuidv4();
         const empresaRef = doc(db, "empresas", empresaId);
-        const now = new Date().toISOString();
+        const now = new Date();
+        const nowISO = now.toISOString();
 
         await setDoc(empresaRef, {
             ...empresaData,
-            fechaCreacion: now,
-            fechaActualizacion: now,
+            fechaCreacion: nowISO,
+            fechaActualizacion: nowISO,
         });
 
         if (empresaData.contactos?.length > 0) {
@@ -42,24 +44,27 @@ export async function writeEmpresa(
             await Promise.all(contactoWrites);
         }
 
-        if (empresaData.areas && empresaData.areas?.length > 0) {
-            const areaWrites = empresaData.areas.map((area) => {
+        if (empresaData.areas && empresaData.areas.length > 0) {
+            for (const area of empresaData.areas) {
                 const areaId = uuidv4();
-                const areaRef = doc(
-                    collection(db, `empresas/${empresaId}/areas`),
-                    areaId
-                );
+                const areaRef = doc(db, "empresas", empresaId, "areas", areaId);
 
-                return setDoc(areaRef, {
+                const defaultMenus = createDefaultAreaMenus(empresaData.nombre, areaId, area.nombre);
+
+                await setDoc(areaRef, {
                     ...area,
                     id: areaId,
                     empresaId,
                     fechaCreacion: now,
                     fechaActualizacion: now,
+                    menus: defaultMenus,
                 });
-            });
 
-            await Promise.all(areaWrites);
+                for (const menu of defaultMenus) {
+                    const menuRef = doc(db, "empresas", empresaId, "areas", areaId, "menus", menu.id);
+                    await setDoc(menuRef, menu);
+                }
+            }
         }
 
         return {

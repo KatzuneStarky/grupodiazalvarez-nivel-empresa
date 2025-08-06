@@ -4,16 +4,16 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { useMenusByArea } from "@/modules/menus/hooks/use-menus-by-area"
-import { createAreaMenu } from "@/modules/menus/actions/write"
+import { createAreaSubMenu } from "@/modules/menus/actions/write"
+import { SubMenu } from "@/modules/menus/types/menu-sistema"
 import { Alert, AlertTitle } from "@/components/ui/alert"
-import { Menu } from "@/modules/menus/types/menu-sistema"
-import { areaMenuSchema } from "../schema/menu.schema"
+import { SubMenuSchema } from "../schema/sub-menu.schema"
+import { useEmpresa } from "@/context/empresa-context"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Check, ChevronsUpDown } from "lucide-react"
 import { useArea } from "@/context/area-context"
-import { ICONS } from "../constants/menu-icons"
 import { Button } from "@/components/ui/button"
+import { ICONS } from "../constants/menu-icons"
 import { RolUsuario } from "@/enum/user-roles"
 import { Input } from "@/components/ui/input"
 import { useRouter } from "next/navigation"
@@ -24,46 +24,48 @@ import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 import { z } from "zod"
 
-const CreateAreaMenuForm = ({
-    areaId,
-    empresaName,
-    menuId
+const SubMenuForm = ({
+    menuId,
+    menuTitle,
+    subMenuId
 }: {
-    areaId: string,
-    menuId?: string,
-    empresaName: string
+    menuId: string,
+    menuTitle: string,
+    subMenuId?: string
 }) => {
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
-    const [menu, setMenu] = useState<Menu | null>(null)
-    const router = useRouter();
-    const { area } = useArea()
-    const { menus, loading, empresa } = useMenusByArea(area?.id)
+    const [subMenu, setSubMenu] = useState<SubMenu | null>(null)
+    const [loading, setLoading] = useState<boolean>(false)
 
-    const form = useForm<z.infer<typeof areaMenuSchema>>({
-        resolver: zodResolver(areaMenuSchema),
+    const { empresa } = useEmpresa()
+    const { area } = useArea()
+    const router = useRouter();
+
+    const form = useForm<z.infer<typeof SubMenuSchema>>({
+        resolver: zodResolver(SubMenuSchema),
         defaultValues: {
-            name: "",
-            areaId: areaId,
+            allowedRoles: [],
+            areaId: area?.id,
             icon: "",
             link: "",
-            allowedRoles: []
-        },
+            name: ""
+        }
     })
 
-    const onSubmit = async (values: z.infer<typeof areaMenuSchema>) => {
+    const onSubmit = async (values: z.infer<typeof SubMenuSchema>) => {
         try {
             setIsSubmitting(true)
 
-            toast.promise(createAreaMenu(empresa?.id ?? "", area?.id ?? "", {
+            toast.promise(createAreaSubMenu(empresa?.id ?? "", area?.id ?? "", menuId, {
                 areaId: area?.id ?? "",
                 path: values.link,
                 title: values.name,
                 visible: true,
                 icon: values.icon,
+                menuId,
                 rolesAllowed: values.allowedRoles as RolUsuario[],
-                subMenus: [],
             }), {
-                loading: "Creando menú favor de esperar...",
+                loading: "Creando submenu favor de esperar...",
                 success: (result) => {
                     if (result.success) {
                         return result.message;
@@ -72,15 +74,15 @@ const CreateAreaMenuForm = ({
                     }
                 },
                 error: (error) => {
-                    return error.message || "Error al registrar el menu.";
+                    return error.message || "Error al registrar el submenu.";
                 },
             })
 
             form.reset()
             router.refresh()
         } catch (error) {
-            console.log("Error al crear el menu", error);
-            toast.error("Error al crear el menu", {
+            console.log("Error al crear el submenu", error);
+            toast.error("Error al crear el submenu", {
                 description: `${error}`
             })
         } finally {
@@ -88,36 +90,19 @@ const CreateAreaMenuForm = ({
         }
     }
 
-    useEffect(() => {
-        if (menuId && menus.length > 0) {
-            const fetchedMenu = menus.find((menu) => menu.id === menuId) || null;
-
-            if (fetchedMenu) {
-                setMenu(fetchedMenu);
-                form.reset({
-                    name: fetchedMenu.title,
-                    icon: fetchedMenu.icon,
-                    link: fetchedMenu.path,
-                    allowedRoles: fetchedMenu.rolesAllowed,
-                    areaId: area?.id ?? "",
-                });
-            }
-        }
-    }, [menuId, menus, form, area?.id]);
-
     const name = form.watch("name")
     useEffect(() => {
         if (name) {
-            form.setValue('link', `/${empresaName}/${area?.nombre}/${name}`);
+            form.setValue('link', `/${empresa?.nombre}/${area?.nombre}/${menuTitle}/${name}`);
         } else {
-            form.setValue('link', `/${empresaName}/${area?.nombre}`);
+            form.setValue('link', `/${empresa?.nombre}/${area?.nombre}/${menuTitle}`);
         }
-    }, [name, empresaName, area?.nombre, form.setValue]);
+    }, [name, empresa?.nombre, area?.nombre, menuTitle, form.setValue]);
 
     return (
         <Form {...form}>
             <form className="space-y-4" onSubmit={form.handleSubmit(onSubmit)}>
-                {loading && menuId && (
+                {loading && subMenuId && (
                     <Alert className="my-4">
                         <Icon iconName="line-md:loading-twotone-loop" />
                         <AlertTitle className="text-center">
@@ -257,11 +242,11 @@ const CreateAreaMenuForm = ({
                                             justify-center focus:shadow-outline focus:outline-none"
                     disabled={isSubmitting}
                 >
-                    {menu ? "Actualizar menu" : "Crear menu"}
+                    {subMenu ? "Actualizar SubMenu" : "Crear SubMenu"}
                 </Button>
             </form>
         </Form>
     )
 }
 
-export default CreateAreaMenuForm
+export default SubMenuForm

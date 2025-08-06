@@ -5,6 +5,8 @@ import AreaNavbar from "@/modules/areas/components/layout/area-navbar";
 import { AreaProvider } from "@/context/area-context"
 import { use } from "react";
 import AreaSidebar from "@/modules/areas/components/layout/area-sidebar";
+import { TimeProvider } from "@/context/time-context";
+import { DateProvider } from "@/context/date-context";
 
 const AreaLayout = ({
     children,
@@ -23,15 +25,19 @@ const AreaLayout = ({
                 empresaName={empresaDecodedName}
                 areaName={areaDecodedName}
             >
-                <SidebarProvider>
-                    <AreaSidebar />
-                    <SidebarInset>
-                        <AreaNavbar companyName={empresaDecodedName} />
-                        <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-                            {children}
-                        </div>
-                    </SidebarInset>
-                </SidebarProvider>
+                <TimeProvider>
+                    <DateProvider>
+                        <SidebarProvider>
+                            <AreaSidebar />
+                            <SidebarInset>
+                                <AreaNavbar companyName={empresaDecodedName} />
+                                <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
+                                    {children}
+                                </div>
+                            </SidebarInset>
+                        </SidebarProvider>
+                    </DateProvider>
+                </TimeProvider>
             </AreaProvider>
         </div>
     )
