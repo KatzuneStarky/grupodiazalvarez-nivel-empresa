@@ -8,7 +8,7 @@ const AreaPage = () => {
 
     return (
         <div>
-            {area?.nombre === "Logistica" && <MainDashboardLogistica />}
+            {area?.nombre === "logistica" && <MainDashboardLogistica />}
         </div>
     )
 }

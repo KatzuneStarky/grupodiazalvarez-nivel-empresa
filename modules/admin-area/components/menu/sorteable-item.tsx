@@ -189,8 +189,6 @@ const SorteableItem: React.FC<SortableItemProps> = ({ id, menu, areaId, empresaI
             </TableRow>
             {hasChildren && isExpanded && orderedSubMenus?.map((submenu) => (
                 <TableRow
-                    ref={setNodeRef}
-                    style={style}
                     className={level && level > 0 ? "bg-muted/30" : "hover:bg-muted/50"}
                     key={submenu.id}
                 >

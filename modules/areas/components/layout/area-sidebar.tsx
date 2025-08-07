@@ -2,11 +2,12 @@
 
 import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarHeader, SidebarMenu, SidebarMenuAction, SidebarMenuButton, SidebarMenuItem, SidebarMenuSub, SidebarMenuSubButton, SidebarMenuSubItem, SidebarRail } from "@/components/ui/sidebar"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { Building2, ChevronDown, ChevronRight, Cog, ExternalLink, LogOut, UserCircle } from "lucide-react"
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { useMenusByArea } from "@/modules/menus/hooks/use-menus-by-area"
 import { filterMenusByRole } from "@/modules/menus/actions/read"
+import { useAreasByEmpresa } from "../../hooks/use-areas"
 import { useEmpresa } from "@/context/empresa-context"
 import { Separator } from "@/components/ui/separator"
 import { useArea } from "@/context/area-context"
@@ -14,13 +15,22 @@ import { useAuth } from "@/context/auth-context"
 import { Button } from "@/components/ui/button"
 import { RolUsuario } from "@/enum/user-roles"
 import Icon from "@/components/global/icon"
+import { Area } from "../../types/areas"
+import { useEffect, useState } from "react"
 
 const AreaSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
     const { userBdd, logout } = useAuth()
     const { area, loading } = useArea()
     const { empresa } = useEmpresa()
+    const { areas } = useAreasByEmpresa(empresa?.id || "")
     const { menus } = useMenusByArea(area?.id)
     const filteredMenus = filterMenusByRole(menus, userBdd?.rol as RolUsuario)
+    const orderedAreas = areas?.sort((a, b) => a.nombre.localeCompare(b.nombre))
+    const [selectedArea, setSelectedArea] = useState<Area | null>()
+
+    useEffect(() => {
+        setSelectedArea(areas && areas[0])
+    }, [areas])
 
     return (
         <Sidebar collapsible="icon" {...props}>
@@ -37,8 +47,8 @@ const AreaSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
                                         <Building2 className="size-4" />
                                     </div>
                                     <div className="grid flex-1 text-left text-sm leading-tight">
-                                        <span className="truncate font-semibold">{area?.nombre}</span>
-                                        <span className="truncate text-xs">{area?.correoContacto}</span>
+                                        <span className="truncate font-semibold capitalize">{selectedArea?.nombre}</span>
+                                        <span className="truncate text-xs">{selectedArea?.correoContacto}</span>
                                     </div>
                                     <ChevronDown className="ml-auto" />
                                 </SidebarMenuButton>
@@ -50,19 +60,17 @@ const AreaSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
                                 sideOffset={4}
                             >
                                 <DropdownMenuLabel className="text-xs text-muted-foreground">Areas de {empresa?.nombre}</DropdownMenuLabel>
-                                {/**
-                                 * {companyAreas.map((area) => (
+                                {orderedAreas?.map((area) => (
                                     <DropdownMenuItem key={area.id} onClick={() => setSelectedArea(area)} className="gap-2 p-2">
                                         <div className="flex size-6 items-center justify-center rounded-sm border">
                                             <Building2 className="size-4 shrink-0" />
                                         </div>
                                         <div className="grid flex-1 text-left text-sm leading-tight">
-                                            <span className="truncate font-medium">{area.name}</span>
-                                            <span className="truncate text-xs text-muted-foreground">{area.location}</span>
+                                            <span className="truncate font-medium capitalize">{area.nombre}</span>
+                                            <span className="truncate text-xs text-muted-foreground">{area.correoContacto}</span>
                                         </div>
                                     </DropdownMenuItem>
                                 ))}
-                                 */}
                             </DropdownMenuContent>
                         </DropdownMenu>
                     </SidebarMenuItem>
