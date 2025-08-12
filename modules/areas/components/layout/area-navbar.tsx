@@ -3,18 +3,21 @@
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { AnimatedToggleMode } from "@/components/global/animated-toggle-mode"
+import YearCombobox from "@/components/global/year-combobox"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { Separator } from "@/components/ui/separator"
 import { Button } from "@/components/ui/button"
 import { Bell, Building2 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
-import YearCombobox from "@/components/global/year-combobox"
+import { useArea } from "@/context/area-context"
 
 interface AppNavbarProps {
     companyName?: string
 }
 
 const AreaNavbar = ({ companyName }: AppNavbarProps) => {
+    const { area } = useArea()
+
     const unreadCount = 0
     const notifications: [{ id: number, title: string, body: string, unread: number, description: string, time: Date }] = [{
         body: "",
@@ -42,11 +45,11 @@ const AreaNavbar = ({ companyName }: AppNavbarProps) => {
                     <Breadcrumb>
                         <BreadcrumbList>
                             <BreadcrumbItem>
-                                <BreadcrumbLink href="/dashboard">Dashboard</BreadcrumbLink>
+                                <BreadcrumbLink href={`/${companyName}/${area?.nombre}`}>Dashboard</BreadcrumbLink>
                             </BreadcrumbItem>
                             <BreadcrumbSeparator />
                             <BreadcrumbItem>
-                                <BreadcrumbPage>Overview</BreadcrumbPage>
+                                <BreadcrumbPage>Vista general</BreadcrumbPage>
                             </BreadcrumbItem>
                         </BreadcrumbList>
                     </Breadcrumb>
