@@ -1,11 +1,15 @@
-import { EstadoEquipos } from "../enum/estado-equipos";
-import { Archivo } from "./archivos";
+import { Operador } from "../../operadores/types/operadores";
 import { ArchivosVencimiento } from "./archivos-vencimiento";
+import { EstadoEquipos } from "../enum/estado-equipos";
+import { Mantenimiento } from "./mantenimiento";
 import { Certificado } from "./certificados";
+import { Revisiones } from "./revisiones";
+import { Archivo } from "./archivos";
 import { Tanque } from "./tanque";
 
 export interface Equipo {
     id: string;
+    tipoUnidad?: string
     numEconomico: string;
     marca: string;
     modelo: string;
@@ -18,8 +22,11 @@ export interface Equipo {
     estado: EstadoEquipos;
     archivos: Archivo[];
     tanque: Tanque[];
-    //mantenimiento: Mantenimiento[];
-    //Revisiones: Revisiones[];
+    idOperador?: string
+    operador?: Operador
+    grupoUnidad: "GRUPO DIAZ ALVAREZ" | "FELIX DIAZ ALVAREZ" | "GENERAL"
+    mantenimiento: Mantenimiento[];
+    Revisiones: Revisiones[];
     createAt: Date;
     updateAt: Date;
     Certificado: Certificado[];
@@ -28,5 +35,5 @@ export interface Equipo {
 
 export interface EquipoRevision {
     equipo: Equipo;
-    //revision: Revisiones;
+    revision: Revisiones;
 }

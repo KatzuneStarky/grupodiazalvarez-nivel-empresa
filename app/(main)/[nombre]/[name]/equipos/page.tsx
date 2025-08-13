@@ -85,7 +85,6 @@ const EquiposPage = () => {
             </div>
 
             <DetailedOverviewCards equipos={filteredEquipment} /> 
-
         </div>
     )
 }
