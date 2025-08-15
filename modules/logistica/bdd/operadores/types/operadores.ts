@@ -1,3 +1,5 @@
+import { Equipo } from "../../equipos/types/equipos";
+
 export interface Operador {
     id: string;
     image?: string;
@@ -16,6 +18,8 @@ export interface Operador {
     numLicencia: string;
     tipoLicencia: string;
     emisor: string;
+    idEquipo?: string
+    equipo?: Equipo
     createdAt: Date;
     updatedAt: Date;
 }

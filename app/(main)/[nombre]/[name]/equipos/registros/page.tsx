@@ -1,17 +1,23 @@
 "use client"
 
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { EstadoEquipos } from "@/modules/logistica/bdd/equipos/enum/estado-equipos"
 import { useEquipos } from "@/modules/logistica/bdd/equipos/hooks/use-equipos"
 import EquiposGrid from "@/modules/logistica/equipos/components/equipos-grid"
 import { BarChart3, Download, Filter, Plus, Search } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { useRouter } from "next/navigation"
 import { useState } from "react"
+import { useArea } from "@/context/area-context"
+import { useEmpresa } from "@/context/empresa-context"
 
 const RegistroEquiposPage = () => {
     const [showFleetAnalytics, setShowFleetAnalytics] = useState<boolean>(false)
     const [searchTerm, setSearchTerm] = useState<string>("")
     const { equipos, isLoading } = useEquipos()
+    const { empresa } = useEmpresa()
+    const { area } = useArea()
+    const router = useRouter()
 
     const filteredEquipos = equipos.filter(
         (equipo) =>
@@ -47,7 +53,11 @@ const RegistroEquiposPage = () => {
                                 <BarChart3 className="w-4 h-4 mr-2" />
                                 Análisis
                             </Button>
-                            <Button className="sm:w-auto">
+                            <Button
+                            className="sm:w-auto" 
+                            onClick={() => router.push(`/${empresa?.nombre}/${area?.nombre}/equipos/registros/nuevo`)}
+
+                            >
                                 <Plus className="w-4 h-4 mr-2" />
                                 Registrar Vehículo
                             </Button>
