@@ -1,9 +1,12 @@
 "use client"
 
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { OperadoresSchema, OperadoresSchemaType } from "@/modules/logistica/operadores/schemas/operadores.schema"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
+import { TipoLicencia } from "@/modules/logistica/operadores/constants/tipo-licencia"
 import { TipoSangre } from "@/modules/logistica/operadores/constants/tipo-sangre"
+import { writeOperador } from "@/modules/logistica/operadores/actions/write"
+import { Emisor } from "@/modules/logistica/operadores/constants/emisor"
 import UploadImage from "@/components/custom/upload-image-firebase"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Separator } from "@/components/ui/separator"
@@ -14,8 +17,7 @@ import { useForm } from "react-hook-form"
 import { v4 as uuidv4 } from "uuid"
 import { Save } from "lucide-react"
 import { useState } from "react"
-import { TipoLicencia } from "@/modules/logistica/operadores/constants/tipo-licencia"
-import { Emisor } from "@/modules/logistica/operadores/constants/emisor"
+import { toast } from "sonner"
 
 const NuevoOperadorPage = () => {
     const [isSubmiting, setIsSubmiting] = useState<boolean>(false)
@@ -50,7 +52,31 @@ const NuevoOperadorPage = () => {
     })
 
     const onSubmit = async (values: OperadoresSchemaType) => {
+        try {
+            setIsSubmiting(true)
 
+            toast.promise(writeOperador(values), {
+                loading: "Creando registro de operador, favor de esperar...",
+                success: (result) => {
+                    if (result.success) {
+                        return result.message;
+                    } else {
+                        throw new Error(result.message);
+                    }
+                },
+                error: (error) => {
+                    return error.message || "Error al registrar el operador.";
+                },
+            })
+
+            form.reset()
+            router.back()
+        } catch (error) {
+            toast.error("Error al guardar el operador")
+            console.log(error);
+        } finally {
+            setIsSubmiting(false)
+        }
     }
 
     const handleImageUpload = (url: string) => {
@@ -279,7 +305,7 @@ const NuevoOperadorPage = () => {
                                     <FormItem className="space-y-2 w-full">
                                         <FormLabel className="text-sm font-medium">Numero externo</FormLabel>
                                         <FormControl>
-                                            <Input placeholder="123" className="h-10" {...field} />
+                                            <Input type="number" placeholder="123" className="h-10" {...field} />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -294,7 +320,7 @@ const NuevoOperadorPage = () => {
                                     <FormItem className="space-y-2 w-full">
                                         <FormLabel className="text-sm font-medium">Codigo postal</FormLabel>
                                         <FormControl>
-                                            <Input placeholder="12345" className="h-10" {...field} />
+                                            <Input placeholder="12345" type="number" className="h-10" {...field} />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
