@@ -4,9 +4,11 @@ import { Calendar, ChevronDown, ChevronUp, Download, Edit, Eye, Filter, Fuel, Gr
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Table as TableComponent, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import UploadViajesDialog from "@/modules/logistica/reportes-viajes/components/upload-viajes-dialog"
 import { useReporteViajes } from "@/modules/logistica/reportes-viajes/hooks/use-reporte-viajes"
 import { ReporteViajes } from "@/modules/logistica/reportes-viajes/types/reporte-viajes"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { formatNumber } from "@/utils/format-number"
 import { Button } from "@/components/ui/button"
 import { Timestamp } from "firebase/firestore"
 import { Badge } from "@/components/ui/badge"
@@ -14,7 +16,6 @@ import { Input } from "@/components/ui/input"
 import { useMemo, useState } from "react"
 import { es } from "date-fns/locale"
 import { format } from "date-fns"
-import UploadViajesDialog from "@/modules/logistica/reportes-viajes/components/upload-viajes-dialog"
 
 export type SortField = "Fecha" | "Cliente" | "LitrosA20" | "Flete"
 export type SortDirection = "asc" | "desc"
@@ -36,15 +37,15 @@ const ReporteViajesPage = () => {
     const { reporteViajes, isLoading, error } = useReporteViajes()
 
     const uniqueMonths
-        = useMemo(() => [...new Set(reporteViajes.map((report) => report.Mes))].sort(), [])
+        = useMemo(() => [...new Set(reporteViajes.map((report) => report.Mes))].sort(), [reporteViajes])
     const uniqueYears
-        = useMemo(() => [...new Set(reporteViajes.map((report) => report.Year?.toString()))].filter(Boolean).sort(), [])
+        = useMemo(() => [...new Set(reporteViajes.map((report) => report.Year?.toString()))].filter(Boolean).sort(), [reporteViajes])
     const uniqueProducts
-        = useMemo(() => [...new Set(reporteViajes.map((report) => report.Producto))].sort(), [])
+        = useMemo(() => [...new Set(reporteViajes.map((report) => report.Producto))].sort(), [reporteViajes])
     const uniqueClients
-        = useMemo(() => [...new Set(reporteViajes.map((report) => report.Cliente))].sort(), [])
+        = useMemo(() => [...new Set(reporteViajes.map((report) => report.Cliente))].sort(), [reporteViajes])
     const uniqueMunicipalities
-        = useMemo(() => [...new Set(reporteViajes.map((report) => report.Municipio))].sort(), [])
+        = useMemo(() => [...new Set(reporteViajes.map((report) => report.Municipio))].sort(), [reporteViajes])
 
     const filteredAndSortedData = useMemo(() => {
         const filtered = reporteViajes.filter((report) => {
@@ -118,10 +119,10 @@ const ReporteViajesPage = () => {
         setCurrentPage(1)
     }
 
-    const getStatusBadge = (faltantes?: number) => {
-        if (!faltantes) return <Badge variant="secondary">Sin datos</Badge>
-        if (faltantes > 0) return <Badge variant="destructive">Sobrante: +{faltantes}L</Badge>
-        if (faltantes < 0) return <Badge variant="outline">Faltante: {faltantes}L</Badge>
+    const getStatusBadge = (faltantes?: string) => {
+        if (!Number(faltantes)) return <Badge variant="secondary">Sin datos</Badge>
+        if (Number(faltantes) > 0) return <Badge variant="destructive">Sobrante: +{faltantes}L</Badge>
+        if (Number(faltantes) < 0) return <Badge variant="outline">Faltante: {faltantes}L</Badge>
         return <Badge variant="default">Exacto</Badge>
     }
 
@@ -348,8 +349,9 @@ const ReporteViajesPage = () => {
                                                 <TableCell>{report.Incremento}%</TableCell>
                                                 <TableCell>${report.Flete?.toLocaleString()}</TableCell>
                                                 <TableCell>{report.FacturaPemex}</TableCell>
-                                                <TableCell>{getStatusBadge(report.FALTANTESYOSOBRANTESA20)}</TableCell>
-                                                <TableCell>{getStatusBadge(report.FALTANTESYOSOBRANTESALNATURAL)}</TableCell>
+                                                <TableCell>{getStatusBadge(formatNumber(report.FALTANTESYOSOBRANTESA20 || 0))}</TableCell>
+                                                <TableCell>{getStatusBadge(formatNumber(report.FALTANTESYOSOBRANTESALNATURAL || 0))}</TableCell>
+
                                                 <TableCell>
                                                     <DropdownMenu>
                                                         <DropdownMenuTrigger asChild>
@@ -434,7 +436,7 @@ const ReporteViajesPage = () => {
                                                 <CardHeader className="pb-3">
                                                     <div className="flex justify-between items-start">
                                                         <CardTitle className="text-lg">{report.Cliente}</CardTitle>
-                                                        {getStatusBadge(report.FALTANTESYOSOBRANTESA20)}
+                                                        {getStatusBadge(formatNumber(report.FALTANTESYOSOBRANTESA20 || 0))}
                                                     </div>
                                                     <p className="text-sm text-muted-foreground">
                                                         {/** format(fecha, "dd/MM/yyyy", { locale: es }) */}
@@ -497,11 +499,11 @@ const ReporteViajesPage = () => {
                                                     <div className="flex justify-between items-center text-xs">
                                                         <div className="flex flex-col gap-1">
                                                             <span className="text-muted-foreground">Estado A20:</span>
-                                                            {getStatusBadge(report.FALTANTESYOSOBRANTESA20)}
+                                                            {getStatusBadge(formatNumber(report.FALTANTESYOSOBRANTESA20 || 0))}
                                                         </div>
                                                         <div className="flex flex-col gap-1">
                                                             <span className="text-muted-foreground">Estado Natural:</span>
-                                                            {getStatusBadge(report.FALTANTESYOSOBRANTESALNATURAL)}
+                                                            {getStatusBadge(formatNumber(report.FALTANTESYOSOBRANTESALNATURAL || 0))}
                                                         </div>
                                                     </div>
 

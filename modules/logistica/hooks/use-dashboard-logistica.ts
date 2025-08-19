@@ -1,6 +1,8 @@
 "use client"
 
-import { getCurrentMonthCapitalized } from "@/functions/monts-functions";
+import { getPercentageChangeBetweenWeeks, getTotalFleteByMonth, getTotalFleteByWeek, getTotalM3ForCurrentMonth, getTotalM3ForCurrentWeek } from "../reportes-viajes/actions/read";
+import { getCurrentMonthCapitalized, getPreviousMonth, getPreviousMonthCapitalized } from "@/functions/monts-functions";
+import { useReporteViajes } from "../reportes-viajes/hooks/use-reporte-viajes";
 import { useOperadores } from "../bdd/operadores/hooks/use-estaciones";
 import { useEstaciones } from "../bdd/estaciones/hooks/use-estaciones";
 import { useEquipos } from "../bdd/equipos/hooks/use-equipos";
@@ -12,6 +14,7 @@ export const useDashboardDataLogistica = () => {
     const { selectedYear } = useYear();
 
     const [percentageChangeWeek, setPercentageChangeWeek] = useState<number>(0);
+    const [totalM3CurrentMonth, setTotalM3CurrentMonth] = useState<number>(0)
     const [totalFleteSemana, setTotalFleteSemana] = useState<number>(0);
     const [percentageChange, setPercentageChange] = useState<number>(0);
     const [totalM3Week, setTotalM3Week] = useState<number>(0);
@@ -21,6 +24,7 @@ export const useDashboardDataLogistica = () => {
     const [totalM3, setTotalM3] = useState<number>(0);
 
     const mesActual = getCurrentMonthCapitalized();
+    const { reporteViajes } = useReporteViajes()
     const { operadores } = useOperadores();
     const { estaciones } = useEstaciones();
     const { equipos } = useEquipos();
@@ -34,8 +38,13 @@ export const useDashboardDataLogistica = () => {
     const equiposCount = equipos.length;
     const clientesCount = 0;
 
-    {/**
-        useEffect(() => {
+    useEffect(() => {
+        const viajesAnio = reporteViajes.filter(viaje => viaje.Year === selectedYear)
+        const totalViajesMesActual = viajesAnio.filter(viaje => viaje.Mes === "Julio").length
+        setTotalViajes(totalViajesMesActual)
+    }, [reporteViajes])
+
+    useEffect(() => {
         if (!selectedYear) return;
 
         const fetchTotalFlete = (totalFletePorMes: { Mes: string; TotalFlete: number; Year: number }[]) => {
@@ -69,10 +78,11 @@ export const useDashboardDataLogistica = () => {
     }, [selectedYear, mesActual]);
 
     useEffect(() => {
-        if (!selectedYear || !mesActual) return;
+        //if (!selectedYear || !mesActual) return;
 
         const fetchTotalM3 = async () => {
-            const total = await getTotalM3ForCurrentMonth(mesActual, selectedYear);
+            const total = await getTotalM3ForCurrentMonth("Julio", selectedYear || 0);
+            console.log(total);
             setTotalM3(total);
         };
 
@@ -94,7 +104,7 @@ export const useDashboardDataLogistica = () => {
 
         const fetchM3Data = async () => {
             const currentMonthTotal = await getTotalM3ForCurrentMonth(mesActual, selectedYear);
-            setTotalM3(currentMonthTotal);
+            setTotalM3CurrentMonth(currentMonthTotal);
 
             const previousMonth = getPreviousMonth(mesActual);
             const previousMonthTotal = await getTotalM3ForCurrentMonth(previousMonth, selectedYear);
@@ -126,7 +136,7 @@ export const useDashboardDataLogistica = () => {
         };
 
         fetchPercentageChange();
-    }, [selectedYear]); */}
+    }, [selectedYear]);
 
     return {
         percentageChangeWeek,
@@ -144,6 +154,7 @@ export const useDashboardDataLogistica = () => {
         semanaActual,
         primerDiaSemana,
         ultimoDiaSemana,
-        totalViajes
+        totalViajes,
+        totalM3CurrentMonth
     };
 };

@@ -4,8 +4,13 @@ import { Activity, DollarSign, Fuel, Gauge, Truck, Users } from "lucide-react"
 import { useDashboardDataLogistica } from "./hooks/use-dashboard-logistica"
 import MetricCard from "./components/metric-card"
 import StatusCard from "./components/status-card"
+import MainCharts from "./components/main-charts"
+import { useYear } from "@/context/year-context"
+import MainActions from "./components/main-actions"
+import MainChartPerformance from "./components/main-chat-performance"
 
 const MainDashboardLogistica = () => {
+    const { selectedYear } = useYear()
     const {
         operadoresCount,
         equiposCount,
@@ -18,7 +23,11 @@ const MainDashboardLogistica = () => {
         totalViajes,
         mesActual,
         totalM3Week,
-        totalFleteSemana
+        totalFleteSemana,
+        percentageChangeWeek,
+        primerDiaSemana,
+        ultimoDiaSemana,
+        semanaActual
     } = useDashboardDataLogistica()
 
     return (
@@ -36,21 +45,21 @@ const MainDashboardLogistica = () => {
                         { label: "Semanal", value: `$${totalFleteSemana}` },
                         { label: "Diario aproximado", value: "" },
                     ]}
-                    className="xl:col-span-2"
                 />
 
                 <MetricCard
                     title="Combustible transportado"
-                    value={`${totalM3} M³`}
+                    value={`${totalM3.toFixed(2)} M³`}
                     change={`${percentageChange}%`}
                     changeType={percentageChange > 0 ? "positive" : "negative"}
                     icon={Fuel}
                     progress={0}
-                    target="0"
+                    target="20000"
                     additional={[
-                        { label: "Semanal", value: `${totalM3Week} M³` },
-                        { label: "Diario aproximado", value: "" },
+                        { label: "Semanal", value: `${totalM3Week.toFixed(2)} M³` },
+                        { label: "Diario aproximado", value: "0" },
                     ]}
+                    className="xl:col-span-2"
                 />
                 <MetricCard
                     title="Eficiencia de flota"
@@ -119,6 +128,19 @@ const MainDashboardLogistica = () => {
                     value={100}
                     color="blue"
                 />
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 place-items-center mt-4 w-full">
+                <div className="col-span-2 w-full">
+                    <MainCharts year={selectedYear || 0} />
+                </div>
+                <MainActions />
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 place-items-center mt-4 w-full">
+                <div className="col-span-2 w-full">
+                    <MainChartPerformance />
+                </div>
             </div>
         </div>
     )
