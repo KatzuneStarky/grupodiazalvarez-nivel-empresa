@@ -1,13 +1,17 @@
 "use client"
 
-import { Activity, DollarSign, Fuel, Gauge, Truck, Users } from "lucide-react"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Activity, DollarSign, Expand, Fuel, Gauge, Truck, Users } from "lucide-react"
 import { useDashboardDataLogistica } from "./hooks/use-dashboard-logistica"
+import MainChartPerformance from "./components/main-chat-performance"
+import MainActions from "./components/main-actions"
 import MetricCard from "./components/metric-card"
 import StatusCard from "./components/status-card"
 import MainCharts from "./components/main-charts"
 import { useYear } from "@/context/year-context"
-import MainActions from "./components/main-actions"
-import MainChartPerformance from "./components/main-chat-performance"
+import dynamic from "next/dynamic";
+
+const Map = dynamic(() => import('../root/components/coverage/map'), { ssr: false });
 
 const MainDashboardLogistica = () => {
     const { selectedYear } = useYear()
@@ -24,10 +28,6 @@ const MainDashboardLogistica = () => {
         mesActual,
         totalM3Week,
         totalFleteSemana,
-        percentageChangeWeek,
-        primerDiaSemana,
-        ultimoDiaSemana,
-        semanaActual
     } = useDashboardDataLogistica()
 
     return (
@@ -141,6 +141,21 @@ const MainDashboardLogistica = () => {
                 <div className="col-span-2 w-full">
                     <MainChartPerformance />
                 </div>
+                <Card className="w-full h-full">
+                    <CardContent className="h-full w-full">
+                        <CardHeader>                                
+                            <CardTitle className="flex items-center justify-between">
+                                Mapa de cobertura
+                                </CardTitle>
+                            <CardDescription>
+                                Mapa de cobertura de las estaciones de servicio 
+                            </CardDescription>                            
+                        </CardHeader>
+                        <div className="h-full w-full flex flex-col items-center justify-center">
+                            <Map />
+                        </div>
+                    </CardContent>
+                </Card>
             </div>
         </div>
     )

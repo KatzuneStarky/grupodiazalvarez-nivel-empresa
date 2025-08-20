@@ -10,9 +10,9 @@ const CENTER: [number, number] = [24.1426, -110.3128];
 const ZOOM_LEVEL = 7;
 
 const customIcon = new L.Icon({
-iconUrl: '/estacion.png',
-iconSize: [32, 32],
-iconAnchor: [16, 32],
+    iconUrl: '/estacion.png',
+    iconSize: [32, 32],
+    iconAnchor: [16, 32],
 });
 
 export default function CoverageMap() {
@@ -33,7 +33,7 @@ export default function CoverageMap() {
         return () => {
             map.remove();
         };
-    }, []);
+    }, [CENTER, ZOOM_LEVEL, L, locations]);
 
     return <div id="map" style={{ width: '100%', height: '70%' }} className="rounded-lg mb-6" />
 }
