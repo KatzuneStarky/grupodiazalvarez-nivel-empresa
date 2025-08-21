@@ -5,6 +5,7 @@ import { EstadoEquipos } from "@/modules/logistica/bdd/equipos/enum/estado-equip
 import { useEquipos } from "@/modules/logistica/bdd/equipos/hooks/use-equipos"
 import { Equipo } from "@/modules/logistica/bdd/equipos/types/equipos"
 import { useMemo, useState } from "react"
+import MaintenancePage from "@/components/custom/maintenance-page"
 
 const EquiposPage = () => {
     const [selectedEquipment, setSelectedEquipment] = useState<Equipo | null>(null)
@@ -72,7 +73,10 @@ const EquiposPage = () => {
     }
 
     return (
-        <div className="flex-1 space-y-6 p-6">
+        <div>
+            <MaintenancePage />
+            {/**
+            <div className="flex-1 space-y-6 p-6">
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
                     <div>
@@ -85,6 +89,7 @@ const EquiposPage = () => {
             </div>
 
             <DetailedOverviewCards equipos={filteredEquipment} /> 
+        </div> */}
         </div>
     )
 }

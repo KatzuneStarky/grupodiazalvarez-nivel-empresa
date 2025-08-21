@@ -1,6 +1,6 @@
 "use client"
 
-import { AlertTriangle, Clock, Copy, CreditCard, Eye, Fuel, Phone, Settings, Shield, User } from "lucide-react"
+import { AlertTriangle, Clock, Copy, CreditCard, Eye, Fuel, Navigation, Phone, Settings, Shield, User } from "lucide-react"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
@@ -16,6 +16,7 @@ import { Switch } from "@/components/ui/switch"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
 import { useState } from "react"
+import { Timestamp } from "firebase/firestore"
 
 interface EquipoCardProps {
     equipo: Equipo
@@ -46,7 +47,7 @@ const EquipoCard = ({
 
     //const nextMaintenance = calculateNextMaintenance(equipo)
     //const warningCount = getExpiryWarnings(equipo)
-    //const complianceProgress = calculateComplianceProgress(equipo)
+    const complianceProgress = 0
     //const performanceScore = getPerformanceScore(equipo)
     const vehicleIcon = vehicleIcons[equipo.marca as keyof typeof vehicleIcons] || vehicleIcons.default
     const brandGradient = brandGradients[equipo.marca as keyof typeof brandGradients] || brandGradients.default
@@ -54,12 +55,17 @@ const EquipoCard = ({
     //const activeAlerts = equipo.alertas?.filter((alert) => !alert.resuelta) || []
     //const highPriorityAlerts = activeAlerts.filter((alert) => alert.prioridad === "Alta")
 
+    const fechaExpiracionSeguro
+        = equipo.seguro?.vigenciaHasta instanceof Timestamp
+            ? equipo.seguro.vigenciaHasta.toDate()
+            : new Date(equipo.seguro &&  equipo.seguro.vigenciaHasta || new Date());
+
     return (
         <div>
             <Card
                 className={cn(
-                    "group relative overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-2",
-                    "border-2 hover:border-primary/30 bg-gradient-to-br from-white to-gray-50/50",
+                    "group relative transition-all duration-300 hover:shadow-xl hover:-translate-y-2",
+                    "border-2 hover:border-primary",
                     "min-h-[600px]",
                 )}
                 onMouseEnter={() => setShowActions(true)}
@@ -68,7 +74,7 @@ const EquipoCard = ({
                 <div className="absolute top-0 right-0 flex gap-1">
                     <div
                         className={cn(
-                            "px-3 py-1 text-xs font-medium text-white transform rotate-12 translate-x-3 -translate-y-1",
+                            "px-3 py-1 text-xs font-medium text-white transform translate-x-3 -translate-y-2 rounded-lg",
                             getStatusColor(equipo.estado),
                         )}
                     >
@@ -95,11 +101,11 @@ const EquipoCard = ({
                                 {vehicleIcon}
                             </div>
                             <div className="space-y-1">
-                                <h3 className="text-2xl font-bold text-gray-900">{equipo.numEconomico}</h3>
-                                <p className="text-sm text-gray-600 font-medium">
+                                <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-300">{equipo.numEconomico}</h3>
+                                <p className="text-sm text-gray-600 dark:text-gray-200 font-medium">
                                     {equipo.marca} {equipo.modelo} {equipo.year}
                                 </p>
-                                {equipo.serie && <p className="text-xs text-gray-500 font-mono">S/N: {equipo.serie}</p>}
+                                {equipo.serie && <p className="text-xs text-gray-500 dark:text-gray-300 font-mono">S/N: {equipo.serie}</p>}
                             </div>
                         </div>
 
@@ -127,25 +133,22 @@ const EquipoCard = ({
                             />
                         </div>
                     </div>
-
                     <div className="grid grid-cols-3 gap-2 mt-4">
                         <div className="text-center p-2 bg-blue-50 rounded-lg">
                             <div className="text-lg font-bold text-blue-600">{/** performanceScore */}%</div>
-                            <div className="text-xs text-blue-600">Performance</div>
+                            <div className="text-xs text-blue-600">Rendimiento</div>
                         </div>
                         <div className="text-center p-2 bg-green-50 rounded-lg">
                             <div className="text-lg font-bold text-green-600">
-                                {/** equipo.consumoCombustible?.eficiencia?.toFixed(1) */}
-                                {0 || "N/A"}
+                                {equipo.rendimientoPromedioKmPorLitro ? formatNumber(equipo.rendimientoPromedioKmPorLitro) : "N/A"}
                             </div>
                             <div className="text-xs text-green-600">km/L</div>
                         </div>
                         <div className="text-center p-2 bg-purple-50 rounded-lg">
                             <div className="text-lg font-bold text-purple-600">
-                                {/** equipo.kilometraje ? formatNumber(equipo.kilometraje) */}
-                                {0 || "N/A"}
+                                {equipo.m3 ? formatNumber(equipo.m3) : "N/A"}
                             </div>
-                            <div className="text-xs text-purple-600">km</div>
+                            <div className="text-xs text-purple-600">M³</div>
                         </div>
                     </div>
                 </CardHeader>
@@ -154,16 +157,16 @@ const EquipoCard = ({
                     <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
                         <TabsList className="grid w-full grid-cols-4 text-xs">
                             <TabsTrigger value="overview" className="text-xs">
-                                Overview
+                                General
                             </TabsTrigger>
                             <TabsTrigger value="technical" className="text-xs">
-                                Technical
+                                Tecnico
                             </TabsTrigger>
                             <TabsTrigger value="financial" className="text-xs">
-                                Financial
+                                Financiero
                             </TabsTrigger>
                             <TabsTrigger value="operations" className="text-xs">
-                                Operations
+                                Operaciones
                             </TabsTrigger>
                         </TabsList>
 
@@ -184,7 +187,6 @@ const EquipoCard = ({
                                 </div>
                             )}
 
-                            {/* Tank Information */}
                             {(equipo.m3 || equipo.tipoTanque) && (
                                 <div className="flex gap-2 flex-wrap">
                                     {equipo.m3 && (
@@ -199,7 +201,6 @@ const EquipoCard = ({
                                 </div>
                             )}
 
-                            {/* Driver Information */}
                             {equipo.operador && (
                                 <div className="flex items-center gap-2 p-2 bg-gray-50 rounded-lg">
                                     <User className="w-4 h-4 text-gray-600" />
@@ -213,24 +214,24 @@ const EquipoCard = ({
                                 </div>
                             )}
 
-                            {/**
-                             * {equipo.ubicacionActual && (
+                            {equipo.ultimaUbicacion && (
                                 <div className="flex items-center gap-2 p-2 bg-green-50 rounded-lg">
                                     <Navigation className="w-4 h-4 text-green-600" />
                                     <div className="flex-1">
-                                        <p className="text-sm font-medium text-green-800">{equipo.ubicacionActual.ciudad}</p>
-                                        <p className="text-xs text-green-600">{equipo.ubicacionActual.direccion}</p>
+                                        <div className="flex gap-4">
+                                            <p className="text-sm font-medium text-green-800">Lat: {equipo.ultimaUbicacion.latitud}</p>
+                                            <p className="text-sm font-medium text-green-800">Lng: {equipo.ultimaUbicacion.longitud}</p>
+                                        </div>
+                                        <p className="text-xs text-green-600">{equipo.ultimaUbicacion.direccionAproximada}</p>
                                     </div>
                                 </div>
                             )}
-                             */}
 
-                            {/**
-                             * <div className="space-y-2">
+                            <div className="space-y-2">
                                 <div className="flex items-center justify-between text-sm">
-                                    <span className="text-gray-600 flex items-center gap-1">
+                                    <span className="text-gray-600 dark:text-gray-300 flex items-center gap-1">
                                         <Shield className="w-4 h-4" />
-                                        Compliance
+                                        Completado
                                     </span>
                                     <span
                                         className={cn(
@@ -257,7 +258,6 @@ const EquipoCard = ({
                                     )}
                                 />
                             </div>
-                             */}
 
                             {/**
                               * {nextMaintenance && (
@@ -324,6 +324,19 @@ const EquipoCard = ({
                         </TabsContent>
 
                         <TabsContent value="financial" className="space-y-3 mt-4">
+                            {equipo.seguro && (
+                                <div className="bg-blue-50 p-2 rounded-lg">
+                                    <div className="flex items-center gap-2 mb-1">
+                                        <Shield className="w-4 h-4 text-blue-600" />
+                                        <span className="text-sm font-medium text-blue-800">Aseguradora</span>
+                                    </div>
+                                    <p className="text-xs text-blue-600">{equipo.seguro.aseguradora}</p>
+                                    <p className="text-xs text-blue-600">
+                                        Expira el: {new Date(fechaExpiracionSeguro).toLocaleDateString()}
+                                    </p>
+                                </div>
+                            )}
+
                             {/**
                              * {equipo.costoOperacion && (
                                 <div className="space-y-2">
@@ -342,20 +355,7 @@ const EquipoCard = ({
                                         </div>
                                     </div>
                                 </div>
-                            )}
-
-                            {equipo.seguro && (
-                                <div className="bg-blue-50 p-2 rounded-lg">
-                                    <div className="flex items-center gap-2 mb-1">
-                                        <Shield className="w-4 h-4 text-blue-600" />
-                                        <span className="text-sm font-medium text-blue-800">Insurance</span>
-                                    </div>
-                                    <p className="text-xs text-blue-600">{equipo.seguro.compania}</p>
-                                    <p className="text-xs text-blue-600">
-                                        Expires: {new Date(equipo.seguro.fechaVencimiento).toLocaleDateString()}
-                                    </p>
-                                </div>
-                            )}
+                            )}                            
 
                             {equipo.financiamiento && (
                                 <div className="bg-green-50 p-2 rounded-lg">

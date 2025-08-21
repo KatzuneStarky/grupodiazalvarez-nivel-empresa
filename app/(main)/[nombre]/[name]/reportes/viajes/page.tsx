@@ -16,6 +16,7 @@ import { Input } from "@/components/ui/input"
 import { useMemo, useState } from "react"
 import { es } from "date-fns/locale"
 import { format } from "date-fns"
+import { parseFirebaseDate } from "@/utils/parse-timestamp-date"
 
 export type SortField = "Fecha" | "Cliente" | "LitrosA20" | "Flete"
 export type SortDirection = "asc" | "desc"
@@ -34,7 +35,7 @@ const ReporteViajesPage = () => {
     const [currentPage, setCurrentPage] = useState<number>(1)
     const [searchTerm, setSearchTerm] = useState<string>("")
 
-    const { reporteViajes, isLoading, error } = useReporteViajes()
+    const { reporteViajes } = useReporteViajes()
 
     const uniqueMonths
         = useMemo(() => [...new Set(reporteViajes.map((report) => report.Mes))].sort(), [reporteViajes])
@@ -426,20 +427,17 @@ const ReporteViajesPage = () => {
                                 </h2>
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                     {reports.map((report) => {
-                                        const fecha
-                                            = report?.Fecha instanceof Timestamp
-                                                ? report?.Fecha.toDate()
-                                                : new Date(report?.Fecha || new Date());
+                                        const fecha = parseFirebaseDate(report.Fecha)
 
                                         return (
                                             <Card key={report.id} className="hover:shadow-lg transition-shadow">
                                                 <CardHeader className="pb-3">
                                                     <div className="flex justify-between items-start">
                                                         <CardTitle className="text-lg">{report.Cliente}</CardTitle>
-                                                        {getStatusBadge(formatNumber(report.FALTANTESYOSOBRANTESA20 || 0))}
+                                                        {getStatusBadge(Number(report.FALTANTESYOSOBRANTESA20 ?? 0).toFixed(2).toString())}
                                                     </div>
                                                     <p className="text-sm text-muted-foreground">
-                                                        {/** format(fecha, "dd/MM/yyyy", { locale: es }) */}
+                                                        {format(fecha, "dd/MM/yyyy", { locale: es })}
                                                     </p>
                                                 </CardHeader>
                                                 <CardContent className="space-y-3">
@@ -499,11 +497,11 @@ const ReporteViajesPage = () => {
                                                     <div className="flex justify-between items-center text-xs">
                                                         <div className="flex flex-col gap-1">
                                                             <span className="text-muted-foreground">Estado A20:</span>
-                                                            {getStatusBadge(formatNumber(report.FALTANTESYOSOBRANTESA20 || 0))}
+                                                            {getStatusBadge(Number(report.FALTANTESYOSOBRANTESA20 ?? 0).toFixed(2).toString())}
                                                         </div>
                                                         <div className="flex flex-col gap-1">
                                                             <span className="text-muted-foreground">Estado Natural:</span>
-                                                            {getStatusBadge(formatNumber(report.FALTANTESYOSOBRANTESALNATURAL || 0))}
+                                                            {getStatusBadge(Number(report.FALTANTESYOSOBRANTESALNATURAL ?? 0).toFixed(2).toString())}
                                                         </div>
                                                     </div>
 
