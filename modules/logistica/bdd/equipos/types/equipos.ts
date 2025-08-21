@@ -10,6 +10,7 @@ import { Tanque } from "./tanque";
 
 export interface Equipo {
     id: string;
+    imagen?: string
     tipoUnidad?: string
     numEconomico: string;
     marca: string;

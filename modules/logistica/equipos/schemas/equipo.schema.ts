@@ -2,42 +2,44 @@ import { EstadoEquipos } from "../../bdd/equipos/enum/estado-equipos";
 import { z } from "zod";
 
 export const EquiposSchema = z.object({
-    tipoUnidad: z.string().optional(),
-    numEconomico: z.string(),
-    marca: z.string(),
-    modelo: z.string(),
-    year: z.number().int().positive(),
-    serie: z.string().optional(),
-    placas: z.string().optional(),
-    m3: z.number().optional(),
-    tipoTanque: z.string().optional(),
-    activo: z.boolean().optional(),
-    estado: z.nativeEnum(EstadoEquipos),
-    ultimaUbicacion: z.object({
-        latitud: z.number(),
-        longitud: z.number(),
+    imagen: z.string().optional(), //listo
+    tipoUnidad: z.string().optional(), //listo
+    numEconomico: z.string(), //listo
+    marca: z.string(), //listo
+    modelo: z.string(), //listo
+    year: z.coerce.number(), //listo
+    serie: z.string().optional(), //listo
+    placas: z.string().optional(), //listo
+    m3: z.coerce.number(), //listo
+    tipoTanque: z.string().optional(), //listo
+    activo: z.boolean().optional(), //listo
+    estado: z.nativeEnum(EstadoEquipos), //listo
+    ultimaUbicacion: z.object({ //listo
+        latitud: z.coerce.number(),
+        longitud: z.coerce.number(),
         fecha: z.date(),
         direccionAproximada: z.string().optional(),
     }).optional(),
-    gpsActivo: z.boolean().optional(),
-    rendimientoPromedioKmPorLitro: z.number().optional(),
-    ultimoConsumo: z.object({
+    gpsActivo: z.boolean().optional(), //listo
+    rendimientoPromedioKmPorLitro: z.coerce.number().optional(), //listo
+    ultimoConsumo: z.object({//listo
         fecha: z.date(),
-        litros: z.number(),
-        odometro: z.number(),
+        litros: z.coerce.number(),
+        odometro: z.coerce.number(),
     }).optional(),
-    seguro: z.object({
+    seguro: z.object({//listo
         numeroPoliza: z.string(),
         aseguradora: z.string(),
         vigenciaHasta: z.date(),
         tipoCobertura: z.string().optional(),
     }).optional(),
-    permisoSCT: z.object({
+    permisoSCT: z.object({//listo
         numero: z.string(),
         tipo: z.string(),
         vigenciaHasta: z.date(),
     }).optional(),
-    idOperador: z.string().optional()
+    idOperador: z.string().optional(),// listo
+    grupoUnidad: z.enum(["GRUPO DIAZ ALVAREZ", "FELIX DIAZ ALVAREZ", "GENERAL"])//listo
 })
 
 export type EquiposSchemaType = z.infer<typeof EquiposSchema>
