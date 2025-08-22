@@ -4,8 +4,8 @@ import DetailedOverviewCards from "@/modules/logistica/equipos/components/detail
 import { EstadoEquipos } from "@/modules/logistica/bdd/equipos/enum/estado-equipos"
 import { useEquipos } from "@/modules/logistica/bdd/equipos/hooks/use-equipos"
 import { Equipo } from "@/modules/logistica/bdd/equipos/types/equipos"
-import { useMemo, useState } from "react"
 import MaintenancePage from "@/components/custom/maintenance-page"
+import { useMemo, useState } from "react"
 
 const EquiposPage = () => {
     const [selectedEquipment, setSelectedEquipment] = useState<Equipo | null>(null)

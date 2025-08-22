@@ -7,6 +7,7 @@ import { TanquesSchema, TanquesSchemaType } from "@/modules/logistica/tanques/sc
 import { AlertCircle, Check, CheckCircle, ChevronsUpDown, ShieldAlert, XCircle } from "lucide-react"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { useEquipos } from "@/modules/logistica/bdd/equipos/hooks/use-equipos"
+import { writeTanque } from "@/modules/logistica/tanques/actions/write"
 import { DatePickerForm } from "@/components/custom/date-picker-form"
 import { Separator } from "@/components/ui/separator"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -16,16 +17,15 @@ import { Input } from "@/components/ui/input"
 import Icon from "@/components/global/icon"
 import { useRouter } from "next/navigation"
 import { useForm } from "react-hook-form"
-import { v4 as uuidv4 } from "uuid"
 import { cn } from "@/lib/utils"
 import { useState } from "react"
+import { toast } from "sonner"
 
 const NuevoTanquePage = () => {
     const [isSubmitting, setIsSubmiting] = useState<boolean>(false)
     const [tanqueId, setTanqueId] = useState<string>()
     const { equipos } = useEquipos()
     const router = useRouter()
-    const uid = uuidv4()
 
     const form = useForm<TanquesSchemaType>({
         resolver: zodResolver(TanquesSchema),
@@ -57,7 +57,30 @@ const NuevoTanquePage = () => {
     })
 
     const onSubmit = async (data: TanquesSchemaType) => {
+        try {
+            setIsSubmiting(true)
 
+            toast.promise(writeTanque(data, data.equipoId || ""), {
+                loading: "Creando registro de tanque, favor de esperar...",
+                success: (result) => {
+                    if (result.success) {
+                        return result.message;
+                    } else {
+                        throw new Error(result.message);
+                    }
+                },
+                error: (error) => {
+                    return error.message || "Error al registrar el tanque.";
+                },
+            })
+
+            form.reset()
+            router.back()
+        } catch (error) {
+            console.log(error)
+        } finally {
+            setIsSubmiting(false)
+        }
     }
 
     return (
@@ -517,6 +540,18 @@ const NuevoTanquePage = () => {
                                 />
                             </div>
                         </div>
+                    </div>
+
+                    <Separator className="mt-4" />
+                    <div className="flex items-center justify-end w-full">
+                        <Button
+                            type="submit"
+                            className="mt-5 tracking-wide font-semibold"
+                            disabled={isSubmitting}
+                        >
+                            <Icon iconName="" />
+                            {tanqueId ? "Actualizar tanque" : "Crear nuevo tanque"}
+                        </Button>
                     </div>
                 </form>
             </Form>

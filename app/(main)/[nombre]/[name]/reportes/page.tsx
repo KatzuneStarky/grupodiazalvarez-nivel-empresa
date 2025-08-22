@@ -1,11 +1,9 @@
-"use client"
-
 import MaintenancePage from "@/components/custom/maintenance-page"
 
-const BddPage = () => {
+const ReportesPage = () => {
     return (
         <MaintenancePage />
     )
 }
 
-export default BddPage
+export default ReportesPage

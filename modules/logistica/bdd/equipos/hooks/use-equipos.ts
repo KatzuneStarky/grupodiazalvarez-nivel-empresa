@@ -22,7 +22,7 @@ export const useEquipos = () => {
                 const equipo = { id: doc.id, ...doc.data() } as Equipo;
                 equiposData.push(equipo);
 
-                const tanquesRef = collection(db, "tanques");
+                const tanquesRef = collection(db, "equipos", equipo.id, "tanques");
                 const tanquesQuery = query(tanquesRef, where("equipoId", "==", equipo.id));
                 const tanquesPromise = getDocs(tanquesQuery).then((tanquesSnapshot) => {
                     const tanquesData: Tanque[] = [];

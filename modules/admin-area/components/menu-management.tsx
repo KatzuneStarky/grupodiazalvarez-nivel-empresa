@@ -12,7 +12,7 @@ import { RolUsuario } from "@/enum/user-roles"
 import { Input } from "@/components/ui/input"
 import CreateAreaMenuForm from "./menu-form"
 import MenuOrder from "./menu-order"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 
 interface MenuManagementProps {
     areaId: string
@@ -22,8 +22,9 @@ interface MenuManagementProps {
 }
 
 const MenuManagement = ({ areaId, empresaId, empresaName, onMenuCountChange }: MenuManagementProps) => {
-    const [searchTerm, setSearchTerm] = useState<string>("")
+    const [orderedMenus, setOrderedMenus] = useState<Menu[]>([]);
     const [roleFilter, setRoleFilter] = useState<RolUsuario | string>("all")
+    const [searchTerm, setSearchTerm] = useState<string>("")
     const { usuarios } = useUsuarios()
     const { menus, loading, error } = useMenusByArea(areaId);
 
@@ -32,16 +33,15 @@ const MenuManagement = ({ areaId, empresaId, empresaName, onMenuCountChange }: M
     const rolesUnicos = roles.map((usuario) => usuario.rol).flat()
         .filter((role, index, self) => self.indexOf(role) === index)
 
-    const filterMenuItems = (items: Menu[]): Menu[] => {
-        return items.filter((item) => {
-            const matchesSearch = item.title.toLowerCase().includes(searchTerm.toLowerCase())
-            const matchesRole = roleFilter === "all" || item.rolesAllowed && item.rolesAllowed.includes(roleFilter as RolUsuario)
-            return matchesSearch && matchesRole
-        })
-    }
+    useEffect(() => {
+        if (menus) setOrderedMenus([...menus].sort((a, b) => a.order - b.order));
+    }, [menus]);
 
-    const topLevelMenus = menus.filter((item) => !item.id)
-    const filteredMenus = filterMenuItems(menus)
+    const filteredMenus = orderedMenus.filter(menu => {
+        const matchesSearch = menu.title.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesRole = roleFilter === "all" || menu.rolesAllowed?.includes(roleFilter as RolUsuario);
+        return matchesSearch && matchesRole;
+    });
 
     return (
         <Card className="shadow-sm">

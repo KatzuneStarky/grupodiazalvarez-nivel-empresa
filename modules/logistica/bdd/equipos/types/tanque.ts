@@ -29,6 +29,6 @@ export interface Tanque {
         vigenciaHasta: Date;
     };
 
-    createAt: Date;
-    updateAt: Date;
+    createdAt: Date;
+    updatedAt: Date;
 }

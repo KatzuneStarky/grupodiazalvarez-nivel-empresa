@@ -156,7 +156,7 @@ const EstadoEquiposPage = () => {
                                                     </TooltipTrigger>
                                                     <TooltipContent>
                                                         <p>
-                                                            {item.label}: {item.count} trucks ({percentage.toFixed(1)}%)
+                                                            {item.label}: {item.count} equipos ({percentage.toFixed(1)}%)
                                                         </p>
                                                     </TooltipContent>
                                                 </Tooltip>

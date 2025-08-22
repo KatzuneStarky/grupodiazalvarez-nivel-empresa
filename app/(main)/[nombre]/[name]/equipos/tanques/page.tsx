@@ -185,7 +185,7 @@ const TanquesPage = () => {
                 </CardContent>
             </Card>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
                 {filteredTanks.map((tanque) => {
                     const fechaExpiracionSeguro
                         = tanque.seguro?.vigenciaHasta instanceof Timestamp
@@ -239,7 +239,7 @@ const TanquesPage = () => {
                                     </div>
                                     <div>
                                         <p className="font-medium">Capacidad</p>
-                                        <p className="text-muted-foreground">{tanque.capacidadLitros}L</p>
+                                        <p className="text-muted-foreground">{tanque.capacidadLitros}M³</p>
                                     </div>
                                 </div>
 
@@ -254,7 +254,7 @@ const TanquesPage = () => {
                                     <div className="flex justify-between text-sm">
                                         <span>Nivel de Combustible</span>
                                         <span>
-                                            0L / {tanque.capacidadLitros}L ({fuelPercentage.toFixed(1)}%)
+                                            0M³ / {tanque.capacidadLitros}M³ ({fuelPercentage.toFixed(1)}%)
                                         </span>
                                     </div>
                                     <Progress value={fuelPercentage} className="h-2" />

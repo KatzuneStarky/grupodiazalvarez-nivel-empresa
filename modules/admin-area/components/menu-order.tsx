@@ -7,7 +7,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import SorteableItem from "./menu/sorteable-item";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
-import { debounce } from "lodash";
 import { toast } from "sonner";
 import {
     DndContext,
@@ -40,16 +39,13 @@ const MenuOrder: React.FC<MenuOrderProps> = ({ areaId, empresaId, empresaName, m
 
     useEffect(() => {
         if (menus && menus.length > 0) {
-            const sorted = [...menus].sort((a, b) => a.order - b.order);
-            setOrderedMenus(sorted);
+            setOrderedMenus((prev) => prev.length === 0 ? [...menus].sort((a, b) => a.order - b.order) : prev);
         }
     }, [menus]);
 
     const sensors = useSensors(
         useSensor(PointerSensor),
-        useSensor(KeyboardSensor, {
-            coordinateGetter: sortableKeyboardCoordinates,
-        })
+        useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
     );
 
     const saveOrder = async () => {
@@ -70,35 +66,13 @@ const MenuOrder: React.FC<MenuOrderProps> = ({ areaId, empresaId, empresaName, m
                 }
             );
 
-            setOrderedMenus(
-                orderedMenus.map((menu, index) => ({
-                    ...menu,
-                    order: index + 1,
-                }))
-            );
+            setOrderedMenus((prev) => prev.map((menu, index) => ({ ...menu, order: index + 1 })));
         } catch (error) {
             console.error("Error updating order:", error);
         } finally {
             setIsSaving(false);
         }
     };
-
-    const debouncedSaveOrder = debounce(saveOrder, 800)
-
-    const handleDragEnd = (event: DragEndEvent) => {
-        const { active, over } = event
-
-        if (active.id !== over?.id) {
-            setOrderedMenus((items) => {
-                const oldIndex = items.findIndex((item) => item.id === active.id)
-                const newIndex = items.findIndex((item) => item.id === over?.id)
-                const newOrder = arrayMove(items, oldIndex, newIndex)
-                //debouncedSaveOrder()
-
-                return newOrder
-            })
-        }
-    }
 
     if (loading) {
         return (
@@ -114,49 +88,62 @@ const MenuOrder: React.FC<MenuOrderProps> = ({ areaId, empresaId, empresaName, m
     }
     if (error) return <div className="text-red-500">Error al cargar los menús</div>
 
+    const handleDragEnd = (event: DragEndEvent) => {
+        const { active, over } = event;
+        if (!over || active.id === over.id) return;
+
+        setOrderedMenus((prev) => {
+            const oldIndex = prev.findIndex((m) => m.id === String(active.id));
+            const newIndex = prev.findIndex((m) => m.id === String(over.id));
+            if (oldIndex === -1 || newIndex === -1) return prev;
+
+            return arrayMove(prev, oldIndex, newIndex).map((m, i) => ({ ...m, order: i + 1 }));
+        });
+    };
+
     return (
-        <div>
-            <DndContext
-                sensors={sensors}
-                collisionDetection={closestCenter}
-                onDragEnd={handleDragEnd}
-            >
-                <SortableContext
-                    items={orderedMenus}
-                    strategy={verticalListSortingStrategy}
-                >
-                    <Table className="border rounded-lg">
-                        <TableHeader>
-                            <TableRow className="bg-muted/50">
-                                <TableHead className="font-semibold"></TableHead>
-                                <TableHead className="font-semibold">Nombre</TableHead>
-                                <TableHead className="font-semibold">Link</TableHead>
-                                <TableHead className="font-semibold">Roles permitidos</TableHead>
-                                <TableHead className="font-semibold">Orden</TableHead>
-                                <TableHead className="font-semibold">Acciones</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {orderedMenus.map((menu) => (
+        <>
+            <Table className="border rounded-lg">
+                <TableHeader>
+                    <TableRow className="bg-muted/50">
+                        <TableHead className="font-semibold"></TableHead>
+                        <TableHead className="font-semibold">Nombre</TableHead>
+                        <TableHead className="font-semibold">Link</TableHead>
+                        <TableHead className="font-semibold">Roles permitidos</TableHead>
+                        <TableHead className="font-semibold">Orden</TableHead>
+                        <TableHead className="font-semibold">Acciones</TableHead>
+                    </TableRow>
+                </TableHeader>
+                <TableBody>
+                    <DndContext
+                        sensors={sensors}
+                        collisionDetection={closestCenter}
+                        onDragEnd={handleDragEnd}
+                    >
+                        <SortableContext
+                            items={orderedMenus.map((m) => m.id)}
+                            strategy={verticalListSortingStrategy}
+                        >
+                            {orderedMenus.map((m) => (
                                 <SorteableItem
-                                    key={menu.id}
-                                    id={menu.id}
-                                    menu={menu}
+                                    key={m.id}
+                                    id={m.id}
+                                    menu={m}
                                     areaId={areaId}
                                     empresaId={empresaId}
                                     empresaName={empresaName}
                                 />
                             ))}
-                        </TableBody>
-                    </Table>
-                </SortableContext>
-            </DndContext>
+                        </SortableContext>
+                    </DndContext>
+                </TableBody>
+            </Table>
             <div className="flex justify-end my-4 mr-4">
                 <Button onClick={saveOrder} disabled={isSaving} className="w-32">
                     {isSaving ? "Guardando..." : "Guardar Orden"}
                 </Button>
             </div>
-        </div>
+        </>
     )
 }
 
