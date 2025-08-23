@@ -8,6 +8,7 @@ export const colorMapping: ProductColorMapping = {
     'PEMEX PREMIUM': 'rgb(213,43,30)',
     'DIESEL INDUSTRIAL BA': 'rgb(129,149,155)',
     'DIESEL MARINO': 'rgb(0,122,136)',
+    'DIESEL INDUSTRIAL BAJO AZUFRE': 'rgb(129,149,155)',
     'DIESEL AUTOMOTRIZ': '#0678DC',
     '87 OCTANOS': 'rgb(0,165,81)',
     '91 OCTANOS': 'rgb(213,43,30)',

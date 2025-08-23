@@ -1,14 +1,18 @@
 "use client"
 
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import DescripcionesCard from '@/modules/logistica/graficas/components/logistica/cards/destinos-card'
+import { Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, Tooltip, XAxis, YAxis } from 'recharts'
 import ProductosCard from '@/modules/logistica/graficas/components/logistica/cards/productos-card'
 import ClientesCard from '@/modules/logistica/graficas/components/logistica/cards/cliente-card'
 import { fetchReporteDataGrafica1 } from '@/modules/logistica/graficas/actions/grafica1/read'
 import { Data2Item, ReporteData } from '@/modules/logistica/graficas/types/grafica1'
+import { colorMapping } from '@/modules/logistica/graficas/constants/colors'
 import { getCurrentMonthCapitalized } from '@/functions/monts-functions'
-import { ChartConfig } from '@/components/ui/chart'
-import { useYear } from '@/context/year-context'
+import { ChartConfig, ChartContainer } from '@/components/ui/chart'
+import { formatNumber } from '@/utils/format-number'
 import React, { useEffect, useState } from 'react'
+import { useYear } from '@/context/year-context'
 
 const chartConfig = {
     totalM3: {
@@ -105,6 +109,19 @@ const Graficas1Page = () => {
         );
     };
 
+    const barCharData = reporteData.data.map((dt) => ({
+        descripcionDelViaje: dt.descripcionDelViaje,
+        totalM3: dt.totalM3,
+        producto: dt.producto,
+    }))
+
+    const pieChartData = reporteData.data1.map((dt) => ({
+        descripcionDelViaje: dt.DescripcionDelViaje,
+        sumaM3: dt.sumaM3,
+        producto: dt.Producto,
+        fill: colorMapping[dt.Producto] || "#000",
+    }));
+
     return (
         <div>
             <div className="m-3 grid xl:grid-cols-3 lg:grid-cols-2 grid-cols-1 gap-4 h-fit">
@@ -134,6 +151,156 @@ const Graficas1Page = () => {
                     handleDescripcionesChange={handleDescripcionChange}
                     capitalizedMonthName={capitalizedMonthName}
                 />
+            </div>
+
+            <div className="grid 2xl:grid-cols-3 gap-4">
+                <Card className="2xl:col-span-2">
+                    <CardHeader>
+                        <CardTitle className="text-4xl">Envios x Estacion</CardTitle>
+                        <CardDescription className="text-xl">Datos de envíos por estación</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        {barCharData.length > 0 ? (
+                            <ChartContainer config={chartConfig}>
+                                <BarChart width={600} height={300} data={barCharData}>
+                                    <CartesianGrid vertical={false} />
+                                    <XAxis
+                                        dataKey="descripcionDelViaje"
+                                        tickLine={true}
+                                        tickMargin={10}
+                                        axisLine={true}
+                                        tickFormatter={(value) => value}
+                                    />
+                                    <YAxis />
+                                    <Tooltip
+                                        cursor={true}
+                                        content={({ payload }) => {
+                                            if (payload && payload.length) {
+                                                const { descripcionDelViaje, totalM3, producto } = payload[0].payload;
+                                                return (
+                                                    <div 
+                                                    style={{ padding: "10px" }}
+                                                    className='bg-white text-black dark:bg-black dark:text-white text-sm'
+                                                    >
+                                                        <strong style={{ color: colorMapping[producto] || "#000" }}>Destino: {descripcionDelViaje}</strong><br />
+                                                        <span style={{ color: colorMapping[producto] || "#000" }} className=''>
+                                                            {producto}: {formatNumber(totalM3)} M³
+                                                        </span><br />
+                                                        <strong style={{ color: colorMapping[producto] || "#000" }}>Total M3: {formatNumber(totalM3)} M³</strong>
+                                                    </div>
+                                                );
+                                            }
+                                            return null;
+                                        }}
+                                    />
+                                    <Bar dataKey="totalM3">
+                                        {barCharData.map((entry, index) => (
+                                            <Cell key={`cell-${index}`} fill={colorMapping[entry.producto] || "#000"} />
+                                        ))}
+                                    </Bar>
+                                </BarChart>
+                            </ChartContainer>
+                        ) : (
+                            <div className="flex items-center justify-center w-full">
+                                {/** <Lottie animationData={ChartAnimation} loop autoplay className="w-1/2" /> */}
+                            </div>
+                        )}
+                    </CardContent>
+                    <CardFooter className="flex-col items-center gap-2 text-sm w-full">
+                        <div className="flex flex-wrap gap-2 font-medium leading-none w-full">
+                            {reporteData.productos.map((c) => (
+                                <div key={c} className="flex items-center mr-1">
+                                    <div
+                                        className="w-4 h-4 mr-1"
+                                        style={{ backgroundColor: colorMapping[c] || "#000" }}
+                                    />
+                                    {c}
+                                </div>
+                            ))}
+                        </div>
+                        <div className="leading-none text-muted-foreground">
+                            Mostrando los datos del mes {mes}
+                        </div>
+                    </CardFooter>
+                </Card>
+
+                <Card className="flex flex-col justify-between">
+                    <CardHeader>
+                        <CardTitle className="text-4xl">Envios x Cliente</CardTitle>
+                        <CardDescription className="text-xl">Datos de envíos por cliente</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        {pieChartData.length > 0 ? (
+                            <ChartContainer config={chartConfig}>
+                                <PieChart width={600} height={300}>
+                                    <Tooltip
+                                        content={({ payload }) => {
+                                            if (payload && payload.length) {
+                                                const { descripcionDelViaje, sumaM3, producto } = payload[0].payload;
+                                                return (
+                                                    <div style={{ padding: "10px", backgroundColor: "#000", color: "#FFF" }}>
+                                                        <strong>{descripcionDelViaje}</strong><br />
+                                                        <span style={{ color: colorMapping[producto] || "#000" }}>
+                                                            {producto}: {formatNumber(sumaM3)} M3
+                                                        </span><br />
+                                                        <strong>Total M3: {formatNumber(sumaM3)}</strong>
+                                                    </div>
+                                                );
+                                            }
+                                            return null;
+                                        }}
+                                    />
+                                    <Pie
+                                        data={pieChartData}
+                                        dataKey="sumaM3"
+                                        label={({ payload, ...props }) => {
+                                            return (
+                                                <text
+                                                    cx={props.cx}
+                                                    cy={props.cy}
+                                                    x={props.x}
+                                                    y={props.y}
+                                                    textAnchor={props.textAnchor}
+                                                    dominantBaseline={props.dominantBaseline}
+                                                    fill={payload.fill}
+                                                    className="text-sm text-center"
+                                                >
+                                                    {formatNumber(payload.sumaM3)}
+                                                </text>
+                                            )
+                                        }}
+                                        nameKey="descripcionDelViaje"
+                                    >
+                                        {pieChartData.map((entry, index) => (
+                                            <Cell key={`cell-${index}`} fill={entry.fill} />
+                                        ))}
+                                    </Pie>
+                                </PieChart>
+                            </ChartContainer>
+                        ) : (
+                            <div className="flex items-center justify-center w-full">
+                                {/** <Lottie animationData={ChartAnimation} loop autoplay className="w-full" /> */}
+                            </div>
+                        )}
+                    </CardContent>
+                    <CardFooter className="flex-col items-center gap-2 text-sm w-full">
+                        <div className="flex flex-wrap gap-2 items-center 
+                        justify-center font-medium leading-none w-full mb-4">
+                            {reporteData.clientes.map((c, index) => (
+                                <div key={c} className="flex items-center mr-1">
+                                    <div
+                                        className="w-4 h-4 mr-1"
+                                        style={{ backgroundColor: colorMapping[index] || "#000" }}
+                                    />
+                                    {c}
+                                </div>
+                            ))}
+                        </div>
+                        <div className="leading-none text-muted-foreground">
+                            Mostrando los datos del mes {mes}
+                        </div>
+                    </CardFooter>
+                </Card>
             </div>
         </div>
     )
