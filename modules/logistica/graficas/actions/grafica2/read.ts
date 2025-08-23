@@ -1,31 +1,41 @@
 import { ResultadoConDatos, RepeticionesEquipoGrafica2, RepeticionesEquipoGrafica3 } from "@/modules/logistica/graficas/types/grafica2";
-import { collection, getDocs, query, where } from "firebase/firestore";
+import { collection, getDocs, Query, query, where } from "firebase/firestore";
 import { db } from "@/firebase/client";
 
 async function construirQuery(
     nombreMes: string,
     equipos: string[] | null = null,
     productos: string[] | null = null,
-    year?: number
-) {
+    year: number = new Date().getFullYear()
+): Promise<Query> {
     const reporteViajesRef = collection(db, "reporteViajes");
-    let q = query(reporteViajesRef, where("Mes", "==", nombreMes));
 
-    if (equipos && equipos.length > 0) {
+    let q: Query = query(reporteViajesRef, where("Mes", "==", nombreMes));
+
+    if (equipos?.length) {
         q = query(q, where("Equipo", "in", equipos));
     }
 
-    if (productos && productos.length > 0) {
+    if (productos?.length) {
         q = query(q, where("Producto", "in", productos));
     }
 
-    const yearParam = year ?? new Date().getFullYear();
-
-    if (typeof yearParam === "number") {
-        q = query(q, where("Year", "==", yearParam));
-    }
+    q = query(q, where("Year", "==", year));
 
     return q;
+}
+
+interface EquipoStats {
+    conteoViajes: number;
+    sumaM3: number;
+    productos: Set<string>;
+}
+
+interface ViajeStats {
+    productos: Set<string>;
+    conteoViajes: number;
+    faltantesA20: number;
+    faltantesNatural: number;
 }
 
 export async function obtenerRepeticionesEquipos(
@@ -38,43 +48,34 @@ export async function obtenerRepeticionesEquipos(
         const q = await construirQuery(nombreMes, equipos, productos, year);
         const querySnapshot = await getDocs(q);
 
-        const conteoEquipos = querySnapshot.docs.reduce((acc, doc) => {
-            const data = doc.data();
-            const { Equipo, M3, Producto } = data;
+        const conteo = new Map<string, EquipoStats>();
 
-            if (!acc[Equipo]) {
-                acc[Equipo] = { conteoViajes: 0, sumaM3: 0, Productos: new Set() };
+        querySnapshot.forEach((doc) => {
+            const { Equipo, M3 = 0, Producto } = doc.data();
+
+            if (!Equipo) return;
+
+            if (!conteo.has(Equipo)) {
+                conteo.set(Equipo, { conteoViajes: 0, sumaM3: 0, productos: new Set() });
             }
 
-            acc[Equipo].conteoViajes++;
-            acc[Equipo].sumaM3 += M3 || 0;
-            acc[Equipo].Productos.add(Producto);
+            const equipoStats = conteo.get(Equipo)!;
+            equipoStats.conteoViajes++;
+            equipoStats.sumaM3 += M3;
+            if (Producto) equipoStats.productos.add(Producto);
+        });
 
-            return acc;
-        }, {} as Record<string, { conteoViajes: number; sumaM3: number; Productos: Set<string> }>);
-
-        // Convertir el resultado a un array de RepeticionesEquipo
-        const datos = Object.keys(conteoEquipos).map((equipo) => ({
+        const datos = Array.from(conteo.entries()).map(([equipo, stats]) => ({
             Viajes: equipo,
-            conteoViajes: conteoEquipos[equipo].conteoViajes,
-            sumaM3: conteoEquipos[equipo].sumaM3,
-            Productos: Array.from(conteoEquipos[equipo].Productos),
+            conteoViajes: stats.conteoViajes,
+            sumaM3: stats.sumaM3,
+            Productos: Array.from(stats.productos),
         }));
 
-        // Extraer productos y equipos únicos
-        const productosFiltrados = Array.from(
-            new Set(datos.flatMap((item) => item.Productos))
-        );
-        const equiposFiltrados = Array.from(
-            new Set(datos.map((item) => item.Viajes))
-        );
+        const productosFiltrados = Array.from(new Set(datos.flatMap((item) => item.Productos)));
+        const equiposFiltrados = datos.map((item) => item.Viajes);
 
-        // Devolver el objeto combinado
-        return {
-            datos,
-            productosFiltrados,
-            equiposFiltrados,
-        };
+        return { datos, productosFiltrados, equiposFiltrados };
     } catch (error) {
         console.error("Error obteniendo repeticiones de equipos:", error);
         throw error;
@@ -91,38 +92,51 @@ export async function obtenerRepeticionesEquiposGrafica2(
         const q = await construirQuery(nombreMes, equipos, productos, year);
         const querySnapshot = await getDocs(q);
 
-        const conteoEquipos = querySnapshot.docs.reduce((acc, doc) => {
-            const data = doc.data();
-            const { Equipo, FALTANTESYOSOBRANTESA20, FALTANTESYOSOBRANTESALNATURAL, DescripcionDelViaje, Producto } = data;
+        const conteo = new Map<string, Map<string, ViajeStats>>();
 
-            if (!acc[Equipo]) {
-                acc[Equipo] = {};
-            }
-            if (!acc[Equipo][DescripcionDelViaje]) {
-                acc[Equipo][DescripcionDelViaje] = { Productos: new Set<string>(), conteoViajes: 0, FALTANTESYOSOBRANTESA20: 0, FALTANTESYOSOBRANTESALNATURAL: 0 };
-            }
-            acc[Equipo][DescripcionDelViaje].Productos.add(Producto);
-            acc[Equipo][DescripcionDelViaje].conteoViajes++;
-            acc[Equipo][DescripcionDelViaje].FALTANTESYOSOBRANTESA20 += FALTANTESYOSOBRANTESA20 !== null ? Number(FALTANTESYOSOBRANTESA20) : 0;
-            acc[Equipo][DescripcionDelViaje].FALTANTESYOSOBRANTESALNATURAL += FALTANTESYOSOBRANTESALNATURAL !== null ? Number(FALTANTESYOSOBRANTESALNATURAL) : 0;
+        querySnapshot.forEach((doc) => {
+            const {
+                Equipo,
+                DescripcionDelViaje,
+                Producto,
+                FALTANTESYOSOBRANTESA20 = 0,
+                FALTANTESYOSOBRANTESALNATURAL = 0
+            } = doc.data();
 
-            return acc;
-        }, {} as Record<string, Record<string, { Productos: Set<string>; conteoViajes: number; FALTANTESYOSOBRANTESA20: number; FALTANTESYOSOBRANTESALNATURAL: number }>>);
+            if (!Equipo || !DescripcionDelViaje) return;
+
+            if (!conteo.has(Equipo)) conteo.set(Equipo, new Map());
+            const viajesMap = conteo.get(Equipo)!;
+
+            if (!viajesMap.has(DescripcionDelViaje)) {
+                viajesMap.set(DescripcionDelViaje, {
+                    productos: new Set(),
+                    conteoViajes: 0,
+                    faltantesA20: 0,
+                    faltantesNatural: 0,
+                });
+            }
+
+            const stats = viajesMap.get(DescripcionDelViaje)!;
+            stats.productos.add(Producto);
+            stats.conteoViajes++;
+            stats.faltantesA20 += Number(FALTANTESYOSOBRANTESA20) || 0;
+            stats.faltantesNatural += Number(FALTANTESYOSOBRANTESALNATURAL) || 0;
+        });
 
         const resultado: RepeticionesEquipoGrafica2[] = [];
-        for (const equipo in conteoEquipos) {
-            for (const descripcion in conteoEquipos[equipo]) {
-                const { Productos, conteoViajes, FALTANTESYOSOBRANTESA20, FALTANTESYOSOBRANTESALNATURAL } = conteoEquipos[equipo][descripcion];
+        conteo.forEach((viajesMap, equipo) => {
+            viajesMap.forEach((stats, descripcion) => {
                 resultado.push({
                     Viajes: equipo,
                     DescripcionDelViaje: descripcion,
-                    Productos: Array.from(Productos),
-                    conteoViajes,
-                    FALTANTESYOSOBRANTESA20,
-                    FALTANTESYOSOBRANTESALNATURAL,
+                    Productos: Array.from(stats.productos),
+                    conteoViajes: stats.conteoViajes,
+                    FALTANTESYOSOBRANTESA20: stats.faltantesA20,
+                    FALTANTESYOSOBRANTESALNATURAL: stats.faltantesNatural,
                 });
-            }
-        }
+            });
+        });
 
         return resultado;
     } catch (error) {
@@ -142,12 +156,24 @@ export async function obtenerRepeticionesEquiposGrafica3(
         const querySnapshot = await getDocs(q);
 
         return querySnapshot.docs.map((doc) => {
-            const data = doc.data();
+            const {
+                Producto,
+                Equipo,
+                FALTANTESYOSOBRANTESA20,
+                DescripcionDelViaje,
+            } = doc.data() as {
+                Producto: string;
+                Equipo: string;
+                FALTANTESYOSOBRANTESA20?: number | null;
+                DescripcionDelViaje: string;
+            };
+
             return {
-                Producto: data.Producto,
-                Equipo: data.Equipo,
-                FALTANTESYOSOBRANTESA20: data.FALTANTESYOSOBRANTESA20 ? data.FALTANTESYOSOBRANTESA20.toString() : null,
-                DescripcionDelViaje: data.DescripcionDelViaje,
+                Producto,
+                Equipo,
+                FALTANTESYOSOBRANTESA20:
+                    FALTANTESYOSOBRANTESA20 != null ? FALTANTESYOSOBRANTESA20.toString() : null,
+                DescripcionDelViaje,
             };
         });
     } catch (error) {

@@ -51,19 +51,22 @@ const Grafica2Page = () => {
     const { selectedYear } = useYear()
 
     const [mes, setMes] = useState<string>(capitalizedMonthName);
-    const [dataGrafica2, setDataGrafica2] = useState<RepeticionesEquipoGrafica2[]>([]);
-    const [dataGrafica, setDataGrafica] = useState<RepeticionesEquipoGrafica3[]>([]);
-    const [availableProductos, setAvailableProductos] = useState<string[]>([]);
-    const [selectedProductos, setSelectedProductos] = useState<string[]>([]);
-    const [availableEquipos, setAvailableEquipos] = useState<string[]>([]);
-    const [selectedEquipos, setSelectedEquipos] = useState<string[]>([]);
-    const [data, setData] = useState<RepeticionesEquipo[]>([]);
-
-    const [reporteState, setReporteState] = useState<ResultadoConDatos>({
-        datos: [],
-        equiposFiltrados: [],
-        productosFiltrados: []
+    const [reporteData, setReporteData] = useState<{
+        data: RepeticionesEquipo[];
+        data2: RepeticionesEquipoGrafica2[];
+        data3: RepeticionesEquipoGrafica3[];
+        productos: string[];
+        equipos: string[];
+    }>({
+        data: [],
+        data2: [],
+        data3: [],
+        productos: [],
+        equipos: [],
     });
+
+    const [selectedProductos, setSelectedProductos] = useState<string[]>([]);
+    const [selectedEquipos, setSelectedEquipos] = useState<string[]>([]);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -91,12 +94,13 @@ const Grafica2Page = () => {
 
                 const { datos, productosFiltrados, equiposFiltrados } = response;
 
-                setData(datos);
-                setDataGrafica2(responseData);
-                setDataGrafica(grafica3);
-
-                setAvailableProductos(productosFiltrados);
-                setAvailableEquipos(equiposFiltrados);
+                setReporteData((prev) => ({
+                    data: datos,
+                    data2: responseData,
+                    data3: grafica3,
+                    productos: Array.from(new Set([...prev.productos, ...productosFiltrados])),
+                    equipos: Array.from(new Set([...prev.equipos, ...equiposFiltrados])),
+                }));
             } catch (error) {
                 console.error("Error fetching data:", error);
             }
@@ -121,13 +125,13 @@ const Grafica2Page = () => {
         );
     };
 
-    const chartData = data.map((dt) => ({
+    const chartData = reporteData.data.map((dt) => ({
         Viajes: dt.Viajes,
         sumaM3: dt.sumaM3,
         conteoViajes: dt.conteoViajes,
     }));
 
-    const chartData2 = dataGrafica2.map((dt) => ({
+    const chartData2 = reporteData.data2.map((dt) => ({
         Viajes: dt.Viajes,
         DescripcionDelViaje: dt.DescripcionDelViaje,
         FALTANTESYOSOBRANTESA20: dt.FALTANTESYOSOBRANTESA20,
@@ -136,9 +140,11 @@ const Grafica2Page = () => {
         Productos: dt.Productos,
     }));
 
-    const chartData3 = dataGrafica.map((dt) => ({
+    const chartData3 = reporteData.data3.map((dt) => ({
         name: dt.DescripcionDelViaje,
-        FALTANTESYOSOBRANTESA20: dt.FALTANTESYOSOBRANTESA20 ? parseFloat(dt.FALTANTESYOSOBRANTESA20) : 0,
+        FALTANTESYOSOBRANTESA20: dt.FALTANTESYOSOBRANTESA20
+            ? parseFloat(dt.FALTANTESYOSOBRANTESA20)
+            : 0,
         Producto: dt.Producto,
     }));
 
@@ -148,7 +154,7 @@ const Grafica2Page = () => {
                 <EquiposCard
                     mes={mes}
                     setMes={setMes}
-                    equipos={availableEquipos}
+                    equipos={reporteData.equipos}
                     selectedEquipos={selectedEquipos}
                     handleEquiposChange={handleEquipoChange}
                     capitalizedMonthName={capitalizedMonthName}
@@ -158,7 +164,7 @@ const Grafica2Page = () => {
                 <ProductosCard
                     mes={mes}
                     setMes={setMes}
-                    productos={availableProductos}
+                    productos={reporteData.productos}
                     selectedProductos={selectedProductos}
                     handleProductosChange={handleProductoChange}
                     capitalizedMonthName={capitalizedMonthName}
@@ -231,7 +237,7 @@ const Grafica2Page = () => {
                         </CardContent>
                         <CardFooter className="flex-col items-center gap-4 text-sm w-full">
                             <div className="flex flex-wrap gap-2 font-medium leading-none w-full">
-                                {availableProductos.map((c) => (
+                                {selectedProductos.map((c) => (
                                     <div key={c} className="flex items-center mr-1">
                                         <div
                                             className="w-4 h-4 mr-1"
