@@ -13,10 +13,10 @@ import { formatNumber } from "@/utils/format-number"
 import { Progress } from "@/components/ui/progress"
 import { Button } from "@/components/ui/button"
 import { Switch } from "@/components/ui/switch"
+import { Timestamp } from "firebase/firestore"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
 import { useState } from "react"
-import { Timestamp } from "firebase/firestore"
 
 interface EquipoCardProps {
     equipo: Equipo
@@ -58,7 +58,7 @@ const EquipoCard = ({
     const fechaExpiracionSeguro
         = equipo.seguro?.vigenciaHasta instanceof Timestamp
             ? equipo.seguro.vigenciaHasta.toDate()
-            : new Date(equipo.seguro &&  equipo.seguro.vigenciaHasta || new Date());
+            : new Date(equipo.seguro && equipo.seguro.vigenciaHasta || new Date());
 
     return (
         <div>
@@ -374,7 +374,7 @@ const EquipoCard = ({
                              */}
                         </TabsContent>
 
-                        <TabsContent value="operations" className="space-y-3 mt-4">
+                        <TabsContent value="operations" className="space-y-3 mt-4">                            
                             {/**
                              * {equipo.consumoCombustible && (
                                 <div className="space-y-2">

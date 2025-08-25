@@ -2,12 +2,13 @@ import { ThemeProvider } from "@/providers/theme-provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/context/auth-context";
 import { YearProvider } from "@/context/year-context";
+import { TourProvider } from "@/context/tour-context";
 import { Toaster } from "@/components/ui/sonner";
 import type { Metadata } from "next";
 
 import 'shepherd.js/dist/css/shepherd.css';
+import "leaflet/dist/leaflet.css"
 import "./globals.css";
-import { TourProvider } from "@/context/tour-context";
 
 export const metadata: Metadata = {
   title: {

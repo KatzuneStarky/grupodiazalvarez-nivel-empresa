@@ -1,7 +1,6 @@
 export type ClasificacionRuta = "material peligroso" | "grava de 3/4" | "cemento" | "arena" | "agua"
 export type TipoViaje = "local" | "foráneo"
 
-
 export interface PuntoGeografico {
   nombre: string
   latitud: number
@@ -20,12 +19,16 @@ export interface Trayecto {
 
 export interface Ruta {
   id: string
-  origen: PuntoGeografico
-  destino: PuntoGeografico
+  idCliente: string
+  cliente?: []
+  origen: PuntoGeografico | null
+  destino: PuntoGeografico | null
   descripcion: string
   tipoViaje: TipoViaje
   clasificacion: ClasificacionRuta
   activa: boolean
   viajeFacturable: boolean
   trayecto: Trayecto
+  createdAt: Date
+  updatedAt: Date
 }

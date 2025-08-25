@@ -1,20 +1,22 @@
 "use client"
 
-import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { useRutas } from "@/modules/logistica/rutas/hooks/use-rutas"
 import { Ruta } from "@/modules/logistica/equipos/types/rutas"
 import { Plus, Route, Truck } from "lucide-react"
+import { Button } from "@/components/ui/button"
 import { useState } from "react"
+import RoutesManager from "@/modules/logistica/rutas/components/routes-manager"
 
 const EquiposRutasPage = () => {
     const [selectedRoute, setSelectedRoute] = useState<Ruta | null>(null)
     const [isEditing, setIsEditing] = useState(false)
-    const [routes, setRoutes] = useState<Ruta[]>([])
     const [showForm, setShowForm] = useState(false)
+    const { rutas } = useRutas()
 
-    const activeRoutes = routes.filter((route) => route.activa).length
-    const totalDistance = routes.reduce((sum, route) => sum + route.trayecto.kilometros, 0)
-    const billableRoutes = routes.filter((route) => route.viajeFacturable).length
+    const activeRoutes = rutas?.filter((route) => route.activa).length
+    const totalDistance = rutas?.reduce((sum, route) => sum + route.trayecto.kilometros, 0)
+    const billableRoutes = rutas?.filter((route) => route.viajeFacturable).length
 
     return (
         <div className="container mx-auto py-8 px-4">
@@ -42,7 +44,7 @@ const EquiposRutasPage = () => {
                             <Route className="h-4 w-4 text-muted-foreground" />
                         </CardHeader>
                         <CardContent>
-                            <div className="text-2xl font-bold">{routes.length}</div>
+                            <div className="text-2xl font-bold">{rutas?.length}</div>
                         </CardContent>
                     </Card>
 
@@ -54,7 +56,7 @@ const EquiposRutasPage = () => {
                         <CardContent>
                             <div className="text-2xl font-bold">{activeRoutes}</div>
                             <p className="text-xs text-muted-foreground">
-                                {routes.length > 0 ? Math.round((activeRoutes / routes.length) * 100) : 0}% del total
+                                {rutas && rutas?.length > 0 ? Math.round((activeRoutes || 0 / rutas?.length) * 100) : 0}% del total
                             </p>
                         </CardContent>
                     </Card>
@@ -65,7 +67,7 @@ const EquiposRutasPage = () => {
                             <Route className="h-4 w-4 text-blue-600" />
                         </CardHeader>
                         <CardContent>
-                            <div className="text-2xl font-bold">{totalDistance.toLocaleString()} km</div>
+                            <div className="text-2xl font-bold">{totalDistance?.toLocaleString()} km</div>
                         </CardContent>
                     </Card>
 
@@ -77,12 +79,14 @@ const EquiposRutasPage = () => {
                         <CardContent>
                             <div className="text-2xl font-bold">{billableRoutes}</div>
                             <p className="text-xs text-muted-foreground">
-                                {routes.length > 0 ? Math.round((billableRoutes / routes.length) * 100) : 0}% del total
+                                {rutas && rutas?.length > 0 ? Math.round((billableRoutes || 0 / rutas?.length) * 100) : 0}% del total
                             </p>
                         </CardContent>
                     </Card>
                 </div>
             </div>
+
+            <RoutesManager routes={rutas || []} />
         </div>
     )
 }
