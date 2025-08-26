@@ -2,9 +2,13 @@ import { ArchivosVencimiento } from "@/modules/logistica/bdd/equipos/types/archi
 import { Certificado } from "@/modules/logistica/bdd/equipos/types/certificados";
 import { Archivo } from "@/modules/logistica/bdd/equipos/types/archivos";
 import { subscribeToAllArchivos } from "../actions/read";
+import { Timestamp } from "firebase/firestore";
 import { useEffect, useState } from "react";
 
 type ArchivoUnion = Archivo | Certificado | ArchivosVencimiento;
+
+const toDate = (value: Date | Timestamp): Date =>
+    value instanceof Timestamp ? value.toDate() : value;
 
 export const useAllArchivos = () => {
     const [archivos, setArchivos] = useState<ArchivoUnion[]>([]);
@@ -14,10 +18,13 @@ export const useAllArchivos = () => {
     useEffect(() => {
         try {
             const unsubscribe = subscribeToAllArchivos((data) => {
-                const sortedData
-                    = data.sort((a, b) =>
-                        new Date(b.createAt).getTime() -
-                        new Date(a.createAt).getTime());
+                const sortedData = data
+                    .map(item => ({
+                        ...item,
+                        createAt: toDate(item.createAt)
+                    }))
+                    .sort((a, b) => b.createAt.getTime() - a.createAt.getTime());
+
                 setArchivos(sortedData);
                 setLoading(false);
             });

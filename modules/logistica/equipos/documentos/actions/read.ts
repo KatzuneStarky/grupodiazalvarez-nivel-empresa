@@ -1,3 +1,5 @@
+"use client"
+
 import { ArchivosVencimiento } from "@/modules/logistica/bdd/equipos/types/archivos-vencimiento";
 import { getMetadata, getStorage, listAll, ref, StorageReference } from "firebase/storage";
 import { Certificado } from "@/modules/logistica/bdd/equipos/types/certificados";

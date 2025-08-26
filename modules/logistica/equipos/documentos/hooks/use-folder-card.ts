@@ -1,3 +1,5 @@
+"use client"
+
 import { isWithinLast7Days } from "@/utils/is-recent-folder";
 import { Timestamp } from "firebase/firestore";
 import { Folder } from "../types/folder"

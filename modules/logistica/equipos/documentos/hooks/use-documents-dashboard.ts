@@ -4,15 +4,15 @@ import { Timestamp } from "firebase/firestore"
 import { Folder } from "../types/folder"
 import { useMemo } from "react"
 
+const toDate = (value: Date | Timestamp): Date =>
+    value instanceof Timestamp ? value.toDate() : new Date(value);
+
 export const useDocumentsDashboard = () => {
     const { folders, isLoading: loadingEquiposFolder, error: errorEquiposFolder } = useEquiposWithFolder()
     const { archivos, loading: loadingArchivos, error: errorArchivos } = useAllArchivos()
 
     const thresholdDate = new Date();
     thresholdDate.setDate(thresholdDate.getDate() - 7);
-
-    const toDate = (value: Date | Timestamp): Date =>
-        value instanceof Timestamp ? value.toDate() : new Date(value);
 
     const getLatestFileDate = (folder: Folder): Date => {
         const allFiles = [
