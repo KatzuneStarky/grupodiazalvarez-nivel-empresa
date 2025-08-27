@@ -1,6 +1,8 @@
 "use client"
 
 import EquipoIdTanqueCard from '@/modules/logistica/equipos/components/equipoId/equipo-id-tanque-card';
+import EquipoIdChart from '@/modules/logistica/equipos/components/equipoId/equipo-id-chart';
+import DocumentCard from '@/modules/logistica/equipos/documentos/components/document-card';
 import EquipoIdCard from '@/modules/logistica/equipos/components/equipoId/equipo-id-card';
 import useEquipoDataById from '@/modules/logistica/equipos/hooks/use-equipos-data-by-id';
 import { esArchivoVencimiento, esCertificado } from '@/functions/tipo-archivo-equipo';
@@ -101,13 +103,15 @@ const EquipoIdPage = ({ params }: { params: Promise<{ equipoId: string }> }) => 
             <div className="flex flex-col lg:flex-row gap-6">
                 <div className="lg:w-2/3 space-y-6">
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        {filteredFiles.length === 0 ? (<p>No hay archivos para mostrar.</p>)
-                            : (filteredFiles.map((file) => (<>{/** <DocumentoCard file={file} key={file.id} /> */}</>)))}
+                        {filteredFiles.length === 0
+                            ? (<p>No hay archivos para mostrar.</p>)
+                            : (filteredFiles.map((file) => (<DocumentCard file={file} key={file.id} />)))
+                        }
                     </div>
                 </div>
 
                 <div className="lg:w-1/3 space-y-6">
-                    {/** <ArchivosChart2 equipoId={equipoId} /> */}
+                    <EquipoIdChart equipoId={equipoId} />
                 </div>
             </div>
         </div>
