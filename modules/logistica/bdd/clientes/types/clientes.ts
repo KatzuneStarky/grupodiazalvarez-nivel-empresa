@@ -26,8 +26,8 @@ export interface Clientes {
         interior?: string
         telefono?: string
         celular?: string
-        correo?: string
     }
+    correo?: string
 
     contactos: ContactosCliente[]
 
