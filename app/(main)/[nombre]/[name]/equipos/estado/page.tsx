@@ -356,7 +356,7 @@ const EstadoEquiposPage = () => {
                                                 </div>
                                             </div>
                                         </DialogTrigger>
-                                        <DialogContent>
+                                        <DialogContent className="max-w-sm">
                                             <DialogHeader>
                                                 <DialogTitle>
                                                     Cambiar el estado del equipo {equipo.numEconomico}

@@ -1,7 +1,12 @@
 "use client"
 
-import { collection, getDocs, onSnapshot, query, where } from "firebase/firestore";
+import { collection, getDocs, onSnapshot } from "firebase/firestore";
+import { ArchivosVencimiento } from "../types/archivos-vencimiento";
+import { Mantenimiento } from "../types/mantenimiento";
+import { Certificado } from "../types/certificados";
+import { Revisiones } from "../types/revisiones";
 import { useEffect, useState } from "react";
+import { Archivo } from "../types/archivos";
 import { Equipo } from "../types/equipos";
 import { Tanque } from "../types/tanque";
 import { db } from "@/firebase/client";
@@ -14,35 +19,71 @@ export const useEquipos = () => {
     useEffect(() => {
         const equiposRef = collection(db, "equipos");
 
-        const unsubscribe = onSnapshot(equiposRef, async (querySnapshot) => {
-            const equiposData: Equipo[] = [];
-            const tanquesPromises: Promise<void>[] = [];
+        const unsubscribe = onSnapshot(
+            equiposRef,
+            async (querySnapshot) => {
+                setIsLoading(true);
 
-            querySnapshot.forEach((doc) => {
-                const equipo = { id: doc.id, ...doc.data() } as Equipo;
-                equiposData.push(equipo);
+                const equiposPromises = querySnapshot.docs.map(async (doc) => {
+                    const equipoBase = { id: doc.id, ...doc.data() } as Equipo;
 
-                const tanquesRef = collection(db, "equipos", equipo.id, "tanques");
-                const tanquesQuery = query(tanquesRef, where("equipoId", "==", equipo.id));
-                const tanquesPromise = getDocs(tanquesQuery).then((tanquesSnapshot) => {
-                    const tanquesData: Tanque[] = [];
-                    tanquesSnapshot.forEach((tanqueDoc) => {
-                        tanquesData.push({ id: tanqueDoc.id, ...tanqueDoc.data() } as Tanque);
-                    });
-                    equipo.tanque = tanquesData;
+                    const tanquesRef = collection(db, "equipos", equipoBase.id, "tanques");
+                    const mantenimientosRef = collection(db, "equipos", equipoBase.id, "mantenimiento");
+                    const revisionesRef = collection(db, "equipos", equipoBase.id, "Revisiones");
+                    const archivosRef = collection(db, "equipos", equipoBase.id, "archivos");
+                    const certificadosRef = collection(db, "equipos", equipoBase.id, "Certificado");
+                    const archivosVencRef = collection(db, "equipos", equipoBase.id, "ArchivosVencimiento");
+
+                    const [
+                        tanquesSnap,
+                        mantenimientosSnap,
+                        revisionesSnap,
+                        archivosSnap,
+                        certificadosSnap,
+                        archivosVencSnap,
+                    ] = await Promise.all([
+                        getDocs(tanquesRef),
+                        getDocs(mantenimientosRef),
+                        getDocs(revisionesRef),
+                        getDocs(archivosRef),
+                        getDocs(certificadosRef),
+                        getDocs(archivosVencRef),
+                    ]);
+
+                    const tanques = tanquesSnap.docs.map((d) => ({ id: d.id, ...d.data() })) as Tanque[];
+                    const mantenimiento = mantenimientosSnap.docs.map((d) => ({ id: d.id, ...d.data() })) as Mantenimiento[];
+                    const Revisiones = revisionesSnap.docs.map((d) => ({ id: d.id, ...d.data() })) as Revisiones[];
+                    const archivos = archivosSnap.docs.map((d) => ({ id: d.id, ...d.data() })) as Archivo[];
+                    const Certificado = certificadosSnap.docs.map((d) => ({ id: d.id, ...d.data() })) as Certificado[];
+                    const ArchivosVencimiento = archivosVencSnap.docs.map((d) => ({ id: d.id, ...d.data() })) as ArchivosVencimiento[];
+
+                    return {
+                        ...equipoBase,
+                        tanque: tanques,
+                        mantenimiento,
+                        Revisiones,
+                        archivos,
+                        Certificado,
+                        ArchivosVencimiento,
+                    };
                 });
 
-                tanquesPromises.push(tanquesPromise);
-            });
-
-            await Promise.all(tanquesPromises);
-            setEquipos(equiposData);
-            setIsLoading(false);
-        }, (error) => {
-            console.error("Error obteniendo los equipos:", error);
-            setError(error);
-            setIsLoading(false);
-        });
+                try {
+                    const equiposData = await Promise.all(equiposPromises);
+                    setEquipos(equiposData);
+                } catch (err) {
+                    console.error("Error obteniendo equipos:", err);
+                    setError(err as Error);
+                } finally {
+                    setIsLoading(false);
+                }
+            },
+            (error) => {
+                console.error("Error en snapshot de equipos:", error);
+                setError(error);
+                setIsLoading(false);
+            }
+        );
 
         return () => unsubscribe();
     }, []);

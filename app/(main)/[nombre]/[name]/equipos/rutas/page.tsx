@@ -1,17 +1,22 @@
 "use client"
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import RoutesManager from "@/modules/logistica/rutas/components/routes-manager"
 import { useRutas } from "@/modules/logistica/rutas/hooks/use-rutas"
 import { Ruta } from "@/modules/logistica/equipos/types/rutas"
+import { useDirectLink } from "@/hooks/use-direct-link"
 import { Plus, Route, Truck } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { useRouter } from "next/navigation"
 import { useState } from "react"
-import RoutesManager from "@/modules/logistica/rutas/components/routes-manager"
 
 const EquiposRutasPage = () => {
     const [selectedRoute, setSelectedRoute] = useState<Ruta | null>(null)
     const [isEditing, setIsEditing] = useState(false)
     const [showForm, setShowForm] = useState(false)
+
+    const { directLink } = useDirectLink("/equipos/rutas/nuevo")
+    const router = useRouter()
     const { rutas } = useRutas()
 
     const activeRoutes = rutas?.filter((route) => route.activa).length
@@ -31,7 +36,7 @@ const EquiposRutasPage = () => {
                             <p className="text-muted-foreground">Administra las rutas de transporte de combustible</p>
                         </div>
                     </div>
-                    <Button className="flex items-center gap-2">
+                    <Button className="flex items-center gap-2" onClick={() => router.push(directLink)}>
                         <Plus className="h-4 w-4" />
                         Nueva Ruta
                     </Button>

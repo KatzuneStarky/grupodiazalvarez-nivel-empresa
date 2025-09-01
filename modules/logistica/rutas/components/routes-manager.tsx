@@ -1,15 +1,18 @@
 "use client"
 
-import { useState } from "react"
-import { ClasificacionRuta, Ruta, TipoViaje } from "../../equipos/types/rutas"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Edit, Eye, Grid, List, Map, Search, Trash2 } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { ClasificacionRuta, Ruta, TipoViaje } from "../../equipos/types/rutas"
+import { Edit, Eye, Grid, List, Map, Search, Trash2 } from "lucide-react"
+import { Separator } from "@/components/ui/separator"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
+import RouteMapPage from "./route-map"
 import RouteCard from "./route-card"
+import { useState } from "react"
 
 interface RouteTableProps {
     routes: Ruta[]
@@ -20,9 +23,11 @@ const RoutesManager = ({ routes }: RouteTableProps) => {
     const [filterActiva, setFilterActiva] = useState<"all" | "active" | "inactive">("all")
     const [filterTipoViaje, setFilterTipoViaje] = useState<TipoViaje | "all">("all")
     const [sortBy, setSortBy] = useState<"distance" | "client" | "date">("client")
+    const [showDetailsModal, setShowDetailsModal] = useState<boolean>(false)
     const [selectedRoute, setSelectedRoute] = useState<Ruta | null>(null)
     const [viewMode, setViewMode] = useState<"table" | "cards">("table")
     const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc")
+    const [showMapModal, setShowMapModal] = useState<boolean>(false)
     const [currentPage, setCurrentPage] = useState(1)
     const [searchTerm, setSearchTerm] = useState("")
 
@@ -61,6 +66,16 @@ const RoutesManager = ({ routes }: RouteTableProps) => {
 
             return sortOrder === "asc" ? comparison : -comparison
         })
+
+    const handleViewMap = (route: Ruta) => {
+        setSelectedRoute(route)
+        setShowMapModal(true)
+    }
+
+    const handleViewDetails = (route: Ruta) => {
+        setSelectedRoute(route)
+        setShowDetailsModal(true)
+    }
 
     const totalPages = Math.ceil(filteredRoutes.length / itemsPerPage)
     const startIndex = (currentPage - 1) * itemsPerPage
@@ -209,10 +224,10 @@ const RoutesManager = ({ routes }: RouteTableProps) => {
                                         </TableCell>
                                         <TableCell>
                                             <div className="flex items-center gap-2">
-                                                <Button variant="ghost" size="sm">
+                                                <Button variant="ghost" size="sm" onClick={() => handleViewDetails(route)}>
                                                     <Eye className="h-4 w-4" />
                                                 </Button>
-                                                <Button variant="ghost" size="sm">
+                                                <Button variant="ghost" size="sm" onClick={() => handleViewMap(route)}>
                                                     <Map className="h-4 w-4" />
                                                 </Button>
                                                 <Button variant="ghost" size="sm">
@@ -262,6 +277,154 @@ const RoutesManager = ({ routes }: RouteTableProps) => {
                     </div>
                 </div>
             )}
+
+            <Dialog open={showMapModal} onOpenChange={setShowMapModal}>
+                <DialogContent className="max-w-5xl max-h-[90vh]">
+                    <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2">
+                            <Map className="h-5 w-5" />
+                            Mapa de Ruta: {selectedRoute?.origen?.nombre} → {selectedRoute?.destino?.nombre}
+                        </DialogTitle>
+                    </DialogHeader>
+                    {selectedRoute && (
+                        <div className="space-y-4 p-8">
+                            <div className="grid grid-cols-3 gap-4 p-4 bg-muted/50 rounded-lg">
+                                <div className="text-center">
+                                    <div className="text-2xl font-bold text-blue-600">{selectedRoute.trayecto.kilometros}</div>
+                                    <div className="text-sm text-muted-foreground">
+                                        Kilómetro{selectedRoute.trayecto.kilometros > 1 ? "s" : ""}
+                                    </div>
+                                </div>
+                                <div className="text-center">
+                                    <div className="text-2xl font-bold text-orange-600">{selectedRoute.trayecto.horas}</div>
+                                    <div className="text-sm text-muted-foreground">
+                                        Hora
+                                        {selectedRoute.trayecto.horas > 1 || selectedRoute.trayecto.horas === 0 ? "s" : ""}
+                                    </div>
+                                </div>
+                                <div className="text-center capitalize">
+                                    <div className="text-lg font-semibold">{selectedRoute.trayecto.tipoTrayecto}</div>
+                                    <div className="text-sm text-muted-foreground">
+                                        Tipo de Trayecto
+                                    </div>
+                                </div>
+                            </div>
+                            <RouteMapPage origen={selectedRoute.origen} destino={selectedRoute.destino} className="h-96 w-full" />
+                        </div>
+                    )}
+                </DialogContent>
+            </Dialog>
+
+            <Dialog open={showDetailsModal} onOpenChange={setShowDetailsModal}>
+                <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                    <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2 text-xl">
+                            <Eye className="h-6 w-6 text-blue-600" />
+                            Detalles Completos de la Ruta
+                        </DialogTitle>
+                    </DialogHeader>
+                    <Separator />
+                    {selectedRoute && (
+                        <div className="space-y-6">
+                            <div className="flex items-center justify-between p-4">
+                                <div className="flex items-center gap-3">
+                                    <div className={`w-4 h-4 rounded-full ${selectedRoute.activa ? "bg-green-500" : "bg-red-500"}`} />
+                                    <div>
+                                        <h3 className="font-semibold text-lg capitalize">{selectedRoute.descripcion}</h3>
+                                        <p className="text-sm text-muted-foreground">ID: {selectedRoute.id}</p>
+                                    </div>
+                                </div>
+                                <div className="flex gap-2">
+                                    <Badge variant={selectedRoute.activa ? "default" : "secondary"} className="px-3 py-1">
+                                        {selectedRoute.activa ? "Activa" : "Inactiva"}
+                                    </Badge>
+                                    <Badge variant={selectedRoute.viajeFacturable ? "default" : "outline"} className="px-3 py-1">
+                                        {selectedRoute.viajeFacturable ? "Facturable" : "No Facturable"}
+                                    </Badge>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
+                                    <CardContent className="p-4 text-center">
+                                        <div className="text-2xl font-bold text-blue-600">{selectedRoute.trayecto.kilometros}</div>
+                                        <div className="text-sm text-blue-700 font-medium">
+                                            Kilómetro{selectedRoute.trayecto.kilometros > 1 ? "s" : ""}
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                                <Card className="bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200">
+                                    <CardContent className="p-4 text-center">
+                                        <div className="text-2xl font-bold text-orange-600">{selectedRoute.trayecto.horas}</div>
+                                        <div className="text-sm text-orange-700 font-medium">
+                                            Hora{selectedRoute.trayecto.horas > 1 || selectedRoute.trayecto.horas === 0 ? "s" : ""}
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                                <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200">
+                                    <CardContent className="p-4 text-center capitalize">
+                                        <div className="text-lg font-bold text-green-600">{selectedRoute.tipoViaje}</div>
+                                        <div className="text-sm text-green-700 font-medium">Tipo de Viaje</div>
+                                    </CardContent>
+                                </Card>
+                                <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200">
+                                    <CardContent className="p-4 text-center capitalize">
+                                        <div className="text-lg font-bold text-purple-600">{selectedRoute.trayecto.tipoTrayecto}</div>
+                                        <div className="text-sm text-purple-700 font-medium">Tipo Trayecto</div>
+                                    </CardContent>
+                                </Card>
+                            </div>
+
+                            <Card className="border-2">
+                                <CardHeader className="">
+                                    <CardTitle className="flex items-center gap-2 text-lg">
+                                        <Map className="h-5 w-5 text-slate-600" />
+                                        Información de Ruta
+                                    </CardTitle>
+                                </CardHeader>
+                                <CardContent className="space-y-4">
+                                    <div className="space-y-3">
+                                        <div className="flex items-center gap-3 p-3 bg-green-100 rounded-lg border border-green-200">
+                                            <div className="w-3 h-3 bg-green-500 rounded-full" />
+                                            <div>
+                                                <div className="text-sm font-medium text-green-500">Origen</div>
+                                                <div className="font-semibold text-green-600">{selectedRoute.origen?.nombre}</div>
+                                                <div className="text-sm text-green-800">
+                                                    Lat: {selectedRoute.origen?.latitud}, Lng: {selectedRoute.origen?.longitud}
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="flex items-center gap-3 p-3 bg-red-100 rounded-lg border border-red-200">
+                                            <div className="w-3 h-3 bg-red-500 rounded-full" />
+                                            <div>
+                                                <div className="text-sm font-medium text-red-500">Destino</div>
+                                                <div className="font-semibold text-red-600">{selectedRoute.destino?.nombre}</div>
+                                                <div className="text-sm text-red-800">
+                                                    Lat: {selectedRoute.destino?.latitud}, Lng: {selectedRoute.destino?.longitud}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="border-t pt-4 space-y-3">
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-sm font-medium text-muted-foreground">Clasificación:</span>
+                                            <Badge variant="outline" className="font-medium capitalize">
+                                                {selectedRoute.clasificacion}
+                                            </Badge>
+                                        </div>
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-sm font-medium text-muted-foreground">Descripción:</span>
+                                            <span className="text-sm font-medium text-right max-w-48">{selectedRoute.descripcion}</span>
+                                        </div>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        </div>
+                    )}
+                </DialogContent>
+            </Dialog>
         </div>
     )
 }

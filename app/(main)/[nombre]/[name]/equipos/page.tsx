@@ -1,10 +1,10 @@
 "use client"
 
 import DetailedOverviewCards from "@/modules/logistica/equipos/components/detailed-overview-cards"
+import { getMaintenanceUrgency } from "@/modules/logistica/utils/get-maintenance-urgency"
 import { EstadoEquipos } from "@/modules/logistica/bdd/equipos/enum/estado-equipos"
 import { useEquipos } from "@/modules/logistica/bdd/equipos/hooks/use-equipos"
 import { Equipo } from "@/modules/logistica/bdd/equipos/types/equipos"
-import MaintenancePage from "@/components/custom/maintenance-page"
 import { useMemo, useState } from "react"
 
 const EquiposPage = () => {
@@ -49,14 +49,14 @@ const EquiposPage = () => {
             }
 
             if (maintenanceFilter !== "Todos") {
-                //const lastMaintenance = equipment.mantenimiento[0]?.fecha
-                //const urgency = lastMaintenance ? getMaintenanceUrgency(lastMaintenance) : "overdue"
-                //if (urgency !== maintenanceFilter) return false
+                const lastMaintenance = equipment.mantenimiento[0]?.fecha
+                const urgency = lastMaintenance ? getMaintenanceUrgency(lastMaintenance) : "overdue"
+                if (urgency !== maintenanceFilter) return false
             }
 
             return true
         })
-    }, [searchTerm, statusFilter, capacityFilter, maintenanceFilter])
+    }, [searchTerm, statusFilter, capacityFilter, maintenanceFilter, equipos])
 
     const activeFiltersCount = [
         searchTerm,
@@ -74,22 +74,20 @@ const EquiposPage = () => {
 
     return (
         <div>
-            <MaintenancePage />
-            {/**
             <div className="flex-1 space-y-6 p-6">
-            <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                    <div>
-                        <h1 className="text-3xl font-bold tracking-tight">Datos de la Flota</h1>
-                        <p className="text-muted-foreground">
-                            Gestión integral de equipos de transporte de combustible
-                        </p>
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                        <div>
+                            <h1 className="text-3xl font-bold tracking-tight">Datos de la Flota</h1>
+                            <p className="text-muted-foreground">
+                                Gestión integral de equipos de transporte de combustible
+                            </p>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <DetailedOverviewCards equipos={filteredEquipment} /> 
-        </div> */}
+                <DetailedOverviewCards equipos={filteredEquipment} />
+            </div>
         </div>
     )
 }

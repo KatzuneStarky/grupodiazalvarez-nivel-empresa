@@ -1,19 +1,27 @@
 "use client"
 
+import { Activity, AlertCircle, AlertTriangle, Clock, TrendingUp, Truck, Wrench } from "lucide-react"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { getMaintenanceUrgency } from "../../utils/get-maintenance-urgency"
 import { EstadoEquipos } from "../../bdd/equipos/enum/estado-equipos"
 import { getDaysUntilExpiry } from "../../utils/documents-expiricy"
 import { Equipo } from "../../bdd/equipos/types/equipos"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { AlertTriangle, CheckCircle, Clock, DollarSign, Fuel, Truck, Wrench } from "lucide-react"
+import { useDirectLink } from "@/hooks/use-direct-link"
 import { Progress } from "@/components/ui/progress"
+import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import Icon from "@/components/global/icon"
+import { useRouter } from "next/navigation"
+import { NewDocumentDialog } from "../documentos/components/new-document-dialog"
 
 const DetailedOverviewCards = ({
     equipos
 }: {
     equipos: Equipo[]
 }) => {
+    const { directLink } = useDirectLink("/equipos")
+    const router = useRouter()
+
     const activeTrucks = equipos.filter((truck) => truck.activo).length
     const inactiveTrucks = equipos.filter((truck) => !truck.activo).length
     const operationalTrucks = equipos.filter((truck) => truck.estado === EstadoEquipos.DISPONIBLE).length
@@ -221,42 +229,7 @@ const DetailedOverviewCards = ({
                 </CardContent>
             </Card>
 
-            <Card>
-                <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                        <Fuel className="h-5 w-5" />
-                        Análisis de Capacidad
-                    </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                    <div className="grid grid-cols-2 gap-2 text-sm">
-                        <div>
-                            <div className="text-muted-foreground">Capacidad Total</div>
-                            <div className="font-bold text-blue-600">{(totalCapacity / 1000).toFixed(0)}K L</div>
-                        </div>
-                        <div>
-                            <div className="text-muted-foreground">Promedio</div>
-                            <div className="font-bold text-green-600">{(avgCapacity / 1000).toFixed(1)}K L</div>
-                        </div>
-                        <div>
-                            <div className="text-muted-foreground">Operativa</div>
-                            <div className="font-bold text-purple-600">{(operationalCapacity / 1000).toFixed(0)}K L</div>
-                        </div>
-                        <div>
-                            <div className="text-muted-foreground">Utilización</div>
-                            <div className="font-bold text-orange-600">
-                                {Math.round((operationalCapacity / totalCapacity) * 100)}%
-                            </div>
-                        </div>
-                    </div>
-                    <div className="pt-2 border-t">
-                        <Progress value={(operationalCapacity / totalCapacity) * 100} className="h-2" />
-                        <div className="text-xs text-muted-foreground mt-1">Capacidad operativa vs total</div>
-                    </div>
-                </CardContent>
-            </Card>
-
-            <Card>
+            <Card className="col-span-2">
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                         <Clock className="h-5 w-5" />
@@ -288,69 +261,93 @@ const DetailedOverviewCards = ({
                 </CardContent>
             </Card>
 
-            <Card>
-                <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                        <DollarSign className="h-5 w-5" />
-                        Resumen de Costos
-                    </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                    <div className="grid grid-cols-1 gap-2 text-sm">
-                        <div className="flex justify-between">
-                            <span className="text-muted-foreground">Mantenimiento Mensual</span>
-                            <span className="font-bold text-blue-600">$285,000</span>
+            <div className="flex flex-col gap-4">
+                <Card>
+                    <CardContent className="p-4">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <p className="text-sm text-muted-foreground">Unidades Activas</p>
+                                <p className="text-2xl font-bold text-green-600">{activeTrucks}</p>
+                            </div>
+                            <Activity className="h-8 w-8 text-green-600" />
                         </div>
-                        <div className="flex justify-between">
-                            <span className="text-muted-foreground">Costo por Unidad</span>
-                            <span className="font-bold text-green-600">$71,250</span>
+                        <div className="mt-2 flex items-center text-xs text-green-600">
+                            <TrendingUp className="h-3 w-3 mr-1" />
+                            +1 vs ayer
                         </div>
-                        <div className="flex justify-between">
-                            <span className="text-muted-foreground">Costo por km</span>
-                            <span className="font-bold text-purple-600">$2.45</span>
+                    </CardContent>
+                </Card>
+
+                <Card>
+                    <CardContent className="p-4">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <p className="text-sm text-muted-foreground">Alertas Activas</p>
+                                <p className="text-2xl font-bold text-red-600">{overdueMaintenance}</p>
+                            </div>
+                            <AlertCircle className="h-8 w-8 text-red-600" />
                         </div>
-                    </div>
-                    <div className="pt-2 border-t">
-                        <div className="flex justify-between items-center">
-                            <span className="text-sm">Eficiencia vs Meta</span>
-                            <Badge variant="outline" className="text-green-600">
-                                +5.2%
-                            </Badge>
+                        <div className="mt-2 flex items-center text-xs text-red-600">
+
                         </div>
-                        <div className="text-xs text-muted-foreground mt-1">Reducción de costos este mes</div>
-                    </div>
-                </CardContent>
-            </Card>
+                    </CardContent>
+                </Card>
+            </div>
 
             <Card>
                 <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                        <CheckCircle className="h-5 w-5" />
-                        Métricas de Seguridad
+                    <CardTitle>
+                        Acciones rapidas
                     </CardTitle>
+                    <CardDescription>
+                        Acciones para la creacion de nuevos registros relacionados con los equipos
+                    </CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-3">
-                    <div className="text-center">
-                        <div className="text-3xl font-bold text-green-600">45</div>
-                        <div className="text-sm text-muted-foreground">Días sin incidentes</div>
-                    </div>
-                    <div className="grid grid-cols-2 gap-2 text-sm">
-                        <div>
-                            <div className="text-muted-foreground">Incidentes YTD</div>
-                            <div className="font-bold text-yellow-600">3</div>
-                        </div>
-                        <div>
-                            <div className="text-muted-foreground">Meta Anual</div>
-                            <div className="font-bold text-blue-600">≤5</div>
-                        </div>
-                    </div>
-                    <div className="pt-2 border-t">
-                        <div className="flex justify-between items-center">
-                            <span className="text-sm">Cumplimiento Seguridad</span>
-                            <span className="text-lg font-bold text-green-600">98%</span>
-                        </div>
-                        <Progress value={98} className="h-2 mt-1" />
-                    </div>
+                <CardContent className="p-4 grid grid-cols-2 gap-4">
+                    <Button
+                        size={"lg"}
+                        className="bg-[#3B82F6] hover:bg-[#60A5FA] text-black"
+                        onClick={() => router.push(`${directLink}/registros/nuevo`)}
+                    >
+                        <Truck />
+                        Crear nuevo equipo
+                    </Button>
+
+                    <Button
+                        size={"lg"}
+                        className="bg-[#10B981] hover:bg-[#34D399] text-black"
+                        onClick={() => router.push(`${directLink}/tanques/nuevo`)}
+                    >
+                        <Icon iconName="mdi:train-car-tank" />
+                        Crear nuevo tanque
+                    </Button>
+
+                    <Button
+                        className="col-span-2 bg-[#F59E0B] hover:bg-[#FBBF24] text-black"
+                        size={"lg"}
+                    >
+                        <Icon iconName="fluent-emoji-high-contrast:vertical-traffic-light" />
+                        Cambiar el estado de un equipo
+                    </Button>
+
+                    <NewDocumentDialog>
+                        <Button
+                            size={"lg"}
+                            className="bg-[#EF4444] hover:bg-[#F87171] text-black"
+                        >
+                            <Icon iconName="famicons:documents" />
+                            Agregar documento
+                        </Button>
+                    </NewDocumentDialog>
+
+                    <Button
+                        size={"lg"}
+                        className="bg-[#8B5CF6] hover:bg-[#A78BFA] text-black"
+                        onClick={() => router.push(`${directLink}/rutas/nuevo`)}
+                    >
+                        <Icon iconName="fa7-solid:route" />
+                        Crear nueva ruta
+                    </Button>
                 </CardContent>
             </Card>
         </div>
