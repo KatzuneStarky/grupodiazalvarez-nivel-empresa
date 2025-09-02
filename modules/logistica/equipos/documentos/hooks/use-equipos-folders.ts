@@ -60,8 +60,8 @@ export const useEquiposWithFolder = () => {
                     extension: d.data().extension ?? "",
                     peso: d.data().peso ?? 0,
                     equipoId: d.data().equipoId ?? equipoId,
-                    createAt: toDate(d.data().createdAt, createdAt),
-                    updateAt: toDate(d.data().updatedAt, createdAt),
+                    createdAt: toDate(d.data().createdAt, createdAt),
+                    updatedAt: toDate(d.data().updatedAt, createdAt),
                   }));
 
                   folder.archivosVencimiento = vencimientoSnap.docs.map((d) => ({
@@ -73,7 +73,8 @@ export const useEquiposWithFolder = () => {
                     extension: d.data().extension ?? "",
                     peso: d.data().peso ?? 0,
                     equipoId: d.data().equipoId ?? equipoId,
-                    createAt: toDate(d.data().createdAt, createdAt),
+                    createdAt: toDate(d.data().createdAt, createdAt),
+                    updatedAt: toDate(d.data().updatedAt, createdAt),
                   }));
 
                   folder.certificado = certificadoSnap.docs.map((d) => ({
@@ -85,7 +86,8 @@ export const useEquiposWithFolder = () => {
                     extension: d.data().extension ?? "",
                     peso: d.data().peso ?? 0,
                     equipoId: d.data().equipoId ?? equipoId,
-                    createAt: toDate(d.data().createdAt, createdAt),
+                    createdAt: toDate(d.data().createdAt, createdAt),
+                    updatedAt: toDate(d.data().updatedAt, createdAt),
                   }));
                 } catch (e) {
                   console.error("Error fetching subcollections:", e);
@@ -95,7 +97,7 @@ export const useEquiposWithFolder = () => {
                 const allFiles = [...folder.archivos, ...folder.archivosVencimiento, ...folder.certificado];
                 if (allFiles.length) {
                   folder.updatedAt = allFiles.reduce(
-                    (latest, f) => (f.createAt > latest ? f.createAt : latest),
+                    (latest, f) => (f.createdAt > latest ? f.createdAt : latest),
                     folder.createdAt
                   );
                 }

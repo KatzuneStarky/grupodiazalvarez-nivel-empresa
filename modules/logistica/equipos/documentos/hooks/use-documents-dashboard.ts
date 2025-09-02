@@ -24,7 +24,7 @@ export const useDocumentsDashboard = () => {
         if (allFiles.length === 0) return new Date(0);
 
         return allFiles.reduce((latest, file) => {
-            const fileDate = toDate(file.createAt);
+            const fileDate = toDate(file.createdAt);
             return fileDate > latest ? fileDate : latest;
         }, new Date(0));
     };
@@ -43,7 +43,7 @@ export const useDocumentsDashboard = () => {
 
     const allArchivos = archivos.flat();
     const sortedArchivos = useMemo(() =>
-        allArchivos.sort((a, b) => toDate(b.createAt).getTime() - toDate(a.createAt).getTime()),
+        allArchivos.sort((a, b) => toDate(b.createdAt).getTime() - toDate(a.createdAt).getTime()),
         [allArchivos]);
 
     const first18Archivos = sortedArchivos.slice(0, 18);

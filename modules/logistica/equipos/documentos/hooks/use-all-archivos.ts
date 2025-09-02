@@ -21,7 +21,7 @@ export const useAllArchivos = () => {
                 const sortedData = data
                     .map(item => ({
                         ...item,
-                        createAt: toDate(item.createAt)
+                        createAt: toDate(item.createdAt)
                     }))
                     .sort((a, b) => b.createAt.getTime() - a.createAt.getTime());
 
