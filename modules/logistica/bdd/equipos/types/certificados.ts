@@ -11,5 +11,6 @@ export interface Certificado {
     peso: number;
     equipoId: string;
     equipo?: Equipo;
-    createAt: Date;
+    createdAt: Date;
+    updatedAt: Date
 }

@@ -10,6 +10,6 @@ export interface Archivo {
     peso: number;
     equipoId: string;
     equipo?: Equipo;
-    createAt: Date;
-    updateAt: Date;
+    createdAt: Date;
+    updatedAt: Date;
 }

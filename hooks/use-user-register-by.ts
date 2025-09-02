@@ -16,7 +16,7 @@ export const useUserRegisterBy = () => {
         setRegisterProvider(auth?.currentUser?.providerData[0].providerId ?? "")
 
         if(registerProvider === "google.com") setIsRegisterByGoogle(TipoRegistroUsuario.google as TipoRegistroUsuario)
-        //if(registerProvider === "email") setIsRegisterByEmail(TipoRegistroUsuario.email as TipoRegistroUsuario)
+        if(registerProvider === "email") setIsRegisterByEmail(TipoRegistroUsuario.email as TipoRegistroUsuario)
     }, [auth, registerProvider])
 
     return { isRegisterByGoogle, isRegisterByEmail, registerProvider }

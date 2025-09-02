@@ -13,7 +13,7 @@ export const NewDocumentDialog = ({ eId, children }: { eId?: string, children: R
             <DialogTrigger asChild>
                 {children}
             </DialogTrigger>
-            <DialogContent className="max-w-xl">
+            <DialogContent className="max-w-2xl">
                 <DialogHeader>
                     <DialogTitle>
                         Subir archivos de los equipos
@@ -40,13 +40,13 @@ export const NewDocumentDialog = ({ eId, children }: { eId?: string, children: R
                         </TabsTrigger>
                     </TabsList>
                     <TabsContent value="archivos" className='mt-4'>
-                        <ArchivosForm equipoId={eId} /> 
+                        <ArchivosForm equipoId={eId} fileCategory="archivos" />
                     </TabsContent>
                     <TabsContent value="certificado" className='mt-4'>
-                        {/** <CertificadoForm /> */}
+                        <ArchivosForm equipoId={eId} fileCategory="certificados" />
                     </TabsContent>
                     <TabsContent value="archivos-vencimiento" className='mt-4'>
-                        {/** <ArchivosVencimientoForm /> */}
+                        <ArchivosForm equipoId={eId} fileCategory="archivosVencimiento" />
                     </TabsContent>
                 </Tabs>
             </DialogContent>

@@ -2,6 +2,7 @@
 
 import { Activity, AlertCircle, AlertTriangle, Clock, TrendingUp, Truck, Wrench } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { NewDocumentDialog } from "../documentos/components/new-document-dialog"
 import { getMaintenanceUrgency } from "../../utils/get-maintenance-urgency"
 import { EstadoEquipos } from "../../bdd/equipos/enum/estado-equipos"
 import { getDaysUntilExpiry } from "../../utils/documents-expiricy"
@@ -12,7 +13,6 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import Icon from "@/components/global/icon"
 import { useRouter } from "next/navigation"
-import { NewDocumentDialog } from "../documentos/components/new-document-dialog"
 
 const DetailedOverviewCards = ({
     equipos
@@ -62,15 +62,15 @@ const DetailedOverviewCards = ({
     }).length;
 
     const allDocs = equipos.flatMap(truck => getSafeDocuments(truck));
-    const expiredDocs = allDocs.filter(doc => doc?.createAt && getDaysUntilExpiry(doc.createAt) < 0);
+    const expiredDocs = allDocs.filter(doc => doc?.createdAt && getDaysUntilExpiry(doc.updatedAt) < 0);
     const criticalDocs = allDocs.filter(doc => {
-        if (!doc?.createAt) return false;
-        const days = getDaysUntilExpiry(doc.createAt);
+        if (!doc?.createdAt) return false;
+        const days = getDaysUntilExpiry(doc.createdAt);
         return days >= 0 && days <= 7;
     });
     const warningDocs = allDocs.filter(doc => {
-        if (!doc?.createAt) return false;
-        const days = getDaysUntilExpiry(doc.createAt);
+        if (!doc?.createdAt) return false;
+        const days = getDaysUntilExpiry(doc.createdAt);
         return days > 7 && days <= 30;
     });
 
