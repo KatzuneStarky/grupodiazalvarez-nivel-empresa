@@ -31,14 +31,14 @@ const DocumentCardContent = ({
                 <div className="flex items-center space-x-2">
                     <Clock className="h-4 w-4 text-muted-foreground" />
                     <span className="text-sm">
-                        Subido el: {convertirFecha(file.createAt).toLocaleDateString()}
+                        Subido el: {convertirFecha(file.createdAt).toLocaleDateString()}
                     </span>
                 </div>
                 {'updateAt' in file && (
                     <div className="flex items-center space-x-2">
                         <Clock className="h-4 w-4 text-muted-foreground" />
                         <span className="text-sm">
-                            Ultima actualizacion: {convertirFecha(file.updateAt).toLocaleDateString()}
+                            Ultima actualizacion: {convertirFecha(file.updatedAt).toLocaleDateString()}
                         </span>
                     </div>
                 )}
