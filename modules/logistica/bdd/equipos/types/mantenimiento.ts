@@ -9,6 +9,7 @@ export interface Mantenimiento {
     mecanico?: string;
     notas?: string;
     tipoServicio?: string;
+    fechaProximo?: Date;
     equipoId?: string;
     equipo?: Equipo | null;
     Evidencia: Evidencia[];

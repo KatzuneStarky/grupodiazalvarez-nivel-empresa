@@ -1,11 +1,15 @@
 "use client"
 
+import { CommandDialogEquipos } from "@/modules/logistica/equipos/documentos/components/command-dialog-equipos"
 import DetailedOverviewCards from "@/modules/logistica/equipos/components/detailed-overview-cards"
 import { getMaintenanceUrgency } from "@/modules/logistica/utils/get-maintenance-urgency"
+import EquipoKpiMetrics from "@/modules/logistica/equipos/components/equipo-kpi-metric"
 import { EstadoEquipos } from "@/modules/logistica/bdd/equipos/enum/estado-equipos"
 import { useEquipos } from "@/modules/logistica/bdd/equipos/hooks/use-equipos"
 import { Equipo } from "@/modules/logistica/bdd/equipos/types/equipos"
+import { Button } from "@/components/ui/button"
 import { useMemo, useState } from "react"
+import OperationalInsights from "@/modules/logistica/equipos/components/operational-insignths"
 
 const EquiposPage = () => {
     const [selectedEquipment, setSelectedEquipment] = useState<Equipo | null>(null)
@@ -13,6 +17,7 @@ const EquiposPage = () => {
     const [maintenanceFilter, setMaintenanceFilter] = useState("Todos")
     const [capacityFilter, setCapacityFilter] = useState("Todos")
     const [searchTerm, setSearchTerm] = useState("")
+    const [open, setOpen] = useState<boolean>(false)
 
     const { equipos } = useEquipos()
 
@@ -74,9 +79,9 @@ const EquiposPage = () => {
 
     return (
         <div>
-            <div className="flex-1 space-y-6 p-6">
+            <div className="flex-1 space-y-6 p-6"> 
                 <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center justify-between gap-4">
                         <div>
                             <h1 className="text-3xl font-bold tracking-tight">Datos de la Flota</h1>
                             <p className="text-muted-foreground">
@@ -84,10 +89,21 @@ const EquiposPage = () => {
                             </p>
                         </div>
                     </div>
+                    <Button onClick={() => setOpen(true)}>
+                        Ver equipo
+                    </Button>
                 </div>
 
                 <DetailedOverviewCards equipos={filteredEquipment} />
+                <EquipoKpiMetrics fleetData={equipos} />
+                <OperationalInsights fleetData={equipos} />
             </div>
+
+            <CommandDialogEquipos
+                equipos={equipos}
+                setOpen={setOpen}
+                open={open}
+            />
         </div>
     )
 }

@@ -1,12 +1,12 @@
 "use client"
 
+import AreaSidebar from "@/modules/areas/components/layout/area-sidebar";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import AreaNavbar from "@/modules/areas/components/layout/area-navbar";
-import { AreaProvider } from "@/context/area-context"
-import { use } from "react";
-import AreaSidebar from "@/modules/areas/components/layout/area-sidebar";
 import { TimeProvider } from "@/context/time-context";
 import { DateProvider } from "@/context/date-context";
+import { AreaProvider } from "@/context/area-context"
+import { use } from "react";
 
 const AreaLayout = ({
     children,

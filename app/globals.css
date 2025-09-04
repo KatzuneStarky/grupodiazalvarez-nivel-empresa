@@ -121,3 +121,72 @@
     @apply bg-background text-foreground;
   }
 }
+
+@layer components {
+  .rbc-calendar {
+    @apply bg-background text-foreground font-sans;
+  }
+
+  .rbc-header {
+    @apply bg-card text-card-foreground border-b border-border font-semibold py-3 px-4;
+  }
+
+  .rbc-month-view {
+    @apply border border-border rounded-lg overflow-hidden shadow-sm;
+  }
+
+  .rbc-date-cell {
+    @apply text-muted-foreground hover:bg-muted/50 transition-colors;
+  }
+
+  .rbc-today {
+    @apply bg-accent/10 font-semibold;
+  }
+
+  .rbc-event {
+    @apply rounded-md border-0 text-xs font-medium px-2 py-1 shadow-sm;
+  }
+
+  .rbc-event.maintenance-safe {
+    background-color: var(--maintenance-safe);
+    color: white;
+  }
+
+  .rbc-event.maintenance-warning {
+    background-color: var(--maintenance-warning);
+    color: white;
+  }
+
+  .rbc-event.maintenance-urgent {
+    background-color: var(--maintenance-urgent);
+    color: white;
+  }
+
+  .rbc-toolbar {
+    @apply mb-6 flex flex-wrap items-center justify-between gap-4 p-4 bg-card rounded-lg border border-border;
+  }
+
+  .rbc-toolbar-label {
+    @apply text-lg font-semibold text-foreground;
+  }
+
+  .rbc-btn-group {
+    @apply flex rounded-md overflow-hidden border border-border;
+  }
+
+  .rbc-btn-group button {
+    @apply px-4 py-2 text-sm font-medium bg-background text-foreground hover:bg-muted transition-colors border-0 border-r border-border last:border-r-0;
+  }
+
+  .rbc-btn-group button.rbc-active {
+    @apply bg-primary text-primary-foreground;
+  }
+
+  .rbc-off-range-bg {
+    @apply bg-muted/30;
+  }
+
+  .rbc-day-slot .rbc-event {
+    @apply mb-1;
+  }
+}

@@ -17,16 +17,18 @@ import { RolUsuario } from "@/enum/user-roles"
 import Icon from "@/components/global/icon"
 import { Area } from "../../types/areas"
 import { useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
 
 const AreaSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
     const { userBdd, logout } = useAuth()
-    const { area, loading } = useArea()
+    const { area } = useArea()
     const { empresa } = useEmpresa()
     const { areas } = useAreasByEmpresa(empresa?.id || "")
     const { menus } = useMenusByArea(area?.id)
     const filteredMenus = filterMenusByRole(menus, userBdd?.rol as RolUsuario)
     const orderedAreas = areas?.sort((a, b) => a.nombre.localeCompare(b.nombre))
     const [selectedArea, setSelectedArea] = useState<Area | null>()
+    const router = useRouter()
 
     useEffect(() => {
         setSelectedArea(areas && areas[0])
@@ -61,7 +63,11 @@ const AreaSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
                             >
                                 <DropdownMenuLabel className="text-xs text-muted-foreground">Areas de {empresa?.nombre}</DropdownMenuLabel>
                                 {orderedAreas?.map((area) => (
-                                    <DropdownMenuItem key={area.id} onClick={() => setSelectedArea(area)} className="gap-2 p-2">
+                                    <DropdownMenuItem key={area.id} onClick={() => {
+                                        setSelectedArea(area)
+                                        router.push(`/${empresa?.nombre}/${area.nombre}`)
+                                        router.refresh()
+                                    }} className="gap-2 p-2">
                                         <div className="flex size-6 items-center justify-center rounded-sm border">
                                             <Building2 className="size-4 shrink-0" />
                                         </div>
