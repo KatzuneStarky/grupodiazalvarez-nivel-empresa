@@ -5,8 +5,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useEquipos } from "@/modules/logistica/bdd/equipos/hooks/use-equipos"
+import interactionPlugin, { DateClickArg } from "@fullcalendar/interaction"
+import { DateSelectArg, EventClickArg } from "@fullcalendar/core/index.js"
 import { CalendarEvent } from "@/modules/mantenimiento/types/calendario"
-import interactionPlugin from "@fullcalendar/interaction"
 import { useDirectLink } from "@/hooks/use-direct-link"
 import esLocale from "@fullcalendar/core/locales/es"
 import timeGridPlugin from "@fullcalendar/timegrid"
@@ -30,6 +31,9 @@ const MantenimientosCalendarioPage = () => {
         return equipos.filter((equipo) => equipo.grupoUnidad === selectedGroup)
     }, [equipos, selectedGroup])
 
+    console.log(filteredEquipos);
+    
+
     const events = useMemo(() => {
         const calendarEvents: any[] = []
 
@@ -52,19 +56,19 @@ const MantenimientosCalendarioPage = () => {
                         borderColor = "var(--maintenance-warning)"
                     }
 
+                    const urgencyClasses = {
+                        safe: "bg-green-500 border-green-500 text-white",
+                        warning: "bg-yellow-500 border-yellow-500 text-black",
+                        urgent: "bg-red-600 border-red-600 text-white",
+                    };
+
                     calendarEvents.push({
                         id: mantenimiento.id,
                         title: `${equipo.numEconomico} - ${mantenimiento.tipoServicio || "Mantenimiento"}`,
                         date: mantenimiento.fechaProximo,
-                        backgroundColor,
-                        borderColor,
-                        textColor: "#ffffff",
-                        extendedProps: {
-                            mantenimiento,
-                            equipo,
-                            urgency,
-                        },
-                    })
+                        className: urgencyClasses[urgency],
+                        extendedProps: { mantenimiento, equipo, urgency },
+                    });
                 }
             })
         })
@@ -72,26 +76,48 @@ const MantenimientosCalendarioPage = () => {
         return calendarEvents
     }, [filteredEquipos])
 
-    const handleEventClick = (clickInfo: any) => {
-        console.log("Event clicked:", clickInfo.event)
-
-        const event = clickInfo.event
+    const handleEventClick = (clickInfo: EventClickArg) => {
+        console.log("Event clicked:", clickInfo.event);
+        const event = clickInfo.event;
         const calendarEvent: CalendarEvent = {
             id: event.id,
             title: event.title,
-            start: event.start,
-            end: event.end || event.start,
-            resource: event.extendedProps,
+            start: event.start!,
+            end: event.end || event.start!,
+            resource: {
+                equipo: event.extendedProps.equipo,
+                mantenimiento: event.extendedProps.mantenimiento,
+                urgency: event.extendedProps.urgency,
+            },
+        };
+        setSelectedEvent(calendarEvent);
+    };
+
+    const handleDateClick = (arg: DateClickArg) => {
+        const equipo = selectedGroup !== "all"
+            ? filteredEquipos.find(e => e.grupoUnidad === selectedGroup) || null
+            : null            
+
+        const calendarEvent: CalendarEvent = {
+            id: "new",
+            title: "Nuevo mantenimiento",
+            start: arg.date,
+            end: arg.date,
+            resource: {
+                equipo,
+                mantenimiento: null,
+                urgency: "safe",
+            },
         }
         setSelectedEvent(calendarEvent)
     }
 
-    const handleDateClick = (arg: any) => {
+    const handleDateSelect = (info: DateSelectArg) => {
         const calendarEvent: CalendarEvent = {
             id: "new",
-            title: `Nuevo mantenimiento`,
-            start: arg.date,
-            end: arg.date,
+            title: "Nuevo mantenimiento",
+            start: info.start,
+            end: info.end,
             resource: {
                 equipo: null,
                 mantenimiento: null,
@@ -124,7 +150,6 @@ const MantenimientosCalendarioPage = () => {
 
     const uniqueGroups = [...new Set(equipos.map((e) => e.grupoUnidad))]
 
-    console.log(selectedGroup);
     return (
         <div className="container mx-auto px-4 py-8">
             <div className="bg-card border-b border-border rounded-lg">
@@ -215,6 +240,8 @@ const MantenimientosCalendarioPage = () => {
                             events={events}
                             eventClick={handleEventClick}
                             dateClick={handleDateClick}
+                            selectable
+                            select={handleDateSelect}
                             height="700px"
                             headerToolbar={{
                                 left: "prev,next today",
@@ -336,7 +363,7 @@ const MantenimientosCalendarioPage = () => {
                                 </Card>
                             )}
 
-                            {selectedEvent.resource.mantenimiento && selectedEvent?.resource.mantenimiento?.Evidencia.length > 0 && (
+                            {selectedEvent.resource.mantenimiento?.Evidencia && selectedEvent?.resource.mantenimiento?.Evidencia.length > 0 && (
                                 <Card className="border-border">
                                     <CardContent className="p-4">
                                         <h4 className="font-semibold text-foreground mb-4 flex items-center gap-2">

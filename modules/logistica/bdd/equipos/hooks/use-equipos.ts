@@ -28,7 +28,7 @@ export const useEquipos = () => {
                     const equipoBase = { id: doc.id, ...doc.data() } as Equipo;
 
                     const tanquesRef = collection(db, "equipos", equipoBase.id, "tanques");
-                    const mantenimientosRef = collection(db, "equipos", equipoBase.id, "mantenimiento");
+                    const mantenimientosRef = collection(db, "equipos", equipoBase.id, "mantenimientos");
                     const revisionesRef = collection(db, "equipos", equipoBase.id, "Revisiones");
                     const archivosRef = collection(db, "equipos", equipoBase.id, "archivos");
                     const certificadosRef = collection(db, "equipos", equipoBase.id, "Certificado");

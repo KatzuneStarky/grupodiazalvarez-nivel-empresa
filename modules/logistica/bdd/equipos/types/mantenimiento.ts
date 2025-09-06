@@ -12,8 +12,8 @@ export interface Mantenimiento {
     fechaProximo?: Date;
     equipoId?: string;
     equipo?: Equipo | null;
-    Evidencia: Evidencia[];
-    mantenimientoData: MantenimientoData[];
+    Evidencia?: Evidencia[];
+    mantenimientoData?: MantenimientoData[];
     createAt: Date;
     updateAt: Date;
 }
@@ -51,3 +51,11 @@ export interface EquipoConMantenimientos extends Equipo {
     mantenimientos: MantenimientoConDetalles[];
     tanques: Tanque[]
 }
+
+export type MantenimientoDataInput = Omit<MantenimientoData, "id" | "createAt" | "updateAt">;
+export type EvidenciaInput = Omit<Evidencia, "id" | "createAt" | "updateAt">;
+
+export type MantenimientoInput = Omit<Mantenimiento, "id" | "createAt" | "updateAt" | "mantenimientoData" | "Evidencia"> & {
+  mantenimientoData: MantenimientoDataInput[];
+  Evidencia: EvidenciaInput[];
+};

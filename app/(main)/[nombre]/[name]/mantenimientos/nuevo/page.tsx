@@ -4,8 +4,10 @@ import { MantenimientoSchema, MantenimientoSchemaType } from "@/modules/mantenim
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import UploadEvidencia from "@/modules/mantenimiento/mantenimientos/components/upload-evidencia";
+import { Camera, Check, CheckCircle2, ChevronsUpDown, Trash, Truck, Wrench } from "lucide-react";
 import { tipoServicio } from "@/modules/mantenimiento/mantenimientos/constants/tipo-servicio";
-import { Camera, Check, ChevronsUpDown, Trash, Truck, Wrench } from "lucide-react";
+import { writeMantenimiento } from "@/modules/mantenimiento/mantenimientos/actions/write";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useEquipos } from "@/modules/logistica/bdd/equipos/hooks/use-equipos";
 import { DatePickerForm } from "@/components/custom/date-picker-form";
@@ -16,20 +18,21 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { IconTools } from "@tabler/icons-react";
 import { Input } from "@/components/ui/input";
-import { useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
-const NuevoMantenimientoPage = ({ equipoId }: { equipoId?: string }) => {
+const NuevoMantenimientoPage = () => {
     const [mantenimientoId, setMantenimientoId] = useState<string | null>(null);
     const [isSubmiting, setIsSubmiting] = useState<boolean>(false);
-    const [files, setFiles] = useState<File[]>([]);
     const { equipos } = useEquipos()
+    const router = useRouter()
 
     const form = useForm<MantenimientoSchemaType>({
         resolver: zodResolver(MantenimientoSchema),
         defaultValues: {
-            equipoId: equipoId || "",
+            equipoId: "",
             Evidencia: [],
             fecha: new Date(),
             fechaProximo: new Date(),
@@ -44,6 +47,23 @@ const NuevoMantenimientoPage = ({ equipoId }: { equipoId?: string }) => {
     const onSubmit = async (data: MantenimientoSchemaType) => {
         setIsSubmiting(true);
         try {
+            toast.promise(writeMantenimiento(data, data.equipoId), {
+                loading: "Creando mantenimiento, favor de esperar...",
+                success: (result) => {
+                    if (result.success) {
+                        setMantenimientoId(result.id || "");
+                        return result.message;
+                    } else {
+                        throw new Error(result.message);
+                    }
+                },
+                error: (error) => {
+                    return error.message || "Error al registrar el mantenimiento.";
+                },
+            })
+
+            form.reset()
+            router.back()
         } catch (error) {
             console.log(error);
             toast.error("Error al crear el mantenimiento", {
@@ -268,6 +288,7 @@ const NuevoMantenimientoPage = ({ equipoId }: { equipoId?: string }) => {
                                 descripcion: "",
                                 mantenimientoId: ""
                             })}
+                            type="button"
                         >
                             Agregar item
                         </Button>
@@ -325,6 +346,7 @@ const NuevoMantenimientoPage = ({ equipoId }: { equipoId?: string }) => {
                                         variant={"destructive"}
                                         className="w-full"
                                         size={"lg"}
+                                        type="button"
                                         onClick={() => remove(index)}
                                     >
                                         <Trash className="w-8 h-8" />
@@ -340,6 +362,32 @@ const NuevoMantenimientoPage = ({ equipoId }: { equipoId?: string }) => {
                             <Camera className="h-4 w-4 text-primary" />
                         </div>
                         <h1 className="text-muted-foreground">Evidencia del mantenimiento</h1>
+                    </div>
+
+                    <div className="mt-4">
+                        <UploadEvidencia
+                            control={form.control}
+                            name="Evidencia"
+                            mantenimientoId={mantenimientoId || ""}
+                            isSubmitting={isSubmiting}
+                        />
+                    </div>
+
+                    <Separator className="my-4" />
+                    <div className="flex items-center justify-end w-full">
+                        <Button type="submit" disabled={isSubmiting}>
+                            {isSubmiting ? (
+                                <>
+                                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                                    Guardando mantenimiento...
+                                </>
+                            ) : (
+                                <>
+                                    <CheckCircle2 className="h-4 w-4 mr-2" />
+                                    Guardar mantenimiento
+                                </>
+                            )}
+                        </Button>
                     </div>
                 </form>
             </Form>

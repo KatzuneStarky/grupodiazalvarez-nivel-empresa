@@ -22,8 +22,8 @@ export const MantenimientoSchema = z.object({
     notas: z.string().optional(),
     tipoServicio: z.string(),
     equipoId: z.string(),
-    mantenimientoData: z.array(MantenimientoDataSchema).optional(),
-    Evidencia: z.array(EvidenciaSchema).optional(),
+    mantenimientoData: z.array(MantenimientoDataSchema),
+    Evidencia: z.array(EvidenciaSchema),
 });
 
 export type MantenimientoSchemaType = z.infer<typeof MantenimientoSchema>;
