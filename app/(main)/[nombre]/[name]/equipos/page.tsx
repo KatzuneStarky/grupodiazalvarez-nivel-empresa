@@ -2,6 +2,7 @@
 
 import { CommandDialogEquipos } from "@/modules/logistica/equipos/documentos/components/command-dialog-equipos"
 import DetailedOverviewCards from "@/modules/logistica/equipos/components/detailed-overview-cards"
+import OperationalInsights from "@/modules/logistica/equipos/components/operational-insignths"
 import { getMaintenanceUrgency } from "@/modules/logistica/utils/get-maintenance-urgency"
 import EquipoKpiMetrics from "@/modules/logistica/equipos/components/equipo-kpi-metric"
 import { EstadoEquipos } from "@/modules/logistica/bdd/equipos/enum/estado-equipos"
@@ -9,7 +10,6 @@ import { useEquipos } from "@/modules/logistica/bdd/equipos/hooks/use-equipos"
 import { Equipo } from "@/modules/logistica/bdd/equipos/types/equipos"
 import { Button } from "@/components/ui/button"
 import { useMemo, useState } from "react"
-import OperationalInsights from "@/modules/logistica/equipos/components/operational-insignths"
 
 const EquiposPage = () => {
     const [selectedEquipment, setSelectedEquipment] = useState<Equipo | null>(null)

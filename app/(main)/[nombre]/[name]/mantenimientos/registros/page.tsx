@@ -1,14 +1,15 @@
 "use client"
 
-import { Mantenimiento } from "@/modules/logistica/bdd/equipos/types/mantenimiento"
-import { useEquipos } from "@/modules/logistica/bdd/equipos/hooks/use-equipos"
 import { AlertTriangle, Calendar, CheckCircle, Clock, FileText, Gauge, User, Wrench } from "lucide-react"
+import MantenimientoDialog from "@/modules/mantenimiento/mantenimientos/components/mantenimiento-dialog"
+import { Mantenimiento } from "@/modules/logistica/bdd/equipos/types/mantenimiento"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { useEquipos } from "@/modules/logistica/bdd/equipos/hooks/use-equipos"
+import { parseFirebaseDate } from "@/utils/parse-timestamp-date"
 import { Badge } from "@/components/ui/badge"
 import { useMemo, useState } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { format } from "date-fns"
-import { parseFirebaseDate } from "@/utils/parse-timestamp-date"
 import { es } from "date-fns/locale"
+import { format } from "date-fns"
 
 const MantenimientosRegistrosPage = () => {
     const [selectedRecord, setSelectedRecord] = useState<Mantenimiento | null>(null)
@@ -110,7 +111,7 @@ const MantenimientosRegistrosPage = () => {
                                         <CardTitle className="text-lg font-semibold text-balance">
                                             {mantenimiento.tipoServicio || "Mantenimiento"}
                                         </CardTitle>
-                                        {getUrgencyBadge(parseFirebaseDate(mantenimiento.fecha))}
+                                        {/** {getUrgencyBadge(parseFirebaseDate(mantenimiento.fechaProximo))} */}
                                     </div>
                                 </CardHeader>
                                 <CardContent className="space-y-4">
@@ -147,7 +148,9 @@ const MantenimientosRegistrosPage = () => {
                                         <div className="flex items-center gap-2 text-sm">
                                             <Wrench className="w-4 h-4 text-muted-foreground" />
                                             <span className="font-medium text-muted-foreground">Servicios:</span>
-                                            <span className="font-semibold text-foreground">{mantenimiento.mantenimientoData.length} items</span>
+                                            <span className="font-semibold text-foreground">
+                                                {mantenimiento.mantenimientoData.length} servicio{mantenimiento.mantenimientoData.length > 1 ? 's' : ''}
+                                            </span>
                                         </div>
                                     )}
 
@@ -177,11 +180,19 @@ const MantenimientosRegistrosPage = () => {
 
                                         if (diffDays <= 15) {
                                             return (
-                                                <div className="absolute top-0 right-0 w-0 h-0 border-l-[20px] border-l-transparent border-t-[20px] border-t-red-500" />
+                                                <div className="absolute top-0 right-0">
+                                                    <div className="relative w-[140px] h-[55px] bg-yellow-500 rotate-45 translate-x-[50px] -translate-y-[4px] flex items-center justify-center shadow-md">
+                                                        <p className="text-xs font-bold text-white">Próximo</p>
+                                                    </div>
+                                                </div>
                                             )
                                         } else if (diffDays <= 30) {
                                             return (
-                                                <div className="absolute top-0 right-0 w-0 h-0 border-l-[20px] border-l-transparent border-t-[20px] border-t-yellow-500" />
+                                                <div className="absolute top-0 right-0">
+                                                    <div className="relative w-[140px] h-[55px] bg-green-500 rotate-45 translate-x-[50px] -translate-y-[4px] flex items-center justify-center shadow-md">
+                                                        <p className="text-xs font-bold text-white">En tiempo</p>
+                                                    </div>
+                                                </div>
                                             )
                                         }
                                         return null
@@ -190,6 +201,12 @@ const MantenimientosRegistrosPage = () => {
                         ))}
                     </div>
                 </div>
+
+                <MantenimientoDialog
+                    isDialogOpen={isDialogOpen}
+                    setIsDialogOpen={setIsDialogOpen}
+                    selectedRecord={selectedRecord}
+                />
             </div>
         </main>
     )

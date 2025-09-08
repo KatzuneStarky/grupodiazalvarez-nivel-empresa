@@ -30,8 +30,6 @@ const MantenimientosCalendarioPage = () => {
         if (selectedGroup === "all") return equipos
         return equipos.filter((equipo) => equipo.grupoUnidad === selectedGroup)
     }, [equipos, selectedGroup])
-
-    console.log(filteredEquipos);
     
 
     const events = useMemo(() => {

@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import Icon from "@/components/global/icon"
 import { useRouter } from "next/navigation"
+import { parseFirebaseDate } from "@/utils/parse-timestamp-date"
 
 const DetailedOverviewCards = ({
     equipos
@@ -29,7 +30,7 @@ const DetailedOverviewCards = ({
     const outOfServiceTrucks = equipos.filter((truck) => truck.estado === EstadoEquipos.FUERA_DE_SERVICIO).length
 
     const getSafeMaintenanceDate = (truck: Equipo) => {
-        return truck.mantenimiento?.[0]?.fecha || null;
+        return parseFirebaseDate(truck.mantenimiento?.[0]?.fecha) || null;
     };
 
     const getSafeDocuments = (truck: Equipo) => {

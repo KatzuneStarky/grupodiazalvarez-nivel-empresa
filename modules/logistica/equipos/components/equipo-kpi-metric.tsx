@@ -9,6 +9,7 @@ import { formatNumber } from "@/utils/format-number"
 import { Badge } from "@/components/ui/badge"
 import { AlertTriangle, CheckCircle, TrendingDown, TrendingUp, Wrench } from "lucide-react"
 import { Progress } from "@/components/ui/progress"
+import { parseFirebaseDate } from "@/utils/parse-timestamp-date"
 
 interface KPIMetricsProps {
     fleetData: Equipo[]
@@ -20,7 +21,7 @@ const EquipoKpiMetrics = ({ fleetData }: KPIMetricsProps) => {
     const fleetAvailability = Math.round((operationalFleet / totalFleet) * 100)
 
     const overdueMaintenance = fleetData.filter((truck) => {
-        const lastMaintenance = truck.mantenimiento[0]?.fecha
+        const lastMaintenance = parseFirebaseDate(truck.mantenimiento[0]?.fecha)
         return lastMaintenance ? getMaintenanceUrgency(lastMaintenance) === "overdue" : true
     }).length
 
