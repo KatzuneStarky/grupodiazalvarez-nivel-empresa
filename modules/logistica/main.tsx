@@ -1,7 +1,7 @@
 "use client"
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Activity, DollarSign, Expand, Fuel, Gauge, Truck, Users } from "lucide-react"
+import { Activity, DollarSign, Fuel, Gauge, Truck, Users } from "lucide-react"
 import { useDashboardDataLogistica } from "./hooks/use-dashboard-logistica"
 import MainChartPerformance from "./components/main-chat-performance"
 import MainActions from "./components/main-actions"
@@ -9,6 +9,7 @@ import MetricCard from "./components/metric-card"
 import StatusCard from "./components/status-card"
 import MainCharts from "./components/main-charts"
 import { useYear } from "@/context/year-context"
+import { useRouter } from "next/navigation"
 import dynamic from "next/dynamic";
 
 const Map = dynamic(() => import('../root/components/coverage/map'), { ssr: false });
@@ -29,6 +30,7 @@ const MainDashboardLogistica = () => {
         totalM3Week,
         totalFleteSemana,
     } = useDashboardDataLogistica()
+    const router = useRouter()
 
     return (
         <div className="flex-1 space-y-6 p-6">

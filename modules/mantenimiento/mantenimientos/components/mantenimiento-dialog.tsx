@@ -84,7 +84,7 @@ const MantenimientoDialog = ({
                                                     <TableHead>Cantidad</TableHead>
                                                 </TableRow>
                                             </TableHeader>
-                                            <TableBody>
+                                            <TableBody key={selectedRecord.id}>
                                                 {selectedRecord.mantenimientoData.map((data) => (
                                                     <TableRow key={data.id}>
                                                         <TableCell>{data.descripcion}</TableCell>

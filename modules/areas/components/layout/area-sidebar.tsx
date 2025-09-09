@@ -31,8 +31,8 @@ const AreaSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
     const router = useRouter()
 
     useEffect(() => {
-        setSelectedArea(areas && areas[0])
-    }, [areas])
+        setSelectedArea(orderedAreas && orderedAreas[0])
+    }, [orderedAreas])
 
     return (
         <Sidebar collapsible="icon" {...props}>
@@ -49,8 +49,10 @@ const AreaSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
                                         <Building2 className="size-4" />
                                     </div>
                                     <div className="grid flex-1 text-left text-sm leading-tight">
-                                        <span className="truncate font-semibold capitalize">{selectedArea?.nombre}</span>
-                                        <span className="truncate text-xs">{selectedArea?.correoContacto}</span>
+                                        <span className="truncate font-semibold capitalize">
+                                            {area?.nombre}
+                                        </span>
+                                        <span className="truncate text-xs">{area?.correoContacto}</span>
                                     </div>
                                     <ChevronDown className="ml-auto" />
                                 </SidebarMenuButton>
@@ -65,7 +67,7 @@ const AreaSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
                                 {orderedAreas?.map((area) => (
                                     <DropdownMenuItem key={area.id} onClick={() => {
                                         setSelectedArea(area)
-                                        router.push(`/${empresa?.nombre}/${area.nombre}`)
+                                        router.replace(`/${empresa?.nombre}/${area.nombre}`)
                                         router.refresh()
                                     }} className="gap-2 p-2">
                                         <div className="flex size-6 items-center justify-center rounded-sm border">

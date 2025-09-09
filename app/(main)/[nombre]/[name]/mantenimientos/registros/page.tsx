@@ -1,28 +1,51 @@
 "use client"
 
-import { AlertTriangle, Calendar, CheckCircle, Clock, FileText, Gauge, User, Wrench } from "lucide-react"
+import { useMantenimientosFilters } from "@/modules/mantenimiento/mantenimientos/hooks/use-mantenimientos-filters"
+import { AlertTriangle, Calendar, CheckCircle, Clock, Edit, Eye, FileText, Gauge, Trash, User, Wrench, WrenchIcon } from "lucide-react"
 import MantenimientoDialog from "@/modules/mantenimiento/mantenimientos/components/mantenimiento-dialog"
+import MantenimientosFilters from "@/modules/mantenimiento/mantenimientos/components/filters"
 import { Mantenimiento } from "@/modules/logistica/bdd/equipos/types/mantenimiento"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { useEquipos } from "@/modules/logistica/bdd/equipos/hooks/use-equipos"
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { parseFirebaseDate } from "@/utils/parse-timestamp-date"
+import { useDirectLink } from "@/hooks/use-direct-link"
+import { Separator } from "@/components/ui/separator"
+import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { useMemo, useState } from "react"
+import { useRouter } from "next/navigation"
+import Icon from "@/components/global/icon"
 import { es } from "date-fns/locale"
 import { format } from "date-fns"
 
 const MantenimientosRegistrosPage = () => {
-    const [selectedRecord, setSelectedRecord] = useState<Mantenimiento | null>(null)
-    const [isDialogOpen, setIsDialogOpen] = useState(false)
-    const { equipos } = useEquipos()
+    const { directLink } = useDirectLink("/mantenimientos/nuevo")
+    const {
+        filterMantenimientos,
+        handleTableCellClick,
+        numEconomicoEquipo,
+        setIsDialogOpen,
+        selectedRecord,
+        isDialogOpen,
+        setEquipoId,
+        equipoId,
+        dateRange,
+        setDateRange,
+        equipos,
+        kmRange,
+        mecanico,
+        searchTerm,
+        selectedKmRange,
+        setMecanico,
+        setSearchTerm,
+        setSelectedKmRange,
+        setTipoServicioFilter,
+        tipoServicioFilter,
+        uniqueMecanicos,
+        setSelectedRecord
+    } = useMantenimientosFilters()
+    const router = useRouter()
 
-    const mantenimientos = useMemo(() => {
-        return equipos.flatMap((equipo) => {
-            return equipo.mantenimiento
-        }).sort((a, b) => {
-            return new Date(b.fecha).getTime() - new Date(a.fecha).getTime()
-        })
-    }, [equipos])
+    if (equipoId === "") return setEquipoId("all")
+
 
     const getUrgencyBadge = (fechaProximo?: Date) => {
         if (!fechaProximo) return null
@@ -91,16 +114,48 @@ const MantenimientosRegistrosPage = () => {
     return (
         <main className="container mx-auto py-8 px-4">
             <div className="space-y-6">
-                <div className="text-center space-y-2">
-                    <h1 className="text-3xl font-bold text-balance">Registros de Mantenimiento</h1>
-                    <p className="text-muted-foreground">
-                        Gestiona y visualiza todos los registros de mantenimiento de tus equipos
-                    </p>
+                <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                        <div className="p-2 bg-primary/10 rounded-lg">
+                            <Icon iconName='vaadin:tools' className="h-12 w-12 text-primary" />
+                        </div>
+                        <div>
+                            <h1 className="text-3xl font-bold">Registros de mantenimientos</h1>
+                            <p className="text-muted-foreground">
+                                Gestione la informacion de los mantenimientos de cada equipo registrado en la plataforma.
+                            </p>
+                        </div>
+                    </div>
+
+                    <Button className="bg-primary text-primary-foreground hover:bg-primary/90" onClick={() => router.push(directLink)}>
+                        <WrenchIcon className="h-4 w-4 mr-2" />
+                        Nuevo Mantenimiento
+                    </Button>
                 </div>
+
+                <Separator className="my-4" />
+                <MantenimientosFilters
+                    equipoId={equipoId}
+                    dateRange={dateRange}
+                    setDateRange={setDateRange}
+                    tipoServicioFilter={tipoServicioFilter}
+                    setTipoServicioFilter={setTipoServicioFilter}
+                    equipos={equipos}
+                    kmRange={kmRange}
+                    mecanico={mecanico}
+                    searchTerm={searchTerm}
+                    selectedKmRange={selectedKmRange}
+                    setEquipoId={setEquipoId}
+                    setMecanico={setMecanico}
+                    setSearchTerm={setSearchTerm}
+                    setSelectedKmRange={setSelectedKmRange}
+                    uniqueMecanicos={uniqueMecanicos || []}
+                />
+                <Separator className="my-8" />
 
                 <div className="space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {mantenimientos.map((mantenimiento) => (
+                        {filterMantenimientos.map((mantenimiento) => (
                             <Card
                                 key={mantenimiento.id}
                                 className="cursor-pointer hover:shadow-lg transition-all duration-200 hover:scale-[1.02] relative overflow-hidden"
@@ -170,6 +225,23 @@ const MantenimientosRegistrosPage = () => {
                                         </div>
                                     )}
                                 </CardContent>
+                                <CardFooter>
+                                    <div className="flex items-center justify-end w-full">
+                                        <div className="grid grid-cols-3 gap-2">
+                                            <Button variant={"outline"} className="w-8 h-8">
+                                                <Eye className="w-4 h-4" />
+                                            </Button>
+
+                                            <Button variant={"outline"} className="w-8 h-8">
+                                                <Edit className="w-4 h-4" />
+                                            </Button>
+
+                                            <Button variant={"outline"} className="w-8 h-8">
+                                                <Trash className="w-4 h-4" />
+                                            </Button>
+                                        </div>
+                                    </div>
+                                </CardFooter>
 
                                 {mantenimiento.fechaProximo &&
                                     (() => {
