@@ -1,26 +1,28 @@
 "use client"
 
 import { EstacionDeServicioSchema, EstacionDeServicioType } from "@/modules/logistica/estaciones/schemas/estacion-servicio.schema"
-import { MunicipiosEstado } from "@/types/municipios-estado"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { EstadoPais } from "@/types/estado-pais"
-import { useRouter } from "next/navigation"
-import { useFieldArray, useForm } from "react-hook-form"
-import { useEffect, useState } from "react"
-import { getEstadosApi } from "@/utils/get-estados-api"
-import { getMunicipiosEstados } from "@/utils/get-municipios-estados"
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
-import { Separator } from "@/components/ui/separator"
-import { IconGasStation } from "@tabler/icons-react"
-import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Switch } from "@/components/ui/switch"
+import { writeEstacion } from "@/modules/logistica/estaciones/actions/write"
+import { getMunicipiosEstados } from "@/utils/get-municipios-estados"
 import { DatePickerForm } from "@/components/custom/date-picker-form"
-import { Textarea } from "@/components/ui/textarea"
-import Icon from "@/components/global/icon"
-import { Button } from "@/components/ui/button"
+import { MunicipiosEstado } from "@/types/municipios-estado"
 import { CheckCircle2, Plus, Trash2 } from "lucide-react"
+import { useFieldArray, useForm } from "react-hook-form"
+import { getEstadosApi } from "@/utils/get-estados-api"
+import { Separator } from "@/components/ui/separator"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { IconGasStation } from "@tabler/icons-react"
+import { Textarea } from "@/components/ui/textarea"
+import { EstadoPais } from "@/types/estado-pais"
+import { Button } from "@/components/ui/button"
+import { Switch } from "@/components/ui/switch"
+import { Input } from "@/components/ui/input"
+import { useRouter } from "next/navigation"
+import { useEffect, useState } from "react"
+import Icon from "@/components/global/icon"
+import { toast } from "sonner"
 
 const NuevaEstacionPage = () => {
     const [selectedEstadoId, setSelectedEstadoId] = useState<string>("1")
@@ -57,14 +59,75 @@ const NuevaEstacionPage = () => {
             rfc: "",
             tanques: [],
             ubicacion: {
-                lat: "0",
-                lng: "0"
+                lat: 0,
+                lng: 0
             }
         }
     })
 
     const onSubmit = async (data: EstacionDeServicioType) => {
+        try {
+            setIsSubmitting(true)
+            toast.promise(writeEstacion({
+                activo: data.activo,
+                contacto: {
+                    email: "test@test.com",
+                    responsable: "",
+                    telefono: ""
+                },
+                direccion: {
+                    calle: data.direccion.calle,
+                    colonia: data.direccion.colonia,
+                    estado: data.direccion.estado,
+                    pais: data.direccion.pais,
+                    ciudad: data.direccion.ciudad,
+                    codigoPostal: data.direccion.codigoPostal,
+                    numeroExterior: data.direccion.numeroExterior,
+                    numeroInterior: "",
+                },
+                fechaRegistro: data.fechaRegistro,
+                nombre: data.nombre,
+                tanques: data.tanques.map(tanque => ({
+                    capacidadActual: tanque.capacidadActual,
+                    capacidadTotal: tanque.capacidadTotal,
+                    tipoCombustible: tanque.tipoCombustible,
+                    fechaUltimaRecarga: tanque.fechaUltimaRecarga,
+                    numeroTanque: tanque.numeroTanque
+                })),
+                horarios: data.horarios,
+                numeroPermisoCRE: data.numeroPermisoCRE,
+                productos: ["Magna"],
+                razonSocial: data.razonSocial,
+                rfc: data.rfc,
+                ubicacion: {
+                    lat: data.ubicacion?.lat || 0,
+                    lng: data.ubicacion?.lng || 0
+                }
+            }), {
+                loading: "Creando registro de estacion de servicio, favor de esperar...",
+                success: (result) => {
+                    if (result.success) {
+                        return result.message;
+                    } else {
+                        throw new Error(result.message);
+                    }
+                },
+                error: (error) => {
+                    return error.message || "Error al registrar la estacion de servicio.";
+                },
+                finally: () => {
+                    setIsSubmitting(false)
+                }
+            })
 
+            form.reset()
+            //router.back()
+        } catch (error) {
+            console.log(error)
+            toast.error("Error al guardar la estación")
+        } finally {
+            setIsSubmitting(false)
+        }
     }
 
     const { append, fields, remove } = useFieldArray({
@@ -96,7 +159,9 @@ const NuevaEstacionPage = () => {
     return (
         <div className="container mx-auto px-4 py-8">
             <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="max-w-7xl mx-auto">
+                <form onSubmit={form.handleSubmit(onSubmit, (errors) => {
+                    console.log("❌ Errores de validación", errors);
+                })}>
                     <div className="flex items-center justify-between w-full">
                         <div className="flex items-center gap-3">
                             <div className="p-2 bg-primary/10 rounded-lg">
@@ -285,6 +350,37 @@ const NuevaEstacionPage = () => {
                                         </CardTitle>
                                     </CardHeader>
                                     <CardContent className="grid grid-cols-5 gap-4">
+                                        <FormField
+                                            control={form.control}
+                                            name={`tanques.${index}.tipoCombustible`}
+                                            render={({ field }) => (
+                                                <FormItem className='w-full'>
+                                                    <FormLabel>Tipo de combustible</FormLabel>
+                                                    <Select
+                                                        onValueChange={(value) => { field.onChange(value) }}
+                                                        defaultValue={field.value}>
+                                                        <FormControl>
+                                                            <SelectTrigger className="w-full">
+                                                                <SelectValue placeholder={"Selecciona un tipo de combustible"} />
+                                                            </SelectTrigger>
+                                                        </FormControl>
+                                                        <SelectContent className="z-[999]">
+                                                            <SelectItem value="Magna">
+                                                                Magna
+                                                            </SelectItem>
+                                                            <SelectItem value="Premium">
+                                                                Premium
+                                                            </SelectItem>
+                                                            <SelectItem value="Diesel">
+                                                                Diesel
+                                                            </SelectItem>
+                                                        </SelectContent>
+                                                    </Select>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+
                                         <FormField
                                             control={form.control}
                                             name={`tanques.${index}.capacidadActual`}
@@ -488,7 +584,7 @@ const NuevaEstacionPage = () => {
                         <div className="grid grid-cols-2 gap-4">
                             <FormField
                                 control={form.control}
-                                name="direccion.numeroInterior"
+                                name="direccion.numeroExterior"
                                 render={({ field }) => (
                                     <FormItem className="w-full">
                                         <FormLabel className="text-sm font-medium">
@@ -559,6 +655,7 @@ const NuevaEstacionPage = () => {
                                         <FormControl>
                                             <Input
                                                 className="h-10"
+                                                type="number"
                                                 disabled
                                                 {...field}
                                             />
@@ -579,6 +676,7 @@ const NuevaEstacionPage = () => {
                                         <FormControl>
                                             <Input
                                                 className="h-10"
+                                                type="number"
                                                 disabled
                                                 {...field}
                                             />

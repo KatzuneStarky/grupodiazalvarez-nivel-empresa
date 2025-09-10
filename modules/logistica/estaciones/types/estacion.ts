@@ -26,7 +26,7 @@ export interface EstacionServicio {
   };
   numeroPermisoCRE?: string;
   horarios?: string;
-  productos?: string[];
+  productos?: ("Magna" | "Premium" | "Diesel")[];
   tanques: TanqueCombustible[];
   activo: boolean;
   fechaRegistro: Date;

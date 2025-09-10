@@ -24,17 +24,17 @@ export const EstacionDeServicioSchema = z.object({
         pais: z.string(),
     }),
     ubicacion: z.object({
-        lat: z.string(),
-        lng: z.string()
-    }),
+        lat: z.coerce.number(),
+        lng: z.coerce.number()
+    }).optional(),
     contacto: z.object({
-        telefono: z.string().min(10).max(16),
-        email: z.string().email(),
+        telefono: z.string(),
+        email: z.string(),
         responsable: z.string(),
     }),
     numeroPermisoCRE: z.string(),
     horarios: z.string(),
-    productos: z.array(z.string()),
+    productos: z.enum(["Magna", "Premium", "Diesel"]).array(),
     tanques: z.array(TanqueCombustibleSchema),
     activo: z.boolean(),
     fechaRegistro: z.date(),

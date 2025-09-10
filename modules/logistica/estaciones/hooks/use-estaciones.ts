@@ -9,7 +9,7 @@ export const useEstaciones = () => {
     const [error, setError] = useState<Error | undefined>()
 
     useEffect(() => {
-        const estacionesRef = collection(db, "estaciones");
+        const estacionesRef = collection(db, "estacionServicio");
 
         const unsubscribe = onSnapshot(estacionesRef, (querySnapshot) => {
             const estacionesData: EstacionServicio[] = [];
