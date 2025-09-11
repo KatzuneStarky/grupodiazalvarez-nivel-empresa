@@ -166,7 +166,6 @@ const MantenimientosRegistrosPage = () => {
                                         <CardTitle className="text-lg font-semibold text-balance">
                                             {mantenimiento.tipoServicio || "Mantenimiento"}
                                         </CardTitle>
-                                        {/** {getUrgencyBadge(parseFirebaseDate(mantenimiento.fechaProximo))} */}
                                     </div>
                                 </CardHeader>
                                 <CardContent className="space-y-4">

@@ -1,8 +1,9 @@
 "use client"
 
 import { Building, Calendar, ChevronLeft, ChevronRight, Clock, Droplets, FileText, Fuel, Mail, MapPin, Phone, Plus, User } from "lucide-react"
+import { useEstacionesFilters } from "@/modules/logistica/estaciones/hooks/use-estaciones-filters"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { useEstaciones } from "@/modules/logistica/estaciones/hooks/use-estaciones"
+import EstacionesFilters from "@/modules/logistica/estaciones/components/filtros"
 import { EstacionServicio } from "@/modules/logistica/estaciones/types/estacion"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { parseFirebaseDate } from "@/utils/parse-timestamp-date"
@@ -17,22 +18,30 @@ import { motion } from "framer-motion"
 import { es } from "date-fns/locale"
 import { format } from "date-fns"
 import { useState } from "react"
-import EstacionesFilters from "@/modules/logistica/estaciones/components/filtros"
 
 const RegistrosEstacionesPage = () => {
     const [currentFuelSlides, setCurrentFuelSlides] = useState<Record<string, number>>({})
     const [selectedStation, setSelectedStation] = useState<EstacionServicio | null>(null)
 
     const { directLink } = useDirectLink("/estaciones/nuevo")
-    const { estaciones } = useEstaciones()
     const router = useRouter()
-
-    const getMainContact = (station: EstacionServicio) => {
-        if (station.contacto.responsable) return station.contacto.responsable
-        if (station.contacto.telefono) return station.contacto.telefono
-        if (station.contacto.email) return station.contacto.email
-        return "Sin contacto"
-    }
+    const {
+        searchTerm,
+        setSearchTerm,
+        dateRange,
+        setDateRange,
+        getMainContact,
+        getStationFuelByType,
+        filteredEstaciones,
+        selectedTanquesRange,
+        setSelectedTanquesRange,
+        tanquesRange,
+        filterCombustible,
+        setFilterCombustible,
+        capacidadRange,
+        setSelectCapacidadRange,
+        selectCapacidadRage
+    } = useEstacionesFilters()
 
     const getFuelTypeColor = (tipo: string) => {
         switch (tipo.toLowerCase()) {
@@ -51,32 +60,6 @@ const RegistrosEstacionesPage = () => {
         if (percentage >= 70) return "bg-green-500"
         if (percentage >= 40) return "bg-yellow-500"
         return "bg-red-500"
-    }
-
-    const getStationFuelByType = (station: EstacionServicio) => {
-        const fuelTypes = new Map<
-            string,
-            { tanks: typeof station.tanques; totalCapacity: number; currentCapacity: number }
-        >()
-
-        station.tanques.forEach((tanque) => {
-            const tipo = tanque.tipoCombustible
-            if (!fuelTypes.has(tipo)) {
-                fuelTypes.set(tipo, { tanks: [], totalCapacity: 0, currentCapacity: 0 })
-            }
-            const fuelData = fuelTypes.get(tipo)!
-            fuelData.tanks.push(tanque)
-            fuelData.totalCapacity += tanque.capacidadTotal
-            fuelData.currentCapacity += tanque.capacidadActual
-        })
-
-        return Array.from(fuelTypes.entries()).map(([tipo, data]) => ({
-            tipo,
-            tanks: data.tanks,
-            totalCapacity: data.totalCapacity,
-            currentCapacity: data.currentCapacity,
-            percentage: data.totalCapacity > 0 ? (data.currentCapacity / data.totalCapacity) * 100 : 0,
-        }))
     }
 
     const nextFuelSlide = (stationId: string, maxSlides: number) => {
@@ -117,10 +100,23 @@ const RegistrosEstacionesPage = () => {
                 </Button>
             </div>
             <Separator className="mt-4 mb-8" />
-            <EstacionesFilters />
-
+            <EstacionesFilters
+                searchTerm={searchTerm}
+                setSearchTerm={setSearchTerm}
+                setDateRange={setDateRange}
+                dateRange={dateRange}
+                selectedTanquesRange={selectedTanquesRange}
+                setSelectedTanquesRange={setSelectedTanquesRange}
+                tanquesRange={tanquesRange}
+                filterCombustible={filterCombustible}
+                setFilterCombustible={setFilterCombustible}
+                capacidadRange={capacidadRange}
+                setSelectCapacidadRange={setSelectCapacidadRange}
+                selectCapacidadRage={selectCapacidadRage}
+            />
+            <Separator className="my-8" />
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {estaciones.map((estacion) => {
+                {filteredEstaciones.map((estacion) => {
                     const fuelByType = getStationFuelByType(estacion)
                     const currentSlideIndex = currentFuelSlides[estacion.id] || 0
                     const currentFuelSlide = fuelByType[currentSlideIndex]
@@ -436,7 +432,7 @@ const RegistrosEstacionesPage = () => {
                                                             {tanque.fechaUltimaRecarga && (
                                                                 <div className="flex items-center gap-2 text-xs text-muted-foreground pt-2 border-t">
                                                                     <Calendar className="h-3 w-3" />
-                                                                    <span>Última recarga: {format(parseFirebaseDate(tanque.fechaUltimaRecarga), "PPP", { locale: es})}</span>
+                                                                    <span>Última recarga: {format(parseFirebaseDate(tanque.fechaUltimaRecarga), "PPP", { locale: es })}</span>
                                                                 </div>
                                                             )}
                                                         </div>
