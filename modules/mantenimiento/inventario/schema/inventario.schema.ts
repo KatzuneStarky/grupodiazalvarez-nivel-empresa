@@ -19,7 +19,6 @@ export const ProductoInventarioSchema = z.object({
     minimo: z.coerce.number(),
     maximo: z.coerce.number(),
     notas: z.string(),
-    inventarioId: z.string(),
     fechaUltimaEntrada: z.date(),
     fechaUltimaSalida: z.date(),
 })
@@ -30,3 +29,6 @@ export const InventarioSchema = z.object({
     productos: z.array(ProductoInventarioSchema),
     fechaActualizacion: z.date(),
 })
+
+export type ProductoInventarioSchemaType = z.infer<typeof ProductoInventarioSchema>
+export type InventarioSchemaType = z.infer<typeof InventarioSchema>

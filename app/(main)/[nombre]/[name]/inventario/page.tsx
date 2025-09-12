@@ -1,33 +1,28 @@
 "use client"
 
-import { useInventarioTaller } from "@/modules/mantenimiento/inventario/hooks/use-inventario-taller"
+import { useInventarioFilters } from "@/modules/mantenimiento/inventario/hooks/use-inventario-filters"
+import InventoryCard from "@/modules/mantenimiento/inventario/components/inventory-card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Filter, Package, Plus, Search } from "lucide-react"
 import { useDirectLink } from "@/hooks/use-direct-link"
 import { Separator } from "@/components/ui/separator"
 import { Button } from "@/components/ui/button"
-import { Filter, Package, Plus, Search } from "lucide-react"
-import { useRouter } from "next/navigation"
-import { useState } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
+import { useRouter } from "next/navigation"
 
 const InventarioPage = () => {
-    const [searchTerm, setSearchTerm] = useState("")
-
-    const { inventarioTaller, loading, error } = useInventarioTaller()
     const { directLink } = useDirectLink("/inventario/nuevo")
     const router = useRouter()
-
-    const filteredInventories = inventarioTaller.filter((inventory) => inventory.nombre.toLowerCase().includes(searchTerm.toLowerCase()))
-    const totalInventories = inventarioTaller.length
-    const totalProducts = inventarioTaller.reduce((sum, inv) => sum + inv.productos.length, 0)
-    const totalLowStock = inventarioTaller.reduce(
-        (sum, inv) => sum + inv.productos.filter((p) => p.minimo && p.cantidad <= p.minimo).length,
-        0,
-    )
-    const totalOutOfStock = inventarioTaller.reduce(
-        (sum, inv) => sum + inv.productos.filter((p) => p.cantidad === 0).length,
-        0,
-    )
+    const {
+        searchTerm,
+        setSearchTerm,
+        filteredInventories,
+        totalInventories,
+        totalProducts,
+        totalLowStock,
+        totalOutOfStock,
+        getInvenroyCardData
+    } = useInventarioFilters()
 
     return (
         <div className="container mx-auto py-8 px-4">
@@ -130,6 +125,34 @@ const InventarioPage = () => {
                 </CardHeader>
             </Card>
             <Separator className="my-4" />
+
+            {filteredInventories.length === 0 ? (
+                <Card>
+                    <CardContent className="p-8 text-center">
+                        <Package className="h-12 w-12 text-muted mx-auto mb-4" />
+                        <h3 className="text-lg font-semibold mb-2">No se encontraron inventarios</h3>
+                        <p className="text-muted dark:text-gray-400">Intenta ajustar la búsqueda.</p>
+                    </CardContent>
+                </Card>
+            ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {filteredInventories.map((inventory) => {
+                        const data = getInvenroyCardData(inventory)
+                        return (
+                            <InventoryCard
+                                key={inventory.id}
+                                inventory={inventory}
+                                inStockCount={data.inStockCount}
+                                lowStockCount={data.lowStockCount}
+                                outOfStockCount={data.outOfStockCount}
+                                totalLowStock={totalLowStock}
+                                totalOutOfStock={totalOutOfStock}
+                                totalProducts={data.totalProducts}
+                            />
+                        )
+                    })}
+                </div>
+            )}
         </div>
     )
 }

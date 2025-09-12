@@ -54,5 +54,6 @@ export const useCatalogosSAT = () => {
         return () => controller.abort();
     }, [query]);
 
+
     return { unidades, productos, query, setQuery, error, loading }
 }

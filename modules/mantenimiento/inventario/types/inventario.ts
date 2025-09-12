@@ -5,5 +5,5 @@ export interface Inventario {
   nombre: string;                
   ubicacion?: string;             
   productos: ProductoInventario[];
-  fechaActualizacion: Date;      
+  fechaActualizacion: Date;   
 }
