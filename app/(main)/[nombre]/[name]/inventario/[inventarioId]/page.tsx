@@ -1,13 +1,13 @@
 "use client"
 
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import ProductCard from "@/modules/mantenimiento/inventario/components/product-card";
 import { useInventarioTallerById } from "@/modules/mantenimiento/inventario/hooks/use-inventario-taller-by-id";
 import { ProductoInventario } from "@/modules/mantenimiento/inventario/types/producto-inventario";
 import { AlertTriangle, CheckCircle, Package } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { use, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 
 const InventarioIdPage = ({ params }: { params: Promise<{ inventarioId: string }> }) => {
     const { inventarioId } = use(params);

@@ -15,9 +15,9 @@ import { useAuth } from "@/context/auth-context"
 import { Button } from "@/components/ui/button"
 import { RolUsuario } from "@/enum/user-roles"
 import Icon from "@/components/global/icon"
-import { Area } from "../../types/areas"
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
+import { Area } from "../../types/areas"
 
 const AreaSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
     const { userBdd, logout } = useAuth()
@@ -179,7 +179,7 @@ const AreaSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
                                     </div>
                                 </DropdownMenuLabel>
                                 <DropdownMenuSeparator />
-                                <DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => router.push(`/usuario/${userBdd?.nombre}`)}>
                                     <UserCircle className="mr-2 h-4 w-4" />
                                     Perfil
                                 </DropdownMenuItem>
