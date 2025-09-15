@@ -3,7 +3,7 @@
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Calendar, Filter, Mail, MoreHorizontal, Phone, Search } from "lucide-react"
+import { Calendar, Download, Filter, Mail, MoreHorizontal, Phone, Search } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
@@ -15,6 +15,8 @@ import { SystemUser } from "@/types/usuario"
 import { es } from "date-fns/locale"
 import { format } from "date-fns"
 import { useState } from "react"
+import { toast } from "sonner"
+import { exportUsers } from "@/functions/excel-export/user/export/export-users"
 
 interface UserManagementProps {
     areaId: string
@@ -70,6 +72,21 @@ const UserManagement = ({
         )
     }
 
+    const exportDataUsuarios = (usuarios: SystemUser[]) => {
+        try {
+            toast.promise(exportUsers(usuarios), {
+                loading: "Exportando usuarios...",
+                success: "Usuarios exportados con éxito",
+                error: "Error al exportar usuarios"
+            })
+        } catch (error) {
+            console.log(error);
+            toast.error("Error al exportar usuarios t", {
+                description: `${error}`
+            })
+        }
+    }
+
     return (
         <Card className="shadow-sm">
             <CardHeader className="border-b bg-muted/20">
@@ -78,10 +95,18 @@ const UserManagement = ({
                         <CardTitle className="text-xl">Gestión de usuarios</CardTitle>
                         <p className="text-sm text-muted-foreground mt-1">Administra usuarios y sus roles en esta área</p>
                     </div>
-                    <Button variant="outline">
-                        <Mail className="h-4 w-4 mr-2" />
-                        Invitar Usuario
-                    </Button>
+
+                    <div className="flex items-center space-x-2">
+                        <Button variant="outline" onClick={() => exportDataUsuarios(users)}>
+                            <Download className="h-4 w-4 mr-2" />
+                            Exportar usuarios
+                        </Button>
+
+                        <Button variant="outline">
+                            <Mail className="h-4 w-4 mr-2" />
+                            Invitar Usuario
+                        </Button>
+                    </div>
                 </div>
             </CardHeader>
             <CardContent className="p-6">
