@@ -3,12 +3,15 @@
 import { Calendar, ChevronDown, ChevronUp, Download, Edit, Eye, Filter, Fuel, Grid3X3, MapPin, MoreHorizontal, Search, Table, Trash2, Truck, Upload, User } from "lucide-react"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Table as TableComponent, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { exportReporteViajes } from "@/functions/excel-export/reportes-viajes/export/export-reporte-viajes"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import UploadViajesDialog from "@/modules/logistica/reportes-viajes/components/upload-viajes-dialog"
 import { useReporteViajes } from "@/modules/logistica/reportes-viajes/hooks/use-reporte-viajes"
 import { ReporteViajes } from "@/modules/logistica/reportes-viajes/types/reporte-viajes"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { parseFirebaseDate } from "@/utils/parse-timestamp-date"
 import { formatNumber } from "@/utils/format-number"
+import { useArea } from "@/context/area-context"
 import { Button } from "@/components/ui/button"
 import { Timestamp } from "firebase/firestore"
 import { Badge } from "@/components/ui/badge"
@@ -16,7 +19,7 @@ import { Input } from "@/components/ui/input"
 import { useMemo, useState } from "react"
 import { es } from "date-fns/locale"
 import { format } from "date-fns"
-import { parseFirebaseDate } from "@/utils/parse-timestamp-date"
+import { toast } from "sonner"
 
 export type SortField = "Fecha" | "Cliente" | "LitrosA20" | "Flete"
 export type SortDirection = "asc" | "desc"
@@ -36,6 +39,7 @@ const ReporteViajesPage = () => {
     const [searchTerm, setSearchTerm] = useState<string>("")
 
     const { reporteViajes } = useReporteViajes()
+    const { area } = useArea()
 
     const uniqueMonths
         = useMemo(() => [...new Set(reporteViajes.map((report) => report.Mes))].sort(), [reporteViajes])
@@ -137,6 +141,21 @@ const ReporteViajesPage = () => {
         return groups
     }, [filteredAndSortedData, reporteViajes])
 
+    const exportReportesViajesAction = async(reportes: ReporteViajes[]) => {
+        try {
+            toast.promise(exportReporteViajes(reportes, area?.nombre || ""), {
+                loading: "Exportando reportes de viajes...",
+                success: {
+                    message: "Reportes de viajes exportados correctamente",
+                    description: `Archivo descargado como: reporte_viajes_${area?.nombre}_${new Date().toLocaleDateString()}.xlsx`
+                },
+                error: "Error al exportar reportes de viajes"
+            })
+        } catch (error) {
+            
+        }
+    }
+
     return (
         <div className="space-y-6 p-6 container mx-auto">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -155,7 +174,7 @@ const ReporteViajesPage = () => {
                         Tarjetas
                     </Button>
                     <UploadViajesDialog />
-                    <Button variant="outline" size="sm">
+                    <Button variant="outline" size="sm" onClick={() => exportReportesViajesAction(reporteViajes)}>
                         <Download className="h-4 w-4 mr-2" />
                         Exportar CSV
                     </Button>

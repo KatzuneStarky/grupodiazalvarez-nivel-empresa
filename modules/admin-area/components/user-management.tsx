@@ -4,6 +4,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Calendar, Download, Filter, Mail, MoreHorizontal, Phone, Search } from "lucide-react"
+import { exportUsers } from "@/functions/excel-export/user/export/export-users"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
@@ -16,7 +17,7 @@ import { es } from "date-fns/locale"
 import { format } from "date-fns"
 import { useState } from "react"
 import { toast } from "sonner"
-import { exportUsers } from "@/functions/excel-export/user/export/export-users"
+import { useArea } from "@/context/area-context"
 
 interface UserManagementProps {
     areaId: string
@@ -32,8 +33,10 @@ const UserManagement = ({
     loading
 }: UserManagementProps) => {
     const [searchTerm, setSearchTerm] = useState<string>("")
-    const [roleFilter, setRoleFilter] = useState("all")
     const [statusFilter, setStatusFilter] = useState("all")
+    const [roleFilter, setRoleFilter] = useState("all")
+
+    const { area } = useArea()
 
     const getInitials = (name: string) => {
         return name
@@ -74,7 +77,7 @@ const UserManagement = ({
 
     const exportDataUsuarios = (usuarios: SystemUser[]) => {
         try {
-            toast.promise(exportUsers(usuarios), {
+            toast.promise(exportUsers(usuarios, area?.nombre || ""), {
                 loading: "Exportando usuarios...",
                 success: "Usuarios exportados con éxito",
                 error: "Error al exportar usuarios"
