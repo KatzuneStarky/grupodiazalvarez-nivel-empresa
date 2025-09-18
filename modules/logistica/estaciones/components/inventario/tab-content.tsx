@@ -5,7 +5,9 @@ import { InventarioEstaciones } from "../../types/inventarios"
 import { formatNumber } from "@/utils/format-number"
 import Icon from "@/components/global/icon"
 import { Ref, useState } from "react"
+import Cuadricula from "./cuadricula"
 import { cn } from "@/lib/utils"
+import InventarioModal from "./inventario-modal"
 
 interface TabContentProps {
     estacionesOrdenadas: InventarioEstaciones[],
@@ -47,7 +49,7 @@ const InventoryTabContent = ({
                     </TabsTrigger>
                 </TabsList>
                 <TabsContent value="cuadricula">
-                    {/** <Cuadricula estacionesOrdenadas={estacionesOrdenadas} componentRef={componentRef} /> */}
+                    <Cuadricula estacionesOrdenadas={estacionesOrdenadas} componentRef={componentRef} />
                 </TabsContent>
                 <TabsContent value="tabla">
                     <div className="container mx-auto px-4 py-8 overflow-x-auto">
@@ -140,6 +142,13 @@ const InventoryTabContent = ({
                      */}
                 </TabsContent>
             </Tabs>
+
+            <InventarioModal
+                isOpen={isModalOpen}
+                onClose={closeModal}
+                data={selectedItem}
+                selectedDInventariado={selectedDInventariado}
+            />
         </div>
     )
 }

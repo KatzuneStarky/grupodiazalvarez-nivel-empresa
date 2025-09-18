@@ -1,16 +1,17 @@
 "use client"
 
+import InventariosEstacionesForm from '@/modules/logistica/estaciones/components/inventario/inventarios-estaciones-form';
 import { useInventarioEstaciones } from '@/modules/logistica/estaciones/hooks/use-inventarios-estaciones';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import InventoryTabContent from '@/modules/logistica/estaciones/components/inventario/tab-content';
 import { ORDEN_ESTACIONES } from '@/modules/logistica/estaciones/constants/estaciones-ordenadas';
 import { InventarioEstaciones } from '@/modules/logistica/estaciones/types/inventarios';
+import { Separator } from '@/components/ui/separator';
 import { useReactToPrint } from 'react-to-print';
 import { Button } from '@/components/ui/button';
 import Icon from '@/components/global/icon';
-import { toast } from 'sonner';
 import { useMemo, useRef } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Separator } from '@/components/ui/separator';
-import InventoryTabContent from '@/modules/logistica/estaciones/components/inventario/tab-content';
+import { toast } from 'sonner';
 
 const InventariosEstacionesPage = () => {
     const componentRef = useRef<HTMLDivElement>(null);
@@ -69,13 +70,13 @@ const InventariosEstacionesPage = () => {
                                 Crear inventario
                             </Button>
                         </DialogTrigger>
-                        <DialogContent>
+                        <DialogContent className='max-w-2xl'>
                             <DialogHeader>
                                 <DialogTitle>
                                     Crear un nuevo inventario de estacion
                                 </DialogTitle>
                             </DialogHeader>
-                            {/** <InventariosEstacionesForm /> */}
+                            <InventariosEstacionesForm />
                         </DialogContent>
                     </Dialog>
                 </div>
