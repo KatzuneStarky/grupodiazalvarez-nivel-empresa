@@ -1,29 +1,48 @@
 "use client"
 
-import { Bar, BarChart, Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { ChartConfig, ChartContainer, ChartLegend, ChartLegendContent, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
+import { Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { BarChart3, PieChartIcon } from "lucide-react"
 import { EstacionServicio } from "../types/estacion"
 import React from "react"
 
+const fuelsConfig = {
+    Magna: { actual: "rgb(0,165,81)", restante: "rgb(50 227 135)" },
+    Premium: { actual: "rgb(213,43,30)", restante: "rgb(247 82 69)" },
+    Diesel: { actual: "rgb(55,55,53)", restante: "rgb(94 94 92)" },
+} as const;
+
+type FuelName = keyof typeof fuelsConfig;
+
+type FuelKeys =
+    | `${FuelName}_actual`
+    | `${FuelName}_restante`;
+
 type CapacityDataItem = {
     estacion: string;
-    Magna_actual?: number;
-    Magna_restante?: number;
-    Premium_actual?: number;
-    Premium_restante?: number;
-    Diesel_actual?: number;
-    Diesel_restante?: number;
-};
+} & {
+        [K in FuelKeys]: number;
+    };
 
-type FuelKeys = "Magna_actual" | "Magna_restante" | "Premium_actual" | "Premium_restante" | "Diesel_actual" | "Diesel_restante";
+const productConfig = {
+    Magna: { color: "rgb(0,165,81)" },
+    Premium: { color: "rgb(213,43,30)" },
+    Diesel: { color: "rgb(55,55,53)" },
+} as const;
+
+const fuelsConfig2 = {
+    Magna: { color: "rgb(0,165,81)" },
+    Premium: { color: "rgb(213,43,30)" },
+    Diesel: { color: "rgb(55,55,53)" },
+} as const;
+
+type ProductName = keyof typeof productConfig;
 
 const DashboardCharts = ({ estaciones }: { estaciones: EstacionServicio[] }) => {
-    const fuels = ["Magna", "Premium", "Diesel"] as const;
-
     const buildCapacityData = (estaciones: EstacionServicio[]): CapacityDataItem[] => {
         return estaciones.map((estacion) => {
-            const data: CapacityDataItem = {
+            const data = {
                 estacion: estacion.nombre,
                 Magna_actual: 0,
                 Magna_restante: 0,
@@ -31,21 +50,15 @@ const DashboardCharts = ({ estaciones }: { estaciones: EstacionServicio[] }) => 
                 Premium_restante: 0,
                 Diesel_actual: 0,
                 Diesel_restante: 0,
-            };
+            } satisfies CapacityDataItem;
 
-            fuels.forEach((fuel) => {
+            (Object.keys(fuelsConfig) as FuelName[]).forEach((fuel) => {
                 const tanquesFuel = estacion.tanques.filter(
                     (t) => t.tipoCombustible === fuel
                 );
 
-                const totalActual = tanquesFuel.reduce(
-                    (sum, t) => sum + t.capacidadActual,
-                    0
-                );
-                const totalCapacidad = tanquesFuel.reduce(
-                    (sum, t) => sum + t.capacidadTotal,
-                    0
-                );
+                const totalActual = tanquesFuel.reduce((sum, t) => sum + t.capacidadActual, 0);
+                const totalCapacidad = tanquesFuel.reduce((sum, t) => sum + t.capacidadTotal, 0);
 
                 if (totalCapacidad > 0) {
                     const keyActual = `${fuel}_actual` as FuelKeys;
@@ -60,40 +73,49 @@ const DashboardCharts = ({ estaciones }: { estaciones: EstacionServicio[] }) => 
         });
     };
 
-    const fuelColors: Record<string, { actual: string; restante: string }> = {
-        Magna: { actual: "#4CAF50", restante: "#A5D6A7" },
-        Premium: { actual: "#F44336", restante: "#EF9A9A" },
-        Diesel: { actual: "#2196F3", restante: "#90CAF9" },
+    const chartConfig: ChartConfig = Object.entries(fuelsConfig).reduce(
+        (acc, [fuel, colors]) => {
+            acc[`${fuel}_actual`] = {
+                label: `${fuel} (Actual)`,
+                color: colors.actual,
+            };
+            acc[`${fuel}_restante`] = {
+                label: `${fuel} (Restante)`,
+                color: colors.restante,
+            };
+            return acc;
+        },
+        {} as ChartConfig
+    );
+
+    const buildPieData = (estaciones: EstacionServicio[]) => {
+        // Inicializamos contadores en 0
+        const counts = { Magna: 0, Premium: 0, Diesel: 0 } as Record<FuelName, number>;
+
+        // Sumamos capacidadActual por tipo de combustible
+        estaciones.forEach((station) => {
+            station.tanques.forEach((tanque) => {
+                const fuel = tanque.tipoCombustible as FuelName;
+                if (fuel in counts) {
+                    counts[fuel] += tanque.capacidadActual;
+                }
+            });
+        });
+
+        const total = Object.values(counts).reduce((sum, v) => sum + v, 0);
+
+        return (Object.entries(counts) as [FuelName, number][]).map(([name, value]) => ({
+            name,
+            value,
+            percentage: total > 0 ? (value / total) * 100 : 0,
+            color: fuelsConfig[name].actual,
+        }));
     };
 
-    const productCounts = {
-        Magna: 0,
-        Premium: 0,
-        Diesel: 0,
-    }
-
-    estaciones.forEach((station) => {
-        station.productos?.forEach((product) => {
-            if (product in productCounts) {
-                productCounts[product as keyof typeof productCounts]++
-            }
-        })
-    })
-
-    const pieData = Object.entries(productCounts).map(([name, value]) => ({
-        name,
-        value,
-        percentage: estaciones.length > 0 ? (value / estaciones.length) * 100 : 0,
-    }))
-
-    const COLORS = {
-        Magna: "rgb(0,165,81)",
-        Premium: "rgb(213,43,30)",
-        Diesel: "rgb(55,55,53)",
-    }
-
     const capacityData = buildCapacityData(estaciones);
-    console.log(capacityData);
+    const pieData = buildPieData(estaciones);
+    console.log(pieData);
+
 
     return (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -106,55 +128,29 @@ const DashboardCharts = ({ estaciones }: { estaciones: EstacionServicio[] }) => 
                 </CardHeader>
                 <CardContent>
                     <div className="h-80">
-                        <ResponsiveContainer width="100%" height={400}>
-                            <BarChart data={capacityData} margin={{ bottom: 80 }}>
+                        <ChartContainer config={chartConfig}>
+                            <BarChart data={capacityData}>
+                                <CartesianGrid vertical={false} />
                                 <XAxis
                                     dataKey="estacion"
-                                    fontSize={12}
-                                    angle={-45}
-                                    textAnchor="end"
-                                    height={80}
+                                    tickLine={false}
+                                    tickMargin={10}
+                                    axisLine={false}
                                 />
-                                <YAxis
-                                    fontSize={12}
-                                    tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`}
-                                />
-                                <Tooltip />
-                                <Legend />
+                                <YAxis />
+                                <ChartTooltip content={<ChartTooltipContent className="w-52 h-fit py-4 px-2" />} />
+                                <ChartLegend content={<ChartLegendContent />} className="mt-4" />
 
-                                {fuels.map((fuel) => (
-                                    <React.Fragment key={fuel}>
-                                        {/* Capacidad actual */}
-                                        <Bar
-                                            dataKey={`${fuel}_actual`}
-                                            stackId={fuel} // 👈 cada combustible tiene su propio stack
-                                            name={`${fuel} (Actual)`}
-                                        >
-                                            {capacityData.map((_, idx) => (
-                                                <Cell
-                                                    key={`cell-${fuel}-actual-${idx}`}
-                                                    fill={fuelColors[fuel].actual}
-                                                />
-                                            ))}
-                                        </Bar>
+                                <Bar dataKey="Magna_actual" stackId="Magna" fill="var(--color-Magna_actual)" />
+                                <Bar dataKey="Magna_restante" stackId="Magna" fill="var(--color-Magna_restante)" />
 
-                                        {/* Capacidad restante */}
-                                        <Bar
-                                            dataKey={`${fuel}_restante`}
-                                            stackId={fuel} // 👈 se apila junto al actual del mismo combustible
-                                            name={`${fuel} (Disponible)`}
-                                        >
-                                            {capacityData.map((_, idx) => (
-                                                <Cell
-                                                    key={`cell-${fuel}-restante-${idx}`}
-                                                    fill={fuelColors[fuel].restante}
-                                                />
-                                            ))}
-                                        </Bar>
-                                    </React.Fragment>
-                                ))}
+                                <Bar dataKey="Premium_actual" stackId="Premium" fill="var(--color-Premium_actual)" />
+                                <Bar dataKey="Premium_restante" stackId="Premium" fill="var(--color-Premium_restante)" />
+
+                                <Bar dataKey="Diesel_actual" stackId="Diesel" fill="var(--color-Diesel_actual)" />
+                                <Bar dataKey="Diesel_restante" stackId="Diesel" fill="var(--color-Diesel_restante)" />
                             </BarChart>
-                        </ResponsiveContainer>
+                        </ChartContainer>
                     </div>
                 </CardContent>
             </Card>
@@ -180,29 +176,26 @@ const DashboardCharts = ({ estaciones }: { estaciones: EstacionServicio[] }) => 
                                     dataKey="value"
                                 >
                                     {pieData.map((entry, index) => (
-                                        <Cell key={`cell-${index}`} fill={COLORS[entry.name as keyof typeof COLORS]} />
+                                        <Cell key={`cell-${index}`} fill={entry.color} />
                                     ))}
                                 </Pie>
-                                <Tooltip
-                                    formatter={(value: number) => [`${value} estaciones`, "Cantidad"]}
-                                />
+                                <Tooltip formatter={(value: number) => [`${value} L`, "Capacidad actual total"]} />
                             </PieChart>
                         </ResponsiveContainer>
                     </div>
+                </CardContent>
+                <CardFooter>
                     <div className="flex justify-center gap-6 mt-4">
-                        {Object.entries(productCounts).map(([product, count]) => (
-                            <div key={product} className="flex items-center gap-2">
-                                <div
-                                    className="w-3 h-3 rounded-full"
-                                    style={{ backgroundColor: COLORS[product as keyof typeof COLORS] }}
-                                />
+                        {pieData.map(({ name, value, color }) => (
+                            <div key={name} className="flex items-center gap-2">
+                                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: color }} />
                                 <span className="text-sm text-muted-foreground">
-                                    {product}: {count}
+                                    {name}: {value}
                                 </span>
                             </div>
                         ))}
                     </div>
-                </CardContent>
+                </CardFooter>
             </Card>
         </div>
     )
