@@ -30,7 +30,6 @@ const RegistroEquiposPage = () => {
     const totalEquipos = equipos.length
     const activeEquipos = equipos.filter((e) => e.activo).length
     const inMaintenanceEquipos = equipos.filter((e) => e.estado === EstadoEquipos.EN_TALLER).length
-    //const totalAlerts = equipos.reduce((sum, e) => sum + (e.alertas?.filter((a) => !a.resuelta).length || 0), 0)
 
     return (
         <div className="container mx-auto px-4 py-8">
@@ -97,16 +96,6 @@ const RegistroEquiposPage = () => {
                         Filtros avanzados
                     </Button>
                 </div>
-
-                {!isLoading && (
-                    <div className="flex items-center justify-between text-sm text-gray-600 bg-gray-50 px-4 py-2 rounded-lg">
-                        <span>
-                            Mostrando {filteredEquipos.length} de {totalEquipos} vehículos
-                            {searchTerm && ` coincidentes con "${searchTerm}"`}
-                        </span>
-                        <span>Última actualización: {new Date().toLocaleTimeString()}</span>
-                    </div>
-                )}
 
                 <EquiposGrid
                     equipos={filteredEquipos}

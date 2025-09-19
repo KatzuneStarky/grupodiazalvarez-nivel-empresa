@@ -7,12 +7,11 @@ import { getMaintenanceUrgency } from "@/modules/logistica/utils/get-maintenance
 import EquipoKpiMetrics from "@/modules/logistica/equipos/components/equipo-kpi-metric"
 import { EstadoEquipos } from "@/modules/logistica/bdd/equipos/enum/estado-equipos"
 import { useEquipos } from "@/modules/logistica/bdd/equipos/hooks/use-equipos"
-import { Equipo } from "@/modules/logistica/bdd/equipos/types/equipos"
 import { Button } from "@/components/ui/button"
 import { useMemo, useState } from "react"
+import { Truck } from "lucide-react"
 
 const EquiposPage = () => {
-    const [selectedEquipment, setSelectedEquipment] = useState<Equipo | null>(null)
     const [statusFilter, setStatusFilter] = useState<EstadoEquipos | "Todos">("Todos")
     const [maintenanceFilter, setMaintenanceFilter] = useState("Todos")
     const [capacityFilter, setCapacityFilter] = useState("Todos")
@@ -90,6 +89,7 @@ const EquiposPage = () => {
                         </div>
                     </div>
                     <Button onClick={() => setOpen(true)}>
+                        <Truck className="h-4 w-4" />
                         Ver equipo
                     </Button>
                 </div>

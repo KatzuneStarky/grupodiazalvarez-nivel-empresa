@@ -26,7 +26,7 @@ const InventariosEstacionesPage = () => {
 
     const handlePrint = useReactToPrint({
         contentRef: componentRef,
-        documentTitle: "Inventariados",
+        documentTitle: `Inventarios_Estaciones_${new Date().toLocaleDateString()}`,
         onBeforePrint: async () => {
             toast.info('Preparando impresión...');
             return Promise.resolve();

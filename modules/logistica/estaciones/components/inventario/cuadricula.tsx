@@ -87,11 +87,10 @@ const Cuadricula = ({
                         </div>
 
                         <div className="border-4 rounded-lg overflow-hidden mb-4">
-                            {/* Encabezados de días */}
                             <div className="grid grid-cols-7 border">
                                 {weekdays.map((day, index) => (
                                     <div
-                                        key={index}
+                                        key={`${day}-${index}`}
                                         className="p-2 text-center text-sm font-medium border-r last:border-r-0 bg-gray-100 text-gray-600"
                                     >
                                         {day.slice(0, 3)}

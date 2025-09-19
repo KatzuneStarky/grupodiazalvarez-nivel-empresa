@@ -3,9 +3,7 @@
 import { Activity, AlertCircle, AlertTriangle, Clock, TrendingUp, Truck, Wrench } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { NewDocumentDialog } from "../documentos/components/new-document-dialog"
-import { getMaintenanceUrgency } from "../../utils/get-maintenance-urgency"
-import { EstadoEquipos } from "../../bdd/equipos/enum/estado-equipos"
-import { getDaysUntilExpiry } from "../../utils/documents-expiricy"
+import { useDetailedEquipoData } from "../hooks/use-detailed-equipo-data"
 import { Equipo } from "../../bdd/equipos/types/equipos"
 import { useDirectLink } from "@/hooks/use-direct-link"
 import { Progress } from "@/components/ui/progress"
@@ -13,7 +11,6 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import Icon from "@/components/global/icon"
 import { useRouter } from "next/navigation"
-import { parseFirebaseDate } from "@/utils/parse-timestamp-date"
 
 const DetailedOverviewCards = ({
     equipos
@@ -23,71 +20,25 @@ const DetailedOverviewCards = ({
     const { directLink } = useDirectLink("/equipos")
     const router = useRouter()
 
-    const activeTrucks = equipos.filter((truck) => truck.activo).length
-    const inactiveTrucks = equipos.filter((truck) => !truck.activo).length
-    const operationalTrucks = equipos.filter((truck) => truck.estado === EstadoEquipos.DISPONIBLE).length
-    const maintenanceTrucks = equipos.filter((truck) => truck.estado === EstadoEquipos.EN_TALLER).length
-    const outOfServiceTrucks = equipos.filter((truck) => truck.estado === EstadoEquipos.FUERA_DE_SERVICIO).length
-
-    const getSafeMaintenanceDate = (truck: Equipo) => {
-        return parseFirebaseDate(truck.mantenimiento?.[0]?.fecha) || null;
-    };
-
-    const getSafeDocuments = (truck: Equipo) => {
-        return [
-            ...(truck.Certificado || []),
-            ...(truck.ArchivosVencimiento || []),
-            ...(truck.archivos || [])
-        ];
-    };
-
-    const overdueMaintenance = equipos.filter(truck => {
-        const lastMaintenance = getSafeMaintenanceDate(truck);
-        return lastMaintenance ?
-            getMaintenanceUrgency(lastMaintenance) === "overdue" :
-            true;
-    }).length;
-
-    const dueMaintenance = equipos.filter(truck => {
-        const lastMaintenance = getSafeMaintenanceDate(truck);
-        return lastMaintenance ?
-            getMaintenanceUrgency(lastMaintenance) === "due" :
-            false;
-    }).length;
-
-    const upcomingMaintenance = equipos.filter(truck => {
-        const lastMaintenance = getSafeMaintenanceDate(truck);
-        return lastMaintenance ?
-            getMaintenanceUrgency(lastMaintenance) === "upcoming" :
-            false;
-    }).length;
-
-    const allDocs = equipos.flatMap(truck => getSafeDocuments(truck));
-    const expiredDocs = allDocs.filter(doc => doc?.createdAt && getDaysUntilExpiry(doc.updatedAt) < 0);
-    const criticalDocs = allDocs.filter(doc => {
-        if (!doc?.createdAt) return false;
-        const days = getDaysUntilExpiry(doc.createdAt);
-        return days >= 0 && days <= 7;
-    });
-    const warningDocs = allDocs.filter(doc => {
-        if (!doc?.createdAt) return false;
-        const days = getDaysUntilExpiry(doc.createdAt);
-        return days > 7 && days <= 30;
-    });
-
-    const totalCapacity = equipos.reduce((sum, truck) => sum + (truck.m3 || 0), 0)
-    const avgCapacity = totalCapacity / equipos.length
-    const operationalCapacity = equipos
-        .filter((truck) => truck.estado === EstadoEquipos.DISPONIBLE)
-        .reduce((sum, truck) => sum + (truck.m3 || 0), 0)
-
-    const currentYear = new Date().getFullYear()
-    const avgAge = equipos.reduce((sum, truck) => sum + (currentYear - truck.year), 0) / equipos.length
-    const newTrucks = equipos.filter((truck) => currentYear - truck.year <= 2).length
-    const oldTrucks = equipos.filter((truck) => currentYear - truck.year > 10).length
-
-    const compliancePercentage = Math.round(((allDocs.length - expiredDocs.length) / allDocs.length) * 100)
-    const maintenanceCompliance = Math.round(((equipos.length - overdueMaintenance) / equipos.length) * 100)
+    const {
+        activeTrucks,
+        avgAge,
+        compliancePercentage,
+        criticalDocs,
+        dueMaintenance,
+        expiredDocs,
+        inactiveTrucks,
+        maintenanceCompliance,
+        maintenanceTrucks,
+        newTrucks,
+        oldTrucks,
+        operationalTrucks,
+        outOfServiceTrucks,
+        overdueMaintenance,
+        upcomingMaintenance,
+        warningDocs,
+        allDocs
+    } = useDetailedEquipoData({ currentYear: new Date().getFullYear(), equipos: equipos })
 
     return (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
