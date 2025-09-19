@@ -3,11 +3,14 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { InventarioEstaciones } from "../../types/inventarios"
 import { formatNumber } from "@/utils/format-number"
+import TablaPremium from "./tablas/tabla-premium"
+import InventarioModal from "./inventario-modal"
+import TablaDiesel from "./tablas/tabla-diesel"
+import TablaMagna from "./tablas/tabla-magna"
 import Icon from "@/components/global/icon"
 import { Ref, useState } from "react"
 import Cuadricula from "./cuadricula"
 import { cn } from "@/lib/utils"
-import InventarioModal from "./inventario-modal"
 
 interface TabContentProps {
     estacionesOrdenadas: InventarioEstaciones[],
@@ -135,11 +138,9 @@ const InventoryTabContent = ({
                         </table>
                     </div>
 
-                    {/**
-                     * <TablaMagna data={estacionesOrdenadas} />
-                    <TablaPremium data={estacionesOrdenadas} />
-                    <TablaDiesel data={estacionesOrdenadas} />
-                     */}
+                    <TablaMagna inventarios={estacionesOrdenadas} />
+                    <TablaPremium inventarios={estacionesOrdenadas} />
+                    <TablaDiesel inventarios={estacionesOrdenadas} />
                 </TabsContent>
             </Tabs>
 

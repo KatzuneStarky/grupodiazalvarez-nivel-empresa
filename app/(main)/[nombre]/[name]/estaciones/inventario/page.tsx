@@ -82,7 +82,10 @@ const InventariosEstacionesPage = () => {
                 </div>
             </div>
             <Separator className='my-4' />
-            <InventoryTabContent componentRef={componentRef} estacionesOrdenadas={estacionesOrdenadas} />
+            <InventoryTabContent
+                estacionesOrdenadas={estacionesOrdenadas}
+                componentRef={componentRef}
+            />
         </div>
     )
 }
