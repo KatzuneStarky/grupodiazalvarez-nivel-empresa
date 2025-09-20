@@ -1,55 +1,83 @@
 "use client"
 
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { SortField, useEquiposFilter } from "@/modules/logistica/equipos/hooks/use-equipos-filter"
+import NoEquiposFilter from "@/modules/logistica/equipos/components/no-equipos-filter"
+import { Filter, Import, Plus, Search, SortAsc, SortDesc, Truck } from "lucide-react"
 import { EstadoEquipos } from "@/modules/logistica/bdd/equipos/enum/estado-equipos"
-import { useEquipos } from "@/modules/logistica/bdd/equipos/hooks/use-equipos"
 import EquiposGrid from "@/modules/logistica/equipos/components/equipos-grid"
-import { BarChart3, Download, Filter, Plus, Search } from "lucide-react"
+import { Card, CardContent } from "@/components/ui/card"
 import { useDirectLink } from "@/hooks/use-direct-link"
+import { Separator } from "@/components/ui/separator"
+import { IconFileExport } from "@tabler/icons-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useRouter } from "next/navigation"
-import { useState } from "react"
 
 const RegistroEquiposPage = () => {
-    const [showFleetAnalytics, setShowFleetAnalytics] = useState<boolean>(false)
-    const [searchTerm, setSearchTerm] = useState<string>("")
-    const { equipos, isLoading } = useEquipos()
+    const { directLink } = useDirectLink("equipos/registros/nuevo")
     const router = useRouter()
 
-    const { directLink } = useDirectLink("equipos/registros/nuevo")
-
-    const filteredEquipos = equipos.filter(
-        (equipo) =>
-            equipo.numEconomico.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            equipo.marca.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            equipo.modelo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            (equipo.placas && equipo.placas.toLowerCase().includes(searchTerm.toLowerCase())) ||
-            (equipo.operador && equipo.operador.nombres.toLowerCase().includes(searchTerm.toLowerCase()))
-    )
+    const {
+        clearFilters,
+        equipos,
+        estadoFilter,
+        getEstadoBadgeVariant,
+        grupoUnidadFilter,
+        handleCardClick,
+        marcaFilter,
+        modeloFilter,
+        searchTerm,
+        selectedEquipo,
+        setEstadoFilter,
+        setGrupoUnidadFilter,
+        setMarcaFilter,
+        setModeloFilter,
+        setSearchTerm,
+        setTipoUnidadFilter,
+        sortField,
+        sortOrder,
+        tipoUnidadFilter,
+        toggleSort,
+        uniqueGruposUnidad,
+        uniqueMarcas,
+        uniqueModelos,
+        uniqueTiposUnidad,
+        isLoading,
+        filteredAndSortedEquipos,
+        openDialog,
+        setSelectedEquipo
+    } = useEquiposFilter()
 
     const totalEquipos = equipos.length
-    const activeEquipos = equipos.filter((e) => e.activo).length
+    const activeEquipos = equipos.filter((e) => e.estado === EstadoEquipos.DISPONIBLE).length
     const inMaintenanceEquipos = equipos.filter((e) => e.estado === EstadoEquipos.EN_TALLER).length
+    const inavtiveEquipos = equipos.filter((e) => e.estado === EstadoEquipos.FUERA_DE_SERVICIO).length
 
     return (
         <div className="container mx-auto px-4 py-8">
             <div className="flex flex-col gap-6">
                 <div className="flex flex-col gap-4">
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                        <div>
-                            <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-400">Parque vehicular</h1>
-                            <p className="text-gray-600 text-lg dark:text-gray-300">
-                                Gestión integral de la flota de vehículos, incluyendo registro, mantenimiento y seguimiento.
-                            </p>
+                        <div className="flex items-center gap-3">
+                            <div className="p-2 bg-primary/10 rounded-lg">
+                                <Truck className="h-12 w-12 text-primary" />
+                            </div>
+                            <div>
+                                <h1 className="text-3xl font-bold">Parque vehicular</h1>
+                                <p className="text-muted-foreground">
+                                    Administración y gestion de vehículos
+                                </p>
+                            </div>
                         </div>
                         <div className="flex gap-2">
                             <Button variant="outline" className="sm:w-auto">
-                                <Download className="w-4 h-4 mr-2" />
-                                Exportar Datos
+                                <Import className="w-4 h-4 mr-2" />
+                                Importar Datos
                             </Button>
-                            <Button variant="outline" className="sm:w-auto" onClick={() => setShowFleetAnalytics(true)}>
-                                <BarChart3 className="w-4 h-4 mr-2" />
-                                Análisis
+                            <Button variant="outline" className="sm:w-auto">
+                                <IconFileExport className="w-4 h-4 mr-2" />
+                                Exportar Datos
                             </Button>
                             <Button
                                 className="sm:w-auto"
@@ -61,6 +89,8 @@ const RegistroEquiposPage = () => {
                         </div>
                     </div>
 
+                    <Separator />
+
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                         <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-4 rounded-lg">
                             <div className="text-2xl font-bold">{totalEquipos}</div>
@@ -68,51 +98,155 @@ const RegistroEquiposPage = () => {
                         </div>
                         <div className="bg-gradient-to-r from-green-500 to-green-600 text-white p-4 rounded-lg">
                             <div className="text-2xl font-bold">{activeEquipos}</div>
-                            <div className="text-green-100">Unidades activas</div>
+                            <div className="text-green-100">Unidades disponibles</div>
                         </div>
                         <div className="bg-gradient-to-r from-yellow-500 to-yellow-600 text-white p-4 rounded-lg">
                             <div className="text-2xl font-bold">{inMaintenanceEquipos}</div>
                             <div className="text-yellow-100">En mantenimiento</div>
                         </div>
                         <div className="bg-gradient-to-r from-red-500 to-red-600 text-white p-4 rounded-lg">
-                            <div className="text-2xl font-bold">{0}</div>
-                            <div className="text-red-100">Alertas activas</div>
+                            <div className="text-2xl font-bold">{inavtiveEquipos}</div>
+                            <div className="text-red-100">Unidades no disponibles</div>
                         </div>
                     </div>
                 </div>
 
-                <div className="flex flex-col sm:flex-row gap-4">
-                    <div className="relative flex-1">
-                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                        <Input
-                            placeholder="Busqueda mediante numero economico, marca, modelo, placas, conductor..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            className="pl-10 h-12 text-base"
-                        />
-                    </div>
-                    <Button variant="outline" className="h-12">
-                        <Filter className="w-4 h-4 mr-2" />
-                        Filtros avanzados
-                    </Button>
-                </div>
+                <Card>
+                    <CardContent>
+                        <div className="space-y-6">
+                            <div className="flex flex-col sm:flex-row gap-4">
+                                <div className="relative flex-1">
+                                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                                    <Input
+                                        placeholder="Buscar por número económico, marca, modelo o placas..."
+                                        value={searchTerm}
+                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                        className="pl-10 bg-card border-border"
+                                    />
+                                </div>
+                                <Button
+                                    variant="outline"
+                                    onClick={clearFilters}
+                                    className="shrink-0 border-border hover:bg-accent/10 bg-transparent"
+                                >
+                                    <Filter className="h-4 w-4 mr-2" />
+                                    Limpiar filtros
+                                </Button>
+                            </div>
 
-                <EquiposGrid
-                    equipos={filteredEquipos}
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+                                <Select value={marcaFilter} onValueChange={setMarcaFilter}>
+                                    <SelectTrigger className="bg-card border-border w-full">
+                                        <SelectValue placeholder="Marca" />
+                                    </SelectTrigger>
+                                    <SelectContent className="bg-popover border-border">
+                                        <SelectItem value="all">Todas las marcas</SelectItem>
+                                        {uniqueMarcas.map((marca) => (
+                                            <SelectItem key={marca} value={marca}>
+                                                {marca}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+
+                                <Select value={modeloFilter} onValueChange={setModeloFilter}>
+                                    <SelectTrigger className="bg-card border-border w-full">
+                                        <SelectValue placeholder="Modelo" />
+                                    </SelectTrigger>
+                                    <SelectContent className="bg-popover border-border">
+                                        <SelectItem value="all">Todos los modelos</SelectItem>
+                                        {uniqueModelos.map((modelo) => (
+                                            <SelectItem key={modelo} value={modelo}>
+                                                {modelo}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+
+                                <Select value={tipoUnidadFilter} onValueChange={setTipoUnidadFilter}>
+                                    <SelectTrigger className="bg-card border-border w-full">
+                                        <SelectValue placeholder="Tipo de unidad" />
+                                    </SelectTrigger>
+                                    <SelectContent className="bg-popover border-border">
+                                        <SelectItem value="all">Todos los tipos</SelectItem>
+                                        {uniqueTiposUnidad.map((tipo) => (
+                                            <SelectItem key={tipo} value={tipo || ""}>
+                                                {tipo}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+
+                                <Select value={grupoUnidadFilter} onValueChange={setGrupoUnidadFilter}>
+                                    <SelectTrigger className="bg-card border-border w-full">
+                                        <SelectValue placeholder="Grupo" />
+                                    </SelectTrigger>
+                                    <SelectContent className="bg-popover border-border">
+                                        <SelectItem value="all">Todos los grupos</SelectItem>
+                                        {uniqueGruposUnidad.map((grupo) => (
+                                            <SelectItem key={grupo} value={grupo}>
+                                                {grupo}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+
+                                <Select value={estadoFilter} onValueChange={setEstadoFilter}>
+                                    <SelectTrigger className="bg-card border-border w-full">
+                                        <SelectValue placeholder="Estado" />
+                                    </SelectTrigger>
+                                    <SelectContent className="bg-popover border-border">
+                                        <SelectItem value="all">Todos los estados</SelectItem>
+                                        {Object.values(EstadoEquipos).map((estado) => (
+                                            <SelectItem key={estado} value={estado}>
+                                                {estado}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+
+                            <div className="flex flex-wrap gap-2 items-center">
+                                <span className="text-sm text-muted-foreground">Ordenar por:</span>
+                                {(
+                                    [
+                                        ["numEconomico", "Número"],
+                                        ["year", "Año"],
+                                        ["marca", "Marca"],
+                                        ["modelo", "Modelo"],
+                                    ] as [SortField, string][]
+                                ).map(([field, label]) => (
+                                    <Button
+                                        key={field}
+                                        variant={sortField === field ? "default" : "outline"}
+                                        size="sm"
+                                        onClick={() => toggleSort(field)}
+                                        className={`text-xs ${sortField === field ? "bg-primary text-primary-foreground" : "border-border hover:bg-accent/10"}`}
+                                    >
+                                        {label}
+                                        {sortField === field &&
+                                            (sortOrder === "asc" ? <SortAsc className="h-3 w-3 ml-1" /> : <SortDesc className="h-3 w-3 ml-1" />)}
+                                    </Button>
+                                ))}
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+
+                <EquiposGrid 
+                    equipos={filteredAndSortedEquipos}
                     loading={isLoading}
-                    onSelect={() => { }}
-                    onStatusToggle={async () => { }}
-                    onDocumentUpload={() => { }}
+                    handleCardClick={handleCardClick}
+                    selectedEquipo={selectedEquipo}
+                    setSelectedEquipo={setSelectedEquipo}
+                    getEstadoBadgeVariant={getEstadoBadgeVariant}
+                />
+
+                <NoEquiposFilter
+                    clearFilters={clearFilters}
+                    filteredAndSortedEquipos={filteredAndSortedEquipos}
                 />
             </div>
-            {/**
-             * <AnalyticsDashboard
-                equipos={equipos}
-                open={showFleetAnalytics}
-                onOpenChange={setShowFleetAnalytics}
-                isFleetView={true}
-            />
-             */}
         </div>
     )
 }
