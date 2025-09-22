@@ -149,16 +149,12 @@ const EquiposGrid = ({
                                     <div className="flex gap-4">
                                         <div className="flex items-center gap-1 text-xs text-muted-foreground/70">
                                             <div className="h-1.5 w-1.5 rounded-full bg-primary/60" />
-                                            <span>{equipo.tanque.length} tanques</span>
+                                            <span>{equipo.tanque.length} Tanque{equipo.tanque.length === 0 || equipo.tanque.length > 1 ? "s" : ""}</span>
                                         </div>
                                         <div className="flex items-center gap-1 text-xs text-muted-foreground/70">
                                             <div className="h-1.5 w-1.5 rounded-full bg-accent/60" />
-                                            <span>{equipo.mantenimiento.length} mant.</span>
+                                            <span>{equipo.mantenimiento.length} Mantenimiento{equipo.mantenimiento.length === 0 || equipo.mantenimiento.length > 1 ? "s" : ""}</span>
                                         </div>
-                                    </div>
-
-                                    <div className="h-6 w-6 rounded-full bg-primary/10 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 group-hover:scale-110">
-                                        <Zap className="h-3 w-3 text-primary" />
                                     </div>
                                 </div>
                             </div>

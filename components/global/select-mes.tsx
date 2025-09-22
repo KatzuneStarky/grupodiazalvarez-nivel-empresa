@@ -13,9 +13,9 @@ interface SelectMesProps {
 
 const SelectMes: React.FC<SelectMesProps> = ({ value, onChange, className }) => {
     return (
-        <div className={`relative h-10 ${className}`}>
+        <div className={`relative h-10`}>
             <Select value={value} onValueChange={onChange}>
-                <SelectTrigger>
+                <SelectTrigger className={`${className}`}>
                     <SelectValue placeholder="Selecciona un mes" />
                 </SelectTrigger>
                 <SelectContent>

@@ -2,6 +2,7 @@
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { SortField, useEquiposFilter } from "@/modules/logistica/equipos/hooks/use-equipos-filter"
+import { exportEquipos } from "@/functions/excel-export/equipos/export/export-equipos"
 import NoEquiposFilter from "@/modules/logistica/equipos/components/no-equipos-filter"
 import { Filter, Import, Plus, Search, SortAsc, SortDesc, Truck } from "lucide-react"
 import { EstadoEquipos } from "@/modules/logistica/bdd/equipos/enum/estado-equipos"
@@ -10,12 +11,15 @@ import { Card, CardContent } from "@/components/ui/card"
 import { useDirectLink } from "@/hooks/use-direct-link"
 import { Separator } from "@/components/ui/separator"
 import { IconFileExport } from "@tabler/icons-react"
+import { useArea } from "@/context/area-context"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useRouter } from "next/navigation"
+import { toast } from "sonner"
 
 const RegistroEquiposPage = () => {
     const { directLink } = useDirectLink("equipos/registros/nuevo")
+    const { area } = useArea()
     const router = useRouter()
 
     const {
@@ -54,6 +58,19 @@ const RegistroEquiposPage = () => {
     const inMaintenanceEquipos = equipos.filter((e) => e.estado === EstadoEquipos.EN_TALLER).length
     const inavtiveEquipos = equipos.filter((e) => e.estado === EstadoEquipos.FUERA_DE_SERVICIO).length
 
+    const exportEquiposData = async() => {
+        try {
+            toast.promise(exportEquipos(equipos, area?.nombre || ""),{
+                loading: "Exportando datos...",
+                success: "Datos exportados con éxito",
+                error: "Error al exportar datos"
+            })
+        } catch (error) {
+            console.log(error);
+            toast.error("Error al exportar datos")
+        }
+    }
+
     return (
         <div className="container mx-auto px-4 py-8">
             <div className="flex flex-col gap-6">
@@ -75,7 +92,7 @@ const RegistroEquiposPage = () => {
                                 <Import className="w-4 h-4 mr-2" />
                                 Importar Datos
                             </Button>
-                            <Button variant="outline" className="sm:w-auto">
+                            <Button variant="outline" className="sm:w-auto" onClick={() => exportEquiposData()}>
                                 <IconFileExport className="w-4 h-4 mr-2" />
                                 Exportar Datos
                             </Button>

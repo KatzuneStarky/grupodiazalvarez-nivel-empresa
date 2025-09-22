@@ -173,7 +173,7 @@ export const getM3ByMonth = async (year: number): Promise<{ month: string; total
 
             const monthData = data.find((d) => d.month === monthName);
             if (monthData) {
-                monthData.total += report.M3; 
+                monthData.total += report.M3;
             }
         }
     });
@@ -256,3 +256,34 @@ export async function calcularM3PorCliente(
         throw error;
     }
 }
+
+export const groupByClienteDescripcion = (viajes: ReporteViajes[]) => {
+    const result = viajes.reduce((acc, curr) => {
+        const cliente = curr.Cliente;
+        const descripcion = curr.DescripcionDelViaje;
+        const municipio = curr.Municipio;
+
+        if (!acc[cliente]) {
+            acc[cliente] = { Municipio: municipio, Descripciones: {} };
+        }
+
+        if (!acc[cliente].Descripciones[descripcion]) {
+            acc[cliente].Descripciones[descripcion] = { TotalA20: 0, TotalNatural: 0 };
+        }
+
+        acc[cliente].Descripciones[descripcion].TotalA20 += curr.FALTANTESYOSOBRANTESA20 || 0;
+        acc[cliente].Descripciones[descripcion].TotalNatural += curr.FALTANTESYOSOBRANTESALNATURAL || 0;
+
+        return acc;
+    }, {} as Record<string, { Municipio?: string; Descripciones: Record<string, { TotalA20: number; TotalNatural: number }> }>);
+
+    return Object.entries(result).map(([cliente, { Municipio, Descripciones }]) => ({
+        Cliente: cliente,
+        Municipio,
+        Descripciones: Object.entries(Descripciones).map(([descripcion, totals]) => ({
+            DescripcionDelViaje: descripcion,
+            TotalA20: totals.TotalA20,
+            TotalNatural: totals.TotalNatural,
+        })),
+    }));
+};
