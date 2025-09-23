@@ -1,5 +1,6 @@
 "use client"
 
+import { CustomFaltantesTooltip } from "@/modules/logistica/metricas/components/custom-faltantes-tooltip";
 import { Bar, BarChart, CartesianGrid, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useFaltantesData } from "@/modules/logistica/reportes-viajes/hooks/use-faltantes-data";
@@ -15,7 +16,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Icon from "@/components/global/icon";
 import { useState } from "react";
-import { CustomFaltantesTooltip } from "@/modules/logistica/metricas/components/custom-faltantes-tooltip";
 
 const MetricasFaltantesPage = () => {
     const capitalizedMonthName = getCurrentMonthCapitalized();

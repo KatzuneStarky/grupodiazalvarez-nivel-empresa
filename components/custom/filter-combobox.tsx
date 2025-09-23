@@ -1,7 +1,7 @@
 "use client"
 
-import { Button } from "@/components/ui/button";
 import { Check, ChevronsUpDown } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import * as React from "react";
 import {
@@ -41,7 +41,7 @@ export function ComboboxFiltro({ options, value, onChange, disabledOptions = [] 
                     variant="outline"
                     role="combobox"
                     aria-expanded={open}
-                    className="justify-between col-span-2"
+                    className="justify-between col-span-2 w-full"
                 >
                     {value
                         ? options.find((option) => option.value === value)?.label

@@ -1,6 +1,6 @@
 import { collection, getDocs, onSnapshot, query, Timestamp, where } from "firebase/firestore";
 import { endOfWeek, getWeekOfMonth, startOfWeek, subWeeks } from "date-fns";
-import { ReporteViajes } from "../types/reporte-viajes";
+import { ClienteViajes, ProductoSuma, ReporteViajes } from "../types/reporte-viajes";
 import { meses } from "@/constants/meses";
 import { db } from "@/firebase/client";
 
@@ -287,3 +287,43 @@ export const groupByClienteDescripcion = (viajes: ReporteViajes[]) => {
         })),
     }));
 };
+
+export async function obtenerSumaM3PorProductoYViaje(
+    mes: string,
+    municipio?: string,
+    year?: number
+): Promise<ClienteViajes[]> {
+    if (!mes) throw new Error("El parámetro 'mes' es requerido.");
+    const yearParam = year ?? new Date().getFullYear();
+
+    const conditions = [where("Mes", "==", mes), where("Year", "==", yearParam)];
+    if (municipio) conditions.push(where("Municipio", "==", municipio));
+
+    const q = query(collection(db, "reporteViajes"), ...conditions);
+    const querySnapshot = await getDocs(q);
+
+    const datosAgrupados: Record<string, Record<string, ProductoSuma>> = {};
+
+    querySnapshot.forEach((doc) => {
+        const data = doc.data() as ReporteViajes;
+        const { Cliente, DescripcionDelViaje, Producto, M3 = 0 } = data;
+
+        if (!Cliente || !DescripcionDelViaje || !Producto) return;
+        if (!datosAgrupados[Cliente]) datosAgrupados[Cliente] = {};
+        if (!datosAgrupados[Cliente][DescripcionDelViaje])
+            datosAgrupados[Cliente][DescripcionDelViaje] = {};
+
+        datosAgrupados[Cliente][DescripcionDelViaje][Producto] =
+            (datosAgrupados[Cliente][DescripcionDelViaje][Producto] || 0) + M3;
+    });
+
+    return Object.entries(datosAgrupados).map(([cliente, descripciones]) => ({
+        Cliente: cliente,
+        DescripcionesDelViaje: Object.entries(descripciones).map(
+            ([descripcion, productos]) => ({
+                Descripcion: descripcion,
+                Productos: productos,
+            })
+        ),
+    }));
+}
