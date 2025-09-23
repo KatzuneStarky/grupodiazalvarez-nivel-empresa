@@ -62,7 +62,6 @@ const CustomTooltip = ({ active, payload }: TooltipProps<any, any>) => {
 };
 
 const MetricasGeneralPage = () => {
-    const [selectCapacidadRange, setSelectCapacidadRange] = useState<[number, number]>([0, 1000]);
     const capitalizedMonth = getCurrentMonthCapitalized();
     const { selectedYear } = useYear();
     const [mes, setMes] = useState<string>(capitalizedMonth);
