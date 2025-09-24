@@ -3,13 +3,15 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { EstadoEquipos } from "../../bdd/equipos/enum/estado-equipos"
-import { Calendar, MapPin, Shield, Truck, Zap } from "lucide-react"
+import { Calendar, MapPin, Shield, Truck } from "lucide-react"
 import { parseFirebaseDate } from "@/utils/parse-timestamp-date"
 import { Equipo } from "../../bdd/equipos/types/equipos"
 import { Badge } from "@/components/ui/badge"
+import { QRCodeCanvas } from "qrcode.react"
 import Icon from "@/components/global/icon"
 import { es } from "date-fns/locale"
 import { format } from "date-fns"
+import { useRef } from "react"
 
 interface EquipoGridProps {
     equipos: Equipo[]
@@ -28,6 +30,7 @@ const EquiposGrid = ({
     setSelectedEquipo,
     getEstadoBadgeVariant
 }: EquipoGridProps) => {
+    const qrCodeRef = useRef<HTMLDivElement>(null);
 
     return (
         <>
@@ -192,10 +195,20 @@ const EquiposGrid = ({
                                 </div>
                             )}
 
+                            <div ref={qrCodeRef} className="rounded-xl">
+                                <QRCodeCanvas
+                                    value={`https://www.grupodiazalvarez.com/protegido/equipo?equipoId=${selectedEquipo?.id}`}
+                                    className="border-4 rounded-xl"
+                                    size={300}
+                                />
+                            </div>
+
                             <div className="flex items-center justify-center gap-3 p-4 rounded-lg bg-muted/30 border border-border">
                                 <div className={`h-3 w-3 rounded-full ${selectedEquipo?.gpsActivo ? "bg-primary" : "bg-destructive"}`} />
                                 <span className="text-sm font-medium">GPS {selectedEquipo?.gpsActivo ? "Conectado" : "Desconectado"}</span>
                             </div>
+
+                            
                         </div>
 
                         <div className="lg:col-span-2 space-y-8">

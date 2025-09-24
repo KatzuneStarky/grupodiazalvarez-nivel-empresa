@@ -1,7 +1,8 @@
 "use client"
 
 import { Equipo } from "@/modules/logistica/bdd/equipos/types/equipos"
-import { directLink } from "@/constants/links"
+import { useEmpresa } from "@/context/empresa-context"
+import { useArea } from "@/context/area-context"
 import {
     CommandDialog,
     CommandEmpty,
@@ -18,7 +19,10 @@ interface props {
 }
 
 export const CommandDialogEquipos = ({ open, setOpen, equipos }: props) => {
-    const ruta = directLink("/equipos")
+    const { empresa } = useEmpresa()
+    const { area } = useArea()
+
+    const link = `/${empresa?.nombre}/${area?.nombre}/equipos`
 
     return (
         <CommandDialog open={open} onOpenChange={setOpen} className="w-96">
@@ -34,7 +38,7 @@ export const CommandDialogEquipos = ({ open, setOpen, equipos }: props) => {
                         <CommandItem
                             key={e.id}
                         >
-                            <a href={`${ruta}/${e.id}`}>
+                            <a href={`${link}/${e.id}`}>
                                 {e.numEconomico} - {e.marca} - {e.modelo}
                             </a>
                         </CommandItem>
