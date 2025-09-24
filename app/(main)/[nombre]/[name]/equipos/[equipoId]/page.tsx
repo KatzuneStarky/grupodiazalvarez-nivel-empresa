@@ -95,7 +95,6 @@ const EquipoIdPage = ({ params }: { params: Promise<{ equipoId: string }> }) => 
                     </div>
                     <div className="flex space-x-2">
                         {/** <CreateNewFile eId={equipoId} /> */}
-                        test
                     </div>
                 </div>
             </div>
