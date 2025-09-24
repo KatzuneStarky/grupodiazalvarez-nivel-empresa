@@ -1,7 +1,11 @@
 "use client"
 
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import EquipoIdTanqueCard from "@/modules/logistica/equipos/components/equipoId/equipo-id-tanque-card"
+import DocumentCard from "@/modules/logistica/equipos/documentos/components/document-card"
+import EquipoIdCard from "@/modules/logistica/equipos/components/equipoId/equipo-id-card"
 import useEquipoDataById from "@/modules/logistica/equipos/hooks/use-equipos-data-by-id"
+import { esArchivoVencimiento, esCertificado } from "@/functions/tipo-archivo-equipo"
 import { Separator } from "@/components/ui/separator"
 import { useSearchParams } from "next/navigation"
 import { useAuth } from "@/context/auth-context"
@@ -9,7 +13,10 @@ import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import Icon from "@/components/global/icon"
+import { Card } from "@/components/ui/card"
+import { File } from "lucide-react"
 import { useState } from "react"
+import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 
 import {
@@ -18,13 +25,6 @@ import {
     InputOTPSeparator,
     InputOTPSlot,
 } from "@/components/ui/input-otp"
-import { esArchivoVencimiento, esCertificado } from "@/functions/tipo-archivo-equipo"
-import EquipoIdCard from "@/modules/logistica/equipos/components/equipoId/equipo-id-card"
-import EquipoIdTanqueCard from "@/modules/logistica/equipos/components/equipoId/equipo-id-tanque-card"
-import { cn } from "@/lib/utils"
-import { File } from "lucide-react"
-import DocumentCard from "@/modules/logistica/equipos/documentos/components/document-card"
-import { Card } from "@/components/ui/card"
 
 type FilterType = "all" | "archivos" | "certificados" | "archivosVencimiento";
 
@@ -44,7 +44,7 @@ const EquipoProtegidoPage = () => {
     const [error, setError] = useState<string | null>(null)
     const [loading, setLoading] = useState<boolean>(false)
     const [otpSent, setOtpSent] = useState<boolean>(false)
-    const [locked, setLocked] = useState<boolean>(false)
+    const [locked, setLocked] = useState<boolean>(true)
     const [phone, setPhone] = useState<string>('')
     const [otp, setOtp] = useState<string>("")
 
