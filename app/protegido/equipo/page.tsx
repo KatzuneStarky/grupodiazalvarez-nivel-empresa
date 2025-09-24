@@ -6,6 +6,9 @@ import DocumentCard from "@/modules/logistica/equipos/documentos/components/docu
 import EquipoIdCard from "@/modules/logistica/equipos/components/equipoId/equipo-id-card"
 import useEquipoDataById from "@/modules/logistica/equipos/hooks/use-equipos-data-by-id"
 import { esArchivoVencimiento, esCertificado } from "@/functions/tipo-archivo-equipo"
+import { SocialLoginButtons } from "@/components/global/social-login-buttons"
+import { Card, CardContent } from "@/components/ui/card"
+import { SocialProvider } from "@/types/social-provider"
 import { Separator } from "@/components/ui/separator"
 import { useSearchParams } from "next/navigation"
 import { useAuth } from "@/context/auth-context"
@@ -13,7 +16,6 @@ import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import Icon from "@/components/global/icon"
-import { Card } from "@/components/ui/card"
 import { File } from "lucide-react"
 import { useState } from "react"
 import { cn } from "@/lib/utils"
@@ -31,7 +33,7 @@ type FilterType = "all" | "archivos" | "certificados" | "archivosVencimiento";
 const EquipoProtegidoPage = () => {
     const searchParams = useSearchParams()
     const equipoId = searchParams.get("equipoId")
-    const { currentUser } = useAuth()
+    const { currentUser, isLoading, loginWithGoogle } = useAuth()
 
     const {
         archivosVencimiento,
@@ -106,8 +108,25 @@ const EquipoProtegidoPage = () => {
         }
     };
 
+    const handleSocialLogin = (provider: SocialProvider) => {
+        if (provider === "google") {
+            loginWithGoogle()
+        }
+    }
+
     if (!currentUser) {
-        return <div>Not logged in</div>
+        return (
+            <div className="min-h-screen flex items-center justify-center">
+                <Card className="w-full max-w-xl">
+                    <CardContent>
+                        <SocialLoginButtons
+                            isLoading={isLoading || false}
+                            onSocialLogin={handleSocialLogin}
+                        />
+                    </CardContent>
+                </Card>
+            </div>
+        )
     }
 
     const combinedArray = [...archivos, ...certificados, ...archivosVencimiento];
