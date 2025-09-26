@@ -2,7 +2,7 @@
 
 import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarHeader, SidebarMenu, SidebarMenuAction, SidebarMenuButton, SidebarMenuItem, SidebarMenuSub, SidebarMenuSubButton, SidebarMenuSubItem, SidebarRail } from "@/components/ui/sidebar"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { Building2, ChevronDown, ChevronRight, Cog, ExternalLink, LogOut, UserCircle } from "lucide-react"
+import { Building2, ChevronDown, ChevronRight, Cog, ExternalLink, File, LogOut, UserCircle } from "lucide-react"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { useMenusByArea } from "@/modules/menus/hooks/use-menus-by-area"
@@ -182,6 +182,10 @@ const AreaSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
                                 <DropdownMenuItem onClick={() => router.push(`/usuario/${userBdd?.nombre}`)}>
                                     <UserCircle className="mr-2 h-4 w-4" />
                                     Perfil
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => router.push(`/usuario/${userBdd?.nombre}/documentos`)}>
+                                    <File className="mr-2 h-4 w-4" />
+                                    Mis documentos
                                 </DropdownMenuItem>
                                 <DropdownMenuItem>
                                     <Cog className="mr-2 h-4 w-4" />
