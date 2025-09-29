@@ -8,7 +8,6 @@ import { useAuth } from "@/context/auth-context"
 import { Button } from "@/components/ui/button"
 import { useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
-import { truncateText } from "@/utils/truncate-text"
 
 interface BreadcrumbNavigationProps {
     currentPath: string[]

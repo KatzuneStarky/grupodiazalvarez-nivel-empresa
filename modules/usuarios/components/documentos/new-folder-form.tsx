@@ -19,10 +19,12 @@ import { toast } from "sonner"
 
 const NewFolderForm = ({
     className,
-    button
+    button,
+    parentId
 }: {
     className?: string,
-    button?: boolean
+    button?: boolean,
+    parentId?: string | null | undefined
 }) => {
     const [activeTagIndex, setActiveTagIndex] = useState<number | null>(null);
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
@@ -50,7 +52,8 @@ const NewFolderForm = ({
                 data.name,
                 currentUser?.uid || "",
                 data.description || "",
-                tags
+                tags,
+                parentId || undefined
             ), {
                 loading: "Creando carpeta, favor de esperar...",
                 success: (result) => {
@@ -79,10 +82,10 @@ const NewFolderForm = ({
         <Dialog>
             <DialogTrigger className={className} asChild={button ? true : false}>
                 {button === false ? (
-                    <div>
+                    <>
                         <Icon iconName="material-symbols:create-new-folder-rounded" />
                         Nueva carpeta
-                    </div>
+                    </>
                 ) : (
                     <Button variant={"outline"}>
                         <Icon iconName="material-symbols:create-new-folder-rounded" />
