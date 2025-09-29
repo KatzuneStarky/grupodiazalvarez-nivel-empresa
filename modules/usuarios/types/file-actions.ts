@@ -1,0 +1,13 @@
+export type FileAction =
+  | "rename"
+  | "delete"
+  | "download"
+  | "share"
+  | "preview"
+  | "move"
+  | "copy"
+  | "restore"
+  | "upload"
+  | "createFolder"
+  | "favorite"
+  | "versionHistory"

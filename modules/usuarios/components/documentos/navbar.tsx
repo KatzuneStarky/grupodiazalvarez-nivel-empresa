@@ -21,7 +21,7 @@ const DocumentosUsuarioNavbar = ({ currentPath, onNavigate, onNavigateHome }: Br
     const router = useRouter()
 
     return (
-        <div className="flex items-center justify-between border-b bg-card overflow-x-auto">
+        <div className="flex items-center justify-between border-b bg-card overflow-hidden">
             <div className="flex items-center gap-1 p-4">
                 <Button
                     variant="ghost"

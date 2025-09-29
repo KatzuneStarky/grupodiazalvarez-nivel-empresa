@@ -46,9 +46,9 @@ const EquiposGeneralPage = () => {
                         <Truck className="h-12 w-12 text-primary" />
                     </div>
                     <div>
-                        <h1 className="text-3xl font-bold">Estaciones de servicio</h1>
+                        <h1 className="text-3xl font-bold">Datos generales</h1>
                         <p className="text-muted-foreground">
-                            Administre la informacion de sus estaciones de servicio
+                            Informacion general de los equipos y sus viajes
                         </p>
                     </div>
                 </div>
@@ -59,8 +59,6 @@ const EquiposGeneralPage = () => {
                 </Button>
 
             </div>
-
-            {mes}
 
             <Separator className="mt-4 mb-8" />
             <EquiposGeneralFilters
