@@ -41,7 +41,8 @@ const NuevoOperadorPage = () => {
             numLicencia: "",
             telefono: "",
             tipoLicencia: "",
-            tipoSangre: ""
+            tipoSangre: "",
+            contactosEmergencia: []
         }
     })
 

@@ -1,5 +1,11 @@
 import { z } from "zod";
 
+export const ContactosEmergenciaSchema = z.object({
+    nombre: z.string(),
+    relacion: z.string(),
+    telefono: z.string(),
+})
+
 export const OperadoresSchema = z.object({
     image: z.string().optional(),
     apellidos: z.string(),
@@ -17,6 +23,7 @@ export const OperadoresSchema = z.object({
     numLicencia: z.string(),
     tipoLicencia: z.string(),
     emisor: z.string(),
+    contactosEmergencia: z.array(ContactosEmergenciaSchema),
     idEquipo: z.string().optional(),
 })
 

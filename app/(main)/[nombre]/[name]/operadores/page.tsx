@@ -83,7 +83,7 @@ const OperadoresPage = () => {
 
             <Separator className="my-8" />
 
-            <div className="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredAndSortedOperators.map((operator) => (
                     <OperadorCard
                         operator={operator}
@@ -97,7 +97,7 @@ const OperadoresPage = () => {
 
             {filteredAndSortedOperators.length > 0 && (
                 <>
-                    <Separator className="my-4" />
+                    <Separator className="my-8" />
                     <OperadorTable
                         SortIcon={SortIcon}
                         getInitials={getInitials}

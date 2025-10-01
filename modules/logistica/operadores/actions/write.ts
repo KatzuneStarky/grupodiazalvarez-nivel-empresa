@@ -1,6 +1,7 @@
+import { deleteDoc, doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 import { Operador } from "../../bdd/operadores/types/operadores"
 import { OperadoresSchema } from "../schemas/operadores.schema";
-import { doc, setDoc, updateDoc } from "firebase/firestore";
+import { deleteFolderContents } from "@/actions/folder/write";
 import { db } from "@/firebase/client";
 import { v4 as uuidv4 } from "uuid";
 
@@ -79,6 +80,32 @@ export const updateOperador = async (data: Omit<Operador, "id" | "createdAt" | "
         return {
             success: false,
             message: "Error al validar los datos",
+            error: error as Error
+        }
+    }
+
+}
+
+export const deleteOperador = async (operadorId: string):
+    Promise<{ success: boolean, message: string, error?: Error }> => {
+    try {
+        const operadorRef = doc(db, "operadores", operadorId)
+        const operadorDoc = await getDoc(operadorRef)
+        
+        if (!operadorDoc.exists()) {
+            throw new Error("El operador no existe");
+        }
+        await deleteFolderContents(`/operador/${operadorId}`)
+        await deleteDoc(operadorRef)
+
+        return {
+            success: true,
+            message: "El operador se ha eliminado correctamente",
+        }
+    } catch (error) {
+        return {
+            success: false,
+            message: "Error al eliminar el operador",
             error: error as Error
         }
     }

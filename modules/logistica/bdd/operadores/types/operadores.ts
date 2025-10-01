@@ -1,5 +1,15 @@
 import { Equipo } from "../../equipos/types/equipos";
 
+export const relacionContactoMap = Object.entries({
+    "FAMILIAR": "FAMILIAR",
+    "MADRE": "MADRE",
+    "PADRE": "PADRE",
+    "HERMANO": "HERMANO",
+    "AMIGO": "AMIGO",
+    "TRABAJO": "TRABAJO",
+    "OTRO": "OTRO"
+}).map(([key, value]) => ({ key, value }))
+
 export interface Operador {
     id: string;
     image?: string;
@@ -18,8 +28,15 @@ export interface Operador {
     numLicencia: string;
     tipoLicencia: string;
     emisor: string;
+    contactosEmergencia?: ContactosEmergencia[]
     idEquipo?: string
     equipo?: Equipo
     createdAt: Date;
     updatedAt: Date;
+}
+
+export interface ContactosEmergencia {
+    nombre: string
+    relacion: string
+    telefono: string
 }
