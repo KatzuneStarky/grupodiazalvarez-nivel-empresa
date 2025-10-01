@@ -34,7 +34,7 @@ const OperadoresPage = () => {
         tipoSange
     } = useOperadoresFilters({ itemsPerPage: 6 })
 
-    const { directLink } = useDirectLink("operadores/nuevo")
+    const { directLink } = useDirectLink("operadores")
     const router = useRouter()
 
     const SortIcon = ({ field }: { field: SortField }) => {
@@ -59,7 +59,7 @@ const OperadoresPage = () => {
 
                 <Button
                     className="sm:w-auto"
-                    onClick={() => router.push(directLink)}
+                    onClick={() => router.push(`${directLink}/nuevo`)}
                 >
                     <Plus className="w-4 h-4 mr-2" />
                     Nuevo operador
@@ -88,6 +88,7 @@ const OperadoresPage = () => {
                     <OperadorCard
                         operator={operator}
                         getInitials={getInitials}
+                        directLink={directLink}
                         key={operator.id}
                     />
                 ))}

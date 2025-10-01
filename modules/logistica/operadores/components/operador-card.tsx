@@ -12,10 +12,12 @@ import { format } from "date-fns"
 
 const OperadorCard = ({
     operator,
-    getInitials
+    getInitials,
+    directLink
 }: {
     operator: Operador,
-    getInitials: (nombre: string, apellidos: string) => string
+    getInitials: (nombre: string, apellidos: string) => string,
+    directLink: string
 }) => {
     return (
         <Card
@@ -117,6 +119,7 @@ const OperadorCard = ({
                     <OperatorActions
                         className="flex items-center justify-end gap-2 pt-2"
                         operador={operator}
+                        directLink={directLink}
                     />
 
                     <div className="flex gap-4 items-center">

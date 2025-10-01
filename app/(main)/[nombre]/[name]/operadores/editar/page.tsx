@@ -1,26 +1,32 @@
 "use client"
 
 import { OperadoresSchema, OperadoresSchemaType } from "@/modules/logistica/operadores/schemas/operadores.schema"
+import { useOperadores } from "@/modules/logistica/bdd/operadores/hooks/use-estaciones"
 import OperadorForm from "@/modules/logistica/operadores/components/operador-form"
-import { writeOperador } from "@/modules/logistica/operadores/actions/write"
+import { updateOperador } from "@/modules/logistica/operadores/actions/write"
+import { useRouter, useSearchParams } from "next/navigation"
 import SubmitButton from "@/components/global/submit-button"
 import PageTitle from "@/components/custom/page-title"
-import { zodResolver } from "@hookform/resolvers/zod"
 import { Separator } from "@/components/ui/separator"
-import { useRouter } from "next/navigation"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
-import { Save, User } from "lucide-react"
 import { v4 as uuidv4 } from "uuid"
-import { useState } from "react"
+import { User } from "lucide-react"
 import { toast } from "sonner"
 
-const NuevoOperadorPage = () => {
+const EditarOperadorPage = () => {
     const [isSubmiting, setIsSubmiting] = useState<boolean>(false)
     const [showFileInfo, setShowFileInfo] = useState(false)
     const [imageUrl, setImageUrl] = useState<string>("")
     const [useCamera, setUseCamera] = useState(false)
+    const searchParams = useSearchParams()
+    const { operadores } = useOperadores()
     const router = useRouter()
     const uid = uuidv4()
+
+    const operadorId = searchParams.get("operadorId")
+    const operador = operadores?.find((operador) => operador.id === operadorId)
 
     const form = useForm<OperadoresSchemaType>({
         resolver: zodResolver(OperadoresSchema),
@@ -49,8 +55,8 @@ const NuevoOperadorPage = () => {
         try {
             setIsSubmiting(true)
 
-            toast.promise(writeOperador(values), {
-                loading: "Creando registro de operador, favor de esperar...",
+            toast.promise(updateOperador(values, operador?.id || ""), {
+                loading: "Actualizando registro de operador, favor de esperar...",
                 success: (result) => {
                     if (result.success) {
                         return result.message;
@@ -59,14 +65,14 @@ const NuevoOperadorPage = () => {
                     }
                 },
                 error: (error) => {
-                    return error.message || "Error al registrar el operador.";
+                    return error.message || "Error al actualizar al operador.";
                 },
             })
 
             form.reset()
             router.back()
         } catch (error) {
-            toast.error("Error al guardar el operador")
+            toast.error("Error al actualizar el operador")
             console.log(error);
         } finally {
             setIsSubmiting(false)
@@ -78,18 +84,43 @@ const NuevoOperadorPage = () => {
         setImageUrl(url)
     }
 
+    useEffect(() => {
+        if (!operador) return
+
+        const currentValues = form.getValues();
+        if (!currentValues.nombres && !currentValues.apellidos) {
+            form.setValue("nombres", operador.nombres)
+            form.setValue("apellidos", operador.apellidos)
+            form.setValue("telefono", operador.telefono)
+            form.setValue("email", operador.email)
+            form.setValue("nss", operador.nss)
+            form.setValue("curp", operador.curp)
+            form.setValue("ine", operador.ine)
+            form.setValue("colonia", operador.colonia)
+            form.setValue("calle", operador.calle)
+            form.setValue("externo", operador.externo)
+            form.setValue("cp", operador.cp)
+            form.setValue("tipoSangre", operador.tipoSangre)
+            form.setValue("numLicencia", operador.numLicencia)
+            form.setValue("tipoLicencia", operador.tipoLicencia)
+            form.setValue("emisor", operador.emisor)
+            form.setValue("idEquipo", operador.idEquipo)
+        }
+    }, [form, operador])
+
     return (
         <div className="container mx-auto py-8 px-4">
             <PageTitle
-                title={`Crear registro de operador`}
-                description={`Genere un nuevo registro con los datos solicitados sobre el nuevo operador`}
+                title={`Editar operador (${operador?.nombres})`}
+                description={`Actualice la informacion necesaria del operador actual (${operador?.nombres} ${operador?.apellidos})`}
                 icon={<User className="h-12 w-12 text-primary" />}
             />
             <Separator className="mt-4" />
-            <OperadorForm
+            <OperadorForm 
                 form={form}
                 handleImageUpload={handleImageUpload}
                 showFileInfo={showFileInfo}
+                operadorId={operador?.id}
                 isSubmiting={isSubmiting}
                 useCamera={useCamera}
                 imageUrl={imageUrl}
@@ -98,8 +129,8 @@ const NuevoOperadorPage = () => {
                 submitButton={
                     <SubmitButton
                         isSubmiting={isSubmiting}
-                        loadingText="Creando operador..."
-                        text="Crear nuevo operador"
+                        loadingText="Actualizando operador..."
+                        text="Actualizar operador"
                     />
                 }
             />
@@ -107,4 +138,4 @@ const NuevoOperadorPage = () => {
     )
 }
 
-export default NuevoOperadorPage
+export default EditarOperadorPage

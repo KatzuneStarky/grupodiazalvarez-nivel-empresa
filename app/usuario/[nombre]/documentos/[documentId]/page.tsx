@@ -1,30 +1,57 @@
 "use client"
 
 import { useFileExplorer } from "@/modules/usuarios/hooks/use-file-explorer"
-import { Separator } from "@/components/ui/separator"
-import { Calendar, FileText, Folder, FolderOpen, Hash } from "lucide-react"
-import { use } from "react"
-import { cn } from "@/lib/utils"
-import { Badge } from "@/components/ui/badge"
-import { formatDistanceToNow } from "date-fns"
+import FileCard from "@/modules/usuarios/components/documentos/file-card"
+import { Calendar, FileText, FolderOpen, Hash } from "lucide-react"
 import { parseFirebaseDate } from "@/utils/parse-timestamp-date"
+import { Separator } from "@/components/ui/separator"
+import { formatDistanceToNow } from "date-fns"
+import { Badge } from "@/components/ui/badge"
+import { use, useEffect, useState } from "react"
 import { es } from "date-fns/locale"
+import { cn } from "@/lib/utils"
 
 const DocumentPage = ({ params }: { params: Promise<{ documentId: string }> }) => {
     const { documentId } = use(params)
+
+    const [rootFolderId, setRootFolderId] = useState<string | null>(null);
 
     const {
         files,
         searchQuery,
         activeFilter,
-        viewMode = "grid"
+        viewMode = "grid",
+        selectedItems,
+        selectFile,
+        handleFileAction,
+        handleFileClick
     } = useFileExplorer()
 
-    const folder = files.find((file) => file.id === documentId)
-    const childrenCount = folder?.children?.length || 0
+    const rootId = rootFolderId ? rootFolderId: documentId
+    const currentFolder = files.find(f => f.type === "folder" && f.id === rootId);
+    const isRootFolder = currentFolder?.parentId == null;
+
+    useEffect(() => {
+        if (isRootFolder && currentFolder?.id) {
+            localStorage.setItem("rootFolderId", currentFolder.id);
+            setRootFolderId(currentFolder.id);
+        }
+    }, [currentFolder, isRootFolder]);
+
+    useEffect(() => {
+        const storedRoot = localStorage.getItem("rootFolderId");
+        if (storedRoot) setRootFolderId(storedRoot);
+    }, []);
+
+    const childrenCount = currentFolder?.children?.length;
 
     return (
         <div className="container mx-auto py-8 px-4">
+            <div className="flex flex-col">
+                <span>{isRootFolder ? "si" : "no"}</span>
+                <span>{rootFolderId}</span>
+                <span>{documentId}</span>
+            </div>
             <div className="mb-6 p-6 rounded-2xl glass-effect border border-white/20 shadow-lg">
                 <div className="flex items-start gap-4">
                     <div className="flex-shrink-0">
@@ -32,16 +59,15 @@ const DocumentPage = ({ params }: { params: Promise<{ documentId: string }> }) =
                             <FolderOpen className="w-8 h-8 text-white" />
                         </div>
                     </div>
-
                     <div className="flex-1 min-w-0">
-                        <h2 className="text-2xl font-bold text-foreground mb-2 text-balance">{folder?.name}</h2>
-                        {folder?.description && (
-                            <p className="text-sm text-muted-foreground mb-4 leading-relaxed text-pretty">{folder.description}</p>
+                        <h2 className="text-2xl font-bold text-foreground mb-2 text-balance">{currentFolder?.name}</h2>
+                        {currentFolder?.description && (
+                            <p className="text-sm text-muted-foreground mb-4 leading-relaxed text-pretty">{currentFolder.description}</p>
                         )}
 
-                        {folder?.tags && folder.tags.length > 0 && (
+                        {currentFolder?.tags && currentFolder.tags.length > 0 && (
                             <div className="flex flex-wrap gap-2 mb-4">
-                                {folder.tags.map((tag, index) => (
+                                {currentFolder.tags.map((tag, index) => (
                                     <Badge
                                         key={index}
                                         variant="secondary"
@@ -57,7 +83,7 @@ const DocumentPage = ({ params }: { params: Promise<{ documentId: string }> }) =
                         <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
                             <div className="flex items-center gap-2">
                                 <Calendar className="w-4 h-4" />
-                                <span>Modificado {formatDistanceToNow(parseFirebaseDate(folder?.lastModified), { addSuffix: true, locale: es })}</span>
+                                <span>Modificado {formatDistanceToNow(parseFirebaseDate(currentFolder?.lastModified), { addSuffix: true, locale: es })}</span>
                             </div>
 
                             <div className="flex items-center gap-2">
@@ -71,14 +97,24 @@ const DocumentPage = ({ params }: { params: Promise<{ documentId: string }> }) =
                 </div>
             </div>
             <Separator className="my-4" />
-            {folder?.children && folder.children.length > 0 ? (
+            {currentFolder?.children && currentFolder.children.length > 0 ? (
                 <div className={cn(
                     "gap-6 p-4",
                     viewMode === "grid"
                         ? "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7"
                         : "space-y-3",
                 )}>
-
+                    {currentFolder.children.map((child) => (
+                        <FileCard
+                            key={child.id}
+                            file={child}
+                            isSelected={selectedItems.includes(child.id)}
+                            viewMode={viewMode}
+                            onSelect={selectFile}
+                            onClick={handleFileClick}
+                            onAction={handleFileAction}
+                        />
+                    ))}
                 </div>
             ) : (
                 <div className="flex flex-col items-center justify-center h-96 text-muted-foreground">

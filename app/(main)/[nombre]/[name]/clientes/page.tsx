@@ -1,6 +1,7 @@
 "use client"
 
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import DeleteClientDialog from "@/modules/logistica/clientes/components/delete-cliente-dialog"
 import { useClientes } from "@/modules/logistica/bdd/clientes/hooks/use-clientes"
 import { Edit, Mail, MapPin, Phone, Plus, Trash, User } from "lucide-react"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
@@ -9,29 +10,28 @@ import { Separator } from "@/components/ui/separator"
 import { Button } from "@/components/ui/button"
 import { useRouter } from "next/navigation"
 import { Badge } from "@/components/ui/badge"
+import PageTitle from "@/components/custom/page-title"
 
 const ClientsPage = () => {
-    const { directLink } = useDirectLink("/clientes/nuevo")
+    const { directLink } = useDirectLink("/clientes")
     const { clientes } = useClientes()
     const router = useRouter()
 
     return (
         <div className="container mx-auto py-8 px-4">
-            <div className="mb-2">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-                    <div>
-                        <h1 className="text-3xl font-sans font-bold text-balance text-foreground mb-2">Clientes</h1>
-                        <p className="text-muted-foreground">Gestiona la información de tus clientes</p>
-                    </div>
-                    <div className="flex gap-3">
-                        <Button onClick={() => router.push(directLink)} className="flex items-center gap-2 bg-primary hover:bg-primary/90">
-                            <Plus className="h-4 w-4" />
-                            Nuevo Cliente
-                        </Button>
-                    </div>
-                </div>
-            </div>
-            <Separator className="mb-4" />
+            <PageTitle
+                title="Clientes"
+                description="Gestiona la información de tus clientes"
+                icon={<User className="h-12 w-12 text-primary" />}
+                hasActions
+                actions={
+                    <Button onClick={() => router.push(`${directLink}/nuevo`)} className="flex items-center gap-2 bg-primary hover:bg-primary/90">
+                        <Plus className="h-4 w-4" />
+                        Nuevo Cliente
+                    </Button>
+                }
+            />
+            <Separator className="my-4" />
 
             {clientes?.length === 0 ? (
                 <div className="text-center py-12">
@@ -167,17 +167,12 @@ const ClientsPage = () => {
                                         <Button
                                             size="sm"
                                             className="flex-1 text-xs h-8 bg-primary hover:bg-primary/90"
+                                            onClick={() => router.push(`${directLink}/editar?clienteId=${cliente.id}`)}
                                         >
                                             <Edit className="h-3 w-3 mr-1" />
                                             Editar
                                         </Button>
-                                        <Button
-                                            size="sm"
-                                            className="flex-1 text-xs h-8 bg-red-700 hover:bg-red-800"
-                                        >
-                                            <Trash className="h-3 w-3 mr-1" />
-                                            Eliminar
-                                        </Button>
+                                        <DeleteClientDialog clientId={cliente.id || ""} />
                                     </div>
                                 </CardContent>
                             </Card>

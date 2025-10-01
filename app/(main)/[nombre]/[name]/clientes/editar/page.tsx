@@ -1,21 +1,27 @@
 "use client"
 
 import { ClienteSchema, ClienteSchemaType } from "@/modules/logistica/clientes/schemas/client.schema"
+import { useClientes } from "@/modules/logistica/bdd/clientes/hooks/use-clientes"
 import ClienteForm from "@/modules/logistica/clientes/components/clientes-form"
-import { WriteCliente } from "@/modules/logistica/clientes/actions/write"
+import { UpdateCliente } from "@/modules/logistica/clientes/actions/write"
+import { useRouter, useSearchParams } from "next/navigation"
 import SubmitButton from "@/components/global/submit-button"
 import PageTitle from "@/components/custom/page-title"
 import { Separator } from "@/components/ui/separator"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useRouter } from "next/navigation"
+import { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
 import { User } from "lucide-react"
-import { useState } from "react"
 import { toast } from "sonner"
 
-const NuevoClientePage = () => {
+const EditarClientePage = () => {
     const [isSubmiting, setIsSubmiting] = useState<boolean>(false)
+    const searchParams = useSearchParams()
+    const { clientes } = useClientes()
     const router = useRouter()
+
+    const clientId = searchParams.get("clienteId")
+    const cliente = clientes?.find((cliente) => cliente.id === clientId)
 
     const form = useForm<ClienteSchemaType>({
         resolver: zodResolver(ClienteSchema),
@@ -49,7 +55,7 @@ const NuevoClientePage = () => {
         try {
             setIsSubmiting(true)
 
-            toast.promise(WriteCliente({
+            toast.promise(UpdateCliente({
                 activo: data.activo,
                 contactos: data.contactos,
                 curp: data.curp,
@@ -60,8 +66,8 @@ const NuevoClientePage = () => {
                 correo: data.correo,
                 grupo: data.grupo,
                 nombreCorto: data.nombreCorto,
-            }), {
-                loading: "Creando registro de cliente, favor de esperar...",
+            }, clientId || ""), {
+                loading: "Actualizando cliente, favor de esperar...",
                 success: (result) => {
                     if (result.success) {
                         return result.message;
@@ -70,7 +76,7 @@ const NuevoClientePage = () => {
                     }
                 },
                 error: (error) => {
-                    return error.message || "Error al registrar el cliente.";
+                    return error.message || "Error al actualizar el cliente.";
                 },
             })
 
@@ -78,7 +84,7 @@ const NuevoClientePage = () => {
             router.back()
         } catch (error) {
             console.log(error);
-            toast.error("Error al crear el cliente", {
+            toast.error("Error al actualizar el cliente", {
                 description: `${error}`
             })
             setIsSubmiting(false)
@@ -87,11 +93,31 @@ const NuevoClientePage = () => {
         }
     }
 
+    useEffect(() => {
+        if (!cliente) return;
+
+        const currentValues = form.getValues();
+        if (!currentValues.nombreFiscal && !currentValues.nombreCorto) {
+            form.reset({
+                nombreFiscal: cliente.nombreFiscal,
+                nombreCorto: cliente.nombreCorto,
+                contactos: cliente.contactos,
+                domicilio: cliente.domicilio,
+                correo: cliente.correo,
+                activo: cliente.activo,
+                grupo: cliente.grupo,
+                curp: cliente.curp,
+                rfc: cliente.rfc,
+                tipoCliente: cliente.tipoCliente || "nacional",
+            });
+        }
+    }, [cliente, form]);
+
     return (
         <div className="container mx-auto px-4 py-8">
             <PageTitle
-                description="Ingrese la información necesaria para generar el nuevo registro de un nuevo cliente."
-                title="Nuevo registro de cliente"
+                title={`Editar cliente (${cliente?.nombreCorto})`}
+                description={`Actualice la informacion necesaria del cliente actual (${cliente?.nombreFiscal})`}
                 icon={<User className="h-12 w-12 text-primary" />}
             />
             <Separator className="mt-4" />
@@ -102,13 +128,13 @@ const NuevoClientePage = () => {
                 submitButton={
                     <SubmitButton
                         isSubmiting={isSubmiting}
-                        loadingText="Guardando cliente..."
-                        text="Guardar cliente"
+                        loadingText="Actualizando cliente..."
+                        text="Actualizar cliente"
                     />
                 }
             />
-        </div >
+        </div>
     )
 }
 
-export default NuevoClientePage
+export default EditarClientePage

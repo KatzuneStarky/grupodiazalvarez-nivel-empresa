@@ -5,8 +5,11 @@ import { Operador } from "../../bdd/operadores/types/operadores"
 import { Edit, MoreHorizontal, Trash2 } from "lucide-react"
 import OperadorDetails from "./operador-details"
 import { Button } from "@/components/ui/button"
+import { useRouter } from "next/navigation"
 
-const OperatorActions = ({ operador, className }: { operador: Operador, className: string }) => {
+const OperatorActions = ({ operador, className, directLink }: { operador: Operador, className: string, directLink: string }) => {
+    const router = useRouter()
+
     return (
         <div className={className}>
             <OperadorDetails operador={operador} />
@@ -17,7 +20,7 @@ const OperatorActions = ({ operador, className }: { operador: Operador, classNam
                     </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
-                    <DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => router.push(`${directLink}/editar?operadorId=${operador.id}`)}>
                         <Edit className="h-4 w-4 mr-2" />
                         Editar
                     </DropdownMenuItem>
