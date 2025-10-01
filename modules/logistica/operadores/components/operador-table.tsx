@@ -18,13 +18,15 @@ interface OperadorTableProps {
     SortIcon: React.ElementType<{ field: SortField }>
     paginatedOperators: Operador[]
     getInitials: (nombres: string, apellidos: string) => string
+    directLink: string
 }
 
 const OperadorTable = ({
     paginatedOperators,
     handleSort,
     SortIcon,
-    getInitials
+    getInitials,
+    directLink
 }: OperadorTableProps) => {
     return (
         <Card className="p-4">
@@ -89,6 +91,7 @@ const OperadorTable = ({
                                 <OperatorActions 
                                     operador={operator}
                                     className="flex gap-2"
+                                    directLink={directLink}
                                 />
                             </TableCell>
                         </TableRow>

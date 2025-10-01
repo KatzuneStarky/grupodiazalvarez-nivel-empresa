@@ -103,6 +103,7 @@ const OperadoresPage = () => {
                         getInitials={getInitials}
                         handleSort={handleSort}
                         paginatedOperators={paginatedOperators}
+                        directLink={directLink}
                     />
                     <OperadorPagination
                         currentPage={currentPage}
