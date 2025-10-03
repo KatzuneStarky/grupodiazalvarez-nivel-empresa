@@ -41,6 +41,12 @@ const EstacionesTablePage = () => {
         selectCapacidadRage
     } = useEstacionesFilters()
 
+    const getFuelLevelColor = (percentage: number) => {
+        if (percentage >= 70) return "bg-green-500"
+        if (percentage >= 40) return "bg-yellow-500"
+        return "bg-red-500"
+    }
+
     return (
         <div className="container mx-auto px-4 py-8">
             <div className="flex items-center justify-between w-full">
@@ -165,7 +171,11 @@ const EstacionesTablePage = () => {
                 </CardContent>
             </Card>
 
-            <EstacionDialog selectedStation={selectedStation} setSelectedStation={setSelectedStation} />
+            <EstacionDialog
+                selectedStation={selectedStation}
+                setSelectedStation={setSelectedStation}
+                getFuelLevelColor={getFuelLevelColor}
+            />
         </div>
     )
 }
