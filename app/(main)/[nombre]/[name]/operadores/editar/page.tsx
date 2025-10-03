@@ -105,6 +105,8 @@ const EditarOperadorPage = () => {
             form.setValue("tipoLicencia", operador.tipoLicencia)
             form.setValue("emisor", operador.emisor)
             form.setValue("idEquipo", operador.idEquipo)
+            form.setValue("image", operador.image)
+            form.setValue("contactosEmergencia", operador.contactosEmergencia || [])
         }
     }, [form, operador])
 

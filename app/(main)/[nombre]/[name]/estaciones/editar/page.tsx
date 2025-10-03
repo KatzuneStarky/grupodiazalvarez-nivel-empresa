@@ -2,30 +2,33 @@
 
 import { EstacionDeServicioSchema, EstacionDeServicioType } from "@/modules/logistica/estaciones/schemas/estacion-servicio.schema"
 import EstacionesForm from "@/modules/logistica/estaciones/components/estaciones-form"
-import { writeEstacion } from "@/modules/logistica/estaciones/actions/write"
+import { useEstaciones } from "@/modules/logistica/estaciones/hooks/use-estaciones"
+import { updateEstacion } from "@/modules/logistica/estaciones/actions/write"
+import { parseFirebaseDate } from "@/utils/parse-timestamp-date"
+import { useRouter, useSearchParams } from "next/navigation"
 import SubmitButton from "@/components/global/submit-button"
 import PageTitle from "@/components/custom/page-title"
-import { Separator } from "@/components/ui/separator"
 import { zodResolver } from "@hookform/resolvers/zod"
+import { Separator } from "@/components/ui/separator"
 import { IconGasStation } from "@tabler/icons-react"
-import { useRouter } from "next/navigation"
+import { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
-import { useState } from "react"
 import { toast } from "sonner"
 
-const NuevaEstacionPage = () => {
-    const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
+const EditarEstacionPage = () => {
+    const [isSubmiting, setIsSubmiting] = useState<boolean>(false)
+    const searchParams = useSearchParams()
+    const { estaciones } = useEstaciones()
     const router = useRouter()
+
+    const estacionId = searchParams.get("estacionId")
+    const estacion = estaciones?.find((estacion) => estacion.id === estacionId)
 
     const form = useForm<EstacionDeServicioType>({
         resolver: zodResolver(EstacionDeServicioSchema),
         defaultValues: {
             activo: true,
-            contacto: [{
-                email: "",
-                responsable: "",
-                telefono: ""
-            }],
+            contacto: [],
             direccion: {
                 calle: "",
                 colonia: "",
@@ -53,8 +56,8 @@ const NuevaEstacionPage = () => {
 
     const onSubmit = async (data: EstacionDeServicioType) => {
         try {
-            setIsSubmitting(true)
-            toast.promise(writeEstacion({
+            setIsSubmiting(true)
+            toast.promise(updateEstacion({
                 activo: data.activo,
                 contacto: data.contacto.map(contacto => ({
                     email: contacto.email,
@@ -90,7 +93,7 @@ const NuevaEstacionPage = () => {
                     lat: data.ubicacion?.lat || 0,
                     lng: data.ubicacion?.lng || 0
                 }
-            }), {
+            }, estacionId || ""), {
                 loading: "Creando registro de estacion de servicio, favor de esperar...",
                 success: (result) => {
                     if (result.success) {
@@ -103,7 +106,7 @@ const NuevaEstacionPage = () => {
                     return error.message || "Error al registrar la estacion de servicio.";
                 },
                 finally: () => {
-                    setIsSubmitting(false)
+                    setIsSubmiting(false)
                 }
             })
 
@@ -113,27 +116,63 @@ const NuevaEstacionPage = () => {
             console.log(error)
             toast.error("Error al guardar la estación")
         } finally {
-            setIsSubmitting(false)
+            setIsSubmiting(false)
         }
     }
+
+    useEffect(() => {
+        if (!estacion) return
+
+        const currentValues = form.getValues()
+        if (!currentValues.nombre) {
+            const contactos = Array.isArray(estacion.contacto)
+                ? estacion.contacto
+                : estacion.contacto
+                    ? [estacion.contacto]
+                    : []
+
+            form.setValue("numeroPermisoCRE", estacion.numeroPermisoCRE || "")
+            form.setValue("razonSocial", estacion.razonSocial || "")
+            form.setValue("rfc", estacion.rfc || "")
+            form.setValue("nombre", estacion.nombre)
+            form.setValue("fechaRegistro", parseFirebaseDate(estacion.fechaRegistro) || new Date())
+            form.setValue("horarios", estacion.horarios || "")
+            form.setValue("activo", estacion.activo)
+            form.setValue("tanques", estacion.tanques.map((tanque) => ({
+                capacidadActual: tanque.capacidadActual,
+                capacidadTotal: tanque.capacidadTotal,
+                tipoCombustible: tanque.tipoCombustible || "Magna",
+                fechaUltimaRecarga: parseFirebaseDate(tanque.fechaUltimaRecarga) || new Date(),
+                numeroTanque: tanque.numeroTanque || ""
+            })))
+            form.setValue("contacto", contactos.map((contacto) => ({
+                email: contacto.email || "",
+                responsable: contacto.responsable || "",
+                telefono: contacto.telefono || "",
+                cargo: contacto.cargo || "Gerente",
+            })))
+            form.setValue("direccion", estacion.direccion)
+            form.setValue("ubicacion", estacion.ubicacion)
+        }
+    }, [estacion, form])
 
     return (
         <div className="container mx-auto px-4 py-8">
             <PageTitle
-                description="Ingrese la información necesaria para generar el nuevo registro de una nueva estación."
-                title="Nuevo registro de estación"
+                description={`Actualice la información de la estación (${estacion?.razonSocial})`}
+                title={`Actualizar la estacion ${estacion?.nombre}`}
                 icon={<IconGasStation className="h-12 w-12 text-primary" />}
             />
             <Separator className="mt-4" />
             <EstacionesForm
                 form={form}
-                isSubmiting={isSubmitting}
+                isSubmiting={isSubmiting}
                 onSubmit={onSubmit}
                 submitButton={
                     <SubmitButton
-                        isSubmiting={isSubmitting}
-                        text="Crear nueva estacion"
-                        loadingText="Creando nueva estacion..."
+                        isSubmiting={isSubmiting}
+                        text="Actualizar la estacion"
+                        loadingText="Actualizando la estacion..."
                     />
                 }
             />
@@ -141,4 +180,4 @@ const NuevaEstacionPage = () => {
     )
 }
 
-export default NuevaEstacionPage
+export default EditarEstacionPage

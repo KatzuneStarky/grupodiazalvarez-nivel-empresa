@@ -23,7 +23,8 @@ export interface EstacionServicio {
     telefono?: string;
     email?: string;
     responsable?: string;
-  };
+    cargo: "Gerente" | "Encargado"
+  }[];
   numeroPermisoCRE?: string;
   horarios?: string;
   productos?: ("Magna" | "Premium" | "Diesel")[];

@@ -1,6 +1,6 @@
 "use client"
 
-import { Building, Calendar, Clock, FileText, Fuel, Mail, MapPin, Phone, User } from "lucide-react"
+import { BadgeIcon, Building, Calendar, Clock, FileText, Fuel, IdCard, Mail, MapPin, Phone, User } from "lucide-react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { getFuelTypeColor } from "../../tanques/constants/fuel-type-color"
 import { parseFirebaseDate } from "@/utils/parse-timestamp-date"
@@ -15,12 +15,16 @@ import { format } from "date-fns"
 interface DialogProps {
     selectedStation: EstacionServicio | null
     setSelectedStation: React.Dispatch<React.SetStateAction<EstacionServicio | null>>
+    getFuelLevelColor: (value: number) => void
 }
 
 export const EstacionDialog = ({
     selectedStation,
-    setSelectedStation
+    setSelectedStation,
+    getFuelLevelColor
 }: DialogProps) => {
+    const contactoArray = Array(selectedStation?.contacto || [])
+
     return (
         <Dialog open={!!selectedStation} onOpenChange={() => setSelectedStation(null)}>
             <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
@@ -97,30 +101,51 @@ export const EstacionDialog = ({
                             </div>
 
                             <Separator />
+                            <h3 className="font-semibold">Contactos</h3>
 
-                            <div className="space-y-2">
-                                <h3 className="font-semibold">Contacto</h3>
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                                    {selectedStation.contacto.telefono && (
-                                        <div className="flex items-center gap-2">
-                                            <Phone className="h-4 w-4" />
-                                            <span>{selectedStation.contacto.telefono}</span>
-                                        </div>
-                                    )}
-                                    {selectedStation.contacto.email && (
-                                        <div className="flex items-center gap-2">
-                                            <Mail className="h-4 w-4" />
-                                            <span>{selectedStation.contacto.email}</span>
-                                        </div>
-                                    )}
-                                    {selectedStation.contacto.responsable && (
-                                        <div className="flex items-center gap-2">
-                                            <User className="h-4 w-4" />
-                                            <span>{selectedStation.contacto.responsable}</span>
-                                        </div>
-                                    )}
+                            {!Array.isArray(selectedStation.contacto) || selectedStation.contacto.length === 0 ? (
+                                <Card>
+                                    <div className="flex items-center justify-center gap-2">
+                                        <IdCard className="h-8 w-8" />
+                                        <span className="text-xl font-extrabold">
+                                            No hay contactos disponibles
+                                        </span>
+                                    </div>
+                                </Card>
+                            ) : (
+                                <div>
+                                    {selectedStation.contacto.map((contacto, index) => (
+                                        <Card className="space-y-2 p-4" key={index}>
+                                            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm">
+                                                {contacto.responsable && (
+                                                    <div className="flex items-center gap-2">
+                                                        <User className="h-4 w-4" />
+                                                        <span>{contacto.responsable}</span>
+                                                    </div>
+                                                )}
+                                                {contacto.cargo && (
+                                                    <div className="flex items-center gap-2">
+                                                        <BadgeIcon className="h-4 w-4" />
+                                                        <span>{contacto.cargo}</span>
+                                                    </div>
+                                                )}
+                                                {contacto.telefono && (
+                                                    <div className="flex items-center gap-2">
+                                                        <Phone className="h-4 w-4" />
+                                                        <span>{contacto.telefono}</span>
+                                                    </div>
+                                                )}
+                                                {contacto.email && (
+                                                    <div className="flex items-center gap-2">
+                                                        <Mail className="h-4 w-4" />
+                                                        <span>{contacto.email}</span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </Card>
+                                    ))}
                                 </div>
-                            </div>
+                            )}
 
                             <Separator />
 
@@ -196,7 +221,7 @@ export const EstacionDialog = ({
                                                             <span className="text-lg font-bold">{Math.round(percentage)}%</span>
                                                         </div>
 
-                                                        <Progress value={percentage} className="h-3" />
+                                                        <Progress value={percentage} className={`h-3 ${getFuelLevelColor(percentage)}`} />
 
                                                         <div className="grid grid-cols-2 gap-4 text-sm">
                                                             <div className="text-center p-2 bg-blue-50 dark:bg-blue-950 rounded">

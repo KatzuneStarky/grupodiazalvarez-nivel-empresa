@@ -3,6 +3,7 @@
 import { useEstacionesFilters } from "@/modules/logistica/estaciones/hooks/use-estaciones-filters"
 import { ChevronLeft, ChevronRight, Droplets, Fuel, MapPin, Plus, User } from "lucide-react"
 import { EstacionDialog } from "@/modules/logistica/estaciones/components/estacion-dialog"
+import EstacionActions from "@/modules/logistica/estaciones/components/estacion-actions"
 import EstacionesFilters from "@/modules/logistica/estaciones/components/filtros"
 import { EstacionServicio } from "@/modules/logistica/estaciones/types/estacion"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -19,7 +20,7 @@ const RegistrosEstacionesPage = () => {
     const [currentFuelSlides, setCurrentFuelSlides] = useState<Record<string, number>>({})
     const [selectedStation, setSelectedStation] = useState<EstacionServicio | null>(null)
 
-    const { directLink } = useDirectLink("/estaciones/nuevo")
+    const { directLink } = useDirectLink("/estaciones")
     const router = useRouter()
     const {
         searchTerm,
@@ -89,7 +90,7 @@ const RegistrosEstacionesPage = () => {
 
                 <Button
                     className="sm:w-auto"
-                    onClick={() => router.push(directLink)}
+                    onClick={() => router.push(`${directLink}/nuevo`)}
                 >
                     <Plus className="w-4 h-4 mr-2" />
                     Nueva estacion
@@ -128,12 +129,16 @@ const RegistrosEstacionesPage = () => {
                                 <CardHeader className="pb-3">
                                     <div className="flex items-start justify-between">
                                         <CardTitle className="text-lg font-semibold text-balance leading-tight">{estacion.nombre}</CardTitle>
-                                        <Badge
-                                            variant={estacion.activo ? "default" : "secondary"}
-                                            className={estacion.activo ? "bg-green-500 hover:bg-green-600" : ""}
-                                        >
-                                            {estacion.activo ? "Activa" : "Inactiva"}
-                                        </Badge>
+                                        <div className="flex items-center gap-2">
+                                            <Badge
+                                                variant={estacion.activo ? "default" : "secondary"}
+                                                className={estacion.activo ? "bg-green-500 hover:bg-green-600" : ""}
+                                            >
+                                                {estacion.activo ? "Activa" : "Inactiva"}
+                                            </Badge>
+
+                                            <EstacionActions directLink={directLink} estacionId={estacion.id} />
+                                        </div>
                                     </div>
                                 </CardHeader>
                                 <CardContent className="space-y-4">
@@ -236,7 +241,11 @@ const RegistrosEstacionesPage = () => {
                 })}
             </div>
 
-            <EstacionDialog selectedStation={selectedStation} setSelectedStation={setSelectedStation} />
+            <EstacionDialog
+                selectedStation={selectedStation}
+                setSelectedStation={setSelectedStation}
+                getFuelLevelColor={getFuelLevelColor}
+            />
         </div>
     )
 }

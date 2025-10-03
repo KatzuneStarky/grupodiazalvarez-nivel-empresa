@@ -27,11 +27,12 @@ export const EstacionDeServicioSchema = z.object({
         lat: z.coerce.number(),
         lng: z.coerce.number()
     }).optional(),
-    contacto: z.object({
+    contacto: z.array(z.object({
         telefono: z.string(),
         email: z.string(),
         responsable: z.string(),
-    }),
+        cargo: z.enum(["Gerente", "Encargado"])
+    })),
     numeroPermisoCRE: z.string(),
     horarios: z.string(),
     productos: z.enum(["Magna", "Premium", "Diesel"]).array(),

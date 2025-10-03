@@ -54,12 +54,13 @@ export const useEstacionesFilters = () => {
                 combustibleFilter === "all" ||
                 estacion.tanques.some(tanque => tanque.tipoCombustible.toLowerCase() === combustibleFilter)
 
-            const matchSearch =
-                term === "" ||
-                (estacion.nombre ?? "").toLowerCase().includes(term) ||
-                (estacion.contacto.responsable ?? "").toLowerCase().includes(term) ||
-                (estacion.contacto.telefono ?? "").includes(term) ||
-                (estacion.contacto.email ?? "").toLowerCase().includes(term)
+            const matchSearch = term === "" ||
+                (estacion.nombre?.toLowerCase().includes(term.toLowerCase())) ||
+                (estacion.contacto?.some(c =>
+                (c?.responsable?.toLowerCase().includes(term.toLowerCase()) ||
+                    c?.telefono?.includes(term) ||
+                    c?.email?.toLowerCase().includes(term.toLowerCase()))
+                ) ?? false)
 
             return matchSearch
                 && matchesTanquesCount
@@ -98,10 +99,10 @@ export const useEstacionesFilters = () => {
     }, [estaciones])
 
     const getMainContact = (station: EstacionServicio) => {
-        if (station.contacto.responsable) return station.contacto.responsable
-        if (station.contacto.telefono) return station.contacto.telefono
-        if (station.contacto.email) return station.contacto.email
-        return "Sin contacto"
+        if (!Array.isArray(station.contacto) || station.contacto.length === 0) return "Sin contacto"
+
+        const firstContacto = station.contacto[0]
+        return firstContacto.responsable || firstContacto.telefono || firstContacto.email || "Sin contacto"
     }
 
     const getStationFuelByType = (station: EstacionServicio) => {
