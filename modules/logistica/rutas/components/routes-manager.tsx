@@ -5,20 +5,23 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ClasificacionRuta, Ruta, TipoViaje } from "../../equipos/types/rutas"
-import { Edit, Eye, Grid, List, Map, Search, Trash2 } from "lucide-react"
+import { Edit, Eye, Grid, List, Map, Search } from "lucide-react"
+import DeleteRouteDialog from "./delete-route-dialog"
 import { Separator } from "@/components/ui/separator"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
+import { useRouter } from "next/navigation"
 import RouteMapPage from "./route-map"
 import RouteCard from "./route-card"
 import { useState } from "react"
 
 interface RouteTableProps {
     routes: Ruta[]
+    directLink: string
 }
 
-const RoutesManager = ({ routes }: RouteTableProps) => {
+const RoutesManager = ({ routes, directLink }: RouteTableProps) => {
     const [filterClasificacion, setFilterClasificacion] = useState<ClasificacionRuta | "all">("all")
     const [filterActiva, setFilterActiva] = useState<"all" | "active" | "inactive">("all")
     const [filterTipoViaje, setFilterTipoViaje] = useState<TipoViaje | "all">("all")
@@ -30,6 +33,7 @@ const RoutesManager = ({ routes }: RouteTableProps) => {
     const [showMapModal, setShowMapModal] = useState<boolean>(false)
     const [currentPage, setCurrentPage] = useState(1)
     const [searchTerm, setSearchTerm] = useState("")
+    const router = useRouter()
 
     const itemsPerPage = 10
 
@@ -230,12 +234,10 @@ const RoutesManager = ({ routes }: RouteTableProps) => {
                                                 <Button variant="ghost" size="sm" onClick={() => handleViewMap(route)}>
                                                     <Map className="h-4 w-4" />
                                                 </Button>
-                                                <Button variant="ghost" size="sm">
+                                                <Button variant="ghost" size="sm" onClick={() => router.push(`${directLink}/editar?rutaId=${route?.id}`)}>
                                                     <Edit className="h-4 w-4" />
                                                 </Button>
-                                                <Button variant="ghost" size="sm">
-                                                    <Trash2 className="h-4 w-4" />
-                                                </Button>
+                                                <DeleteRouteDialog routeId={route.id} variant="ghost" />
                                             </div>
                                         </TableCell>
                                     </TableRow>
@@ -247,7 +249,12 @@ const RoutesManager = ({ routes }: RouteTableProps) => {
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {paginatedRoutes.map((route) => (
-                        <RouteCard key={route.id} route={route} />
+                        <RouteCard
+                            key={route.id}
+                            route={route}
+                            directLink={directLink}
+                            handleViewMap={handleViewMap}
+                        />
                     ))}
                 </div>
             )}

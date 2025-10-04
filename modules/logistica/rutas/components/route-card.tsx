@@ -1,16 +1,22 @@
 "use client"
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Clock, Edit, Map, MapPin, Truck, User } from "lucide-react"
+import DeleteRouteDialog from "./delete-route-dialog"
 import { Ruta } from "../../equipos/types/rutas"
-import { Badge } from "@/components/ui/badge"
-import { Clock, Edit, Map, MapPin, Trash2, Truck, User } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import { useRouter } from "next/navigation"
 
 interface RouteCardProps {
     route: Ruta
+    directLink: string
+    handleViewMap: (route: Ruta) => void
 }
 
-const RouteCard = ({ route }: RouteCardProps) => {
+const RouteCard = ({ route, directLink, handleViewMap }: RouteCardProps) => {
+    const router = useRouter()
+
     return (
         <Card className="hover:shadow-md transition-shadow">
             <CardHeader className="pb-3">
@@ -83,16 +89,14 @@ const RouteCard = ({ route }: RouteCardProps) => {
                 </div>
 
                 <div className="flex items-center gap-2 pt-2 border-t">
-                    <Button variant="outline" size="sm" className="flex-1">
+                    <Button variant="outline" size="sm" className="flex-1" onClick={() => handleViewMap(route)}>
                         <Map className="h-4 w-4 mr-1" />
                         Ver Mapa
                     </Button>
-                    <Button variant="outline" size="sm">
+                    <Button variant="outline" size="sm" onClick={() => router.push(`${directLink}/editar?rutaId=${route.id}`)}>
                         <Edit className="h-4 w-4" />
                     </Button>
-                    <Button variant="outline" size="sm">
-                        <Trash2 className="h-4 w-4" />
-                    </Button>
+                    <DeleteRouteDialog routeId={route.id} variant="outline" />
                 </div>
             </CardContent>
         </Card>

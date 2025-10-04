@@ -15,7 +15,7 @@ const EquiposRutasPage = () => {
     const [isEditing, setIsEditing] = useState(false)
     const [showForm, setShowForm] = useState(false)
 
-    const { directLink } = useDirectLink("/equipos/rutas/nuevo")
+    const { directLink } = useDirectLink("/equipos/rutas")
     const router = useRouter()
     const { rutas } = useRutas()
 
@@ -36,7 +36,7 @@ const EquiposRutasPage = () => {
                             <p className="text-muted-foreground">Administra las rutas de transporte de combustible</p>
                         </div>
                     </div>
-                    <Button className="flex items-center gap-2" onClick={() => router.push(directLink)}>
+                    <Button className="flex items-center gap-2" onClick={() => router.push(`${directLink}/nuevo`)}>
                         <Plus className="h-4 w-4" />
                         Nueva Ruta
                     </Button>
@@ -91,7 +91,7 @@ const EquiposRutasPage = () => {
                 </div>
             </div>
 
-            <RoutesManager routes={rutas || []} />
+            <RoutesManager routes={rutas || []} directLink={directLink} />
         </div>
     )
 }

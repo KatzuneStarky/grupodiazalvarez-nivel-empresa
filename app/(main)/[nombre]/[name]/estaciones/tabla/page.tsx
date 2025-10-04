@@ -1,6 +1,7 @@
 "use client"
 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import DeleteEstacionDialog from "@/modules/logistica/estaciones/components/delete-estacion-dialog"
 import { useEstacionesFilters } from "@/modules/logistica/estaciones/hooks/use-estaciones-filters"
 import { EstacionDialog } from "@/modules/logistica/estaciones/components/estacion-dialog"
 import EstacionesFilters from "@/modules/logistica/estaciones/components/filtros"
@@ -20,7 +21,7 @@ import { useState } from "react"
 
 const EstacionesTablePage = () => {
     const [selectedStation, setSelectedStation] = useState<EstacionServicio | null>(null)
-    const { directLink } = useDirectLink("/estaciones/nuevo")
+    const { directLink } = useDirectLink("/estaciones")
     const router = useRouter()
 
     const {
@@ -28,8 +29,6 @@ const EstacionesTablePage = () => {
         setSearchTerm,
         dateRange,
         setDateRange,
-        getMainContact,
-        getStationFuelByType,
         filteredEstaciones,
         selectedTanquesRange,
         setSelectedTanquesRange,
@@ -64,7 +63,7 @@ const EstacionesTablePage = () => {
 
                 <Button
                     className="sm:w-auto"
-                    onClick={() => router.push(directLink)}
+                    onClick={() => router.push(`${directLink}/nuevo`)}
                 >
                     <Plus className="w-4 h-4 mr-2" />
                     Nueva estacion
@@ -146,17 +145,12 @@ const EstacionesTablePage = () => {
                                                 variant="ghost"
                                                 size="sm"
                                                 className="text-primary hover:text-primary-foreground hover:bg-primary"
+                                                onClick={() => router.push(`${directLink}/editar?estacionId=${station.id}`)}
                                             >
                                                 <Edit className="h-4 w-4" />
                                             </Button>
 
-                                            <Button
-                                                variant="ghost"
-                                                size="sm"
-                                                className="text-primary hover:text-primary-foreground hover:bg-primary"
-                                            >
-                                                <Trash className="h-4 w-4" />
-                                            </Button>
+                                            <DeleteEstacionDialog estacionId={station.id} className="text-primary hover:text-primary-foreground hover:bg-primary" />
                                         </TableCell>
                                     </TableRow>
                                 ))}

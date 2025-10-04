@@ -123,8 +123,7 @@ const RegistrosEstacionesPage = () => {
                             key={estacion.id}
                         >
                             <Card
-                                className="cursor-pointer hover:shadow-xl transition-all duration-300 border-0 shadow-md bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-800"
-                                onClick={() => setSelectedStation(estacion)}
+                                className="hover:shadow-xl transition-all duration-300 border-0 shadow-md bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-800"
                             >
                                 <CardHeader className="pb-3">
                                     <div className="flex items-start justify-between">

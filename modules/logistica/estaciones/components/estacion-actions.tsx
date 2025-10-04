@@ -11,6 +11,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import DeleteEstacionDialog from "./delete-estacion-dialog"
 
 const EstacionActions = ({
     directLink,
@@ -31,11 +32,16 @@ const EstacionActions = ({
             <DropdownMenuContent>
                 <DropdownMenuLabel>Acciones</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => router.push(`${directLink}/editar?estacionId=${estacionId}`)}>
-                    <Edit />
+                <DropdownMenuItem
+                    onClick={() => router.push(`${directLink}/editar?estacionId=${estacionId}`)}
+                    className="flex items-center justify-center"
+                >
+                    <Edit className="h-4 w-4" />
                     Editar
                 </DropdownMenuItem>
-                <DropdownMenuItem>Billing</DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                    <DeleteEstacionDialog estacionId={estacionId} className="w-full" title="Eliminar" />
+                </DropdownMenuItem>
             </DropdownMenuContent>
         </DropdownMenu>
     )

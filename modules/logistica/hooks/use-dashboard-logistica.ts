@@ -4,11 +4,13 @@ import { getPercentageChangeBetweenWeeks, getTotalFleteByMonth, getTotalFleteByW
 import { getCurrentMonthCapitalized, getPreviousMonth, getPreviousMonthCapitalized } from "@/functions/monts-functions";
 import { useReporteViajes } from "../reportes-viajes/hooks/use-reporte-viajes";
 import { useOperadores } from "../bdd/operadores/hooks/use-estaciones";
-import { useEstaciones } from "../bdd/estaciones/hooks/use-estaciones";
+import { useEstaciones } from "../estaciones/hooks/use-estaciones";
+import { useClientes } from "../bdd/clientes/hooks/use-clientes";
 import { useEquipos } from "../bdd/equipos/hooks/use-equipos";
 import { endOfWeek, getWeek, startOfWeek } from "date-fns";
 import { useYear } from "@/context/year-context";
 import { useEffect, useState } from "react";
+import { useRutas } from "../rutas/hooks/use-rutas";
 
 export const useDashboardDataLogistica = () => {
     const { selectedYear } = useYear();
@@ -27,7 +29,9 @@ export const useDashboardDataLogistica = () => {
     const { reporteViajes } = useReporteViajes()
     const { operadores } = useOperadores();
     const { estaciones } = useEstaciones();
+    const { clientes } = useClientes()
     const { equipos } = useEquipos();
+    const { rutas } = useRutas()
 
     const semanaActual = getWeek(new Date());
     const primerDiaSemana = startOfWeek(new Date());
@@ -36,7 +40,8 @@ export const useDashboardDataLogistica = () => {
     const estacionesCount = estaciones.length;
     const operadoresCount = operadores.length;
     const equiposCount = equipos.length;
-    const clientesCount = 0;
+    const clientesCount = clientes?.length;
+    const rutasCount = rutas?.length
 
     useEffect(() => {
         const viajesAnio = reporteViajes.filter(viaje => viaje.Year === selectedYear)
@@ -155,6 +160,7 @@ export const useDashboardDataLogistica = () => {
         primerDiaSemana,
         ultimoDiaSemana,
         totalViajes,
-        totalM3CurrentMonth
+        totalM3CurrentMonth,
+        rutasCount
     };
 };

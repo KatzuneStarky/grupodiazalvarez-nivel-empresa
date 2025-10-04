@@ -1,24 +1,30 @@
 "use client"
 
 import { RutaSchema, RutaSchemaType } from "@/modules/logistica/rutas/schemas/ruta.schema"
-import RoutesForm from "@/modules/logistica/rutas/components/routes-form"
-import { writeRoute } from "@/modules/logistica/rutas/actions/write"
+import { useRutas } from "@/modules/logistica/rutas/hooks/use-rutas"
+import { useRouter, useSearchParams } from "next/navigation"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useForm } from "react-hook-form"
+import { v4 as uuidv4 } from "uuid"
+import { useEffect, useState } from "react"
 import SubmitButton from "@/components/global/submit-button"
 import PageTitle from "@/components/custom/page-title"
-import { Separator } from "@/components/ui/separator"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useRouter } from "next/navigation"
-import { useForm } from "react-hook-form"
 import { Route } from "lucide-react"
-import { v4 as uuidv4 } from "uuid"
-import { useState } from "react"
+import { Separator } from "@/components/ui/separator"
+import RoutesForm from "@/modules/logistica/rutas/components/routes-form"
 import { toast } from "sonner"
+import { updateRoute } from "@/modules/logistica/rutas/actions/write"
 
-const NuevaRutaPage = () => {
+const EditarRutaPage = () => {
     const [selectionMode, setSelectionMode] = useState<"none" | "origin" | "destination">("none")
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
+    const searchParams = useSearchParams()
+    const { rutas } = useRutas()
     const router = useRouter()
     const newId = uuidv4()
+
+    const rutaId = searchParams.get("rutaId")
+    const ruta = rutas?.find((ruta) => ruta.id === rutaId)
 
     const form = useForm<RutaSchemaType>({
         resolver: zodResolver(RutaSchema),
@@ -58,11 +64,11 @@ const NuevaRutaPage = () => {
         }
     })
 
-    const onSubmit = async (data: RutaSchemaType) => {
+    const onSubmit = (data: RutaSchemaType) => {
         try {
             setIsSubmitting(true)
 
-            toast.promise(writeRoute({
+            toast.promise(updateRoute({
                 activa: data.activa,
                 clasificacion: data.clasificacion,
                 descripcion: data.descripcion,
@@ -96,8 +102,8 @@ const NuevaRutaPage = () => {
                     tipoTrayecto: data.trayecto.tipoTrayecto
                 },
                 viajeFacturable: data.viajeFacturable,
-            }), {
-                loading: "Creando registro de la nueva ruta, favor de esperar...",
+            }, rutaId || ""), {
+                loading: "Actualizando el registro de la ruta, favor de esperar...",
                 success: (result) => {
                     if (result.success) {
                         return result.message;
@@ -106,39 +112,57 @@ const NuevaRutaPage = () => {
                     }
                 },
                 error: (error) => {
-                    return error.message || "Error al registrar la ruta.";
+                    return error.message || "Error al actualizar la ruta.";
                 },
             })
 
             form.reset()
             router.back()
         } catch (error) {
-            toast.error("Error al crear la ruta")
+            toast.error("Error al actualizar la ruta")
             console.log(error);
         } finally {
             setIsSubmitting(false)
         }
     }
 
+    useEffect(() => {
+        if (!ruta) return
+
+        const currentValues = form.getValues()
+        if (!currentValues.origen || !currentValues.descripcion) {
+            form.setValue("idCliente", ruta.idCliente),
+                form.setValue("origen", ruta.origen || currentValues.origen)
+            form.setValue("destino", ruta.destino || currentValues.destino)
+            form.setValue("descripcion", ruta.descripcion || currentValues.descripcion)
+            form.setValue("tipoViaje", ruta.tipoViaje)
+            form.setValue("clasificacion", ruta.clasificacion)
+            form.setValue("activa", ruta.activa)
+            form.setValue("viajeFacturable", ruta.viajeFacturable)
+            form.setValue("trayecto", ruta.trayecto)
+        }
+
+    }, [ruta, form])
+
     return (
         <div className="container mx-auto px-4 py-8">
             <PageTitle
-                description={`Ingrese los datos solicitados y seleccione la ruta de punto A a punto B en el mapa`}
-                title={`Nuevo registro para una ruta`}
+                description={`Actualice los datos y modifique si es necesario la ruta de punto A a punto B en el mapa`}
+                title={`Actualizacion de la ruta`}
                 icon={<Route className="h-12 w-12 text-primary" />}
             />
             <Separator className="my-8" />
-            <RoutesForm 
+            <RoutesForm
                 form={form}
                 isSubmiting={isSubmitting}
                 onSubmit={onSubmit}
                 selectionMode={selectionMode}
                 setSelectionMode={setSelectionMode}
                 submitButton={
-                    <SubmitButton 
+                    <SubmitButton
                         isSubmiting={isSubmitting}
-                        loadingText="Guardando ruta..."
-                        text="Guardar ruta"
+                        loadingText="Actualizando ruta..."
+                        text="Actualizar ruta"
                     />
                 }
             />
@@ -146,4 +170,4 @@ const NuevaRutaPage = () => {
     )
 }
 
-export default NuevaRutaPage
+export default EditarRutaPage

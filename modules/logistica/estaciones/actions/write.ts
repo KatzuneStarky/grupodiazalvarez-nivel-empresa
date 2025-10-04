@@ -1,6 +1,6 @@
 import { EstacionDeServicioSchema } from "../schemas/estacion-servicio.schema";
 import { EstacionServicio } from "../types/estacion";
-import { doc, setDoc, updateDoc } from "firebase/firestore";
+import { deleteDoc, doc, setDoc, updateDoc } from "firebase/firestore";
 import { db } from "@/firebase/client";
 import { v4 as uuidv4 } from "uuid";
 
@@ -81,6 +81,35 @@ export const updateEstacion = async (dataEstacion: Omit<EstacionServicio, "id" |
         console.log(error);
         return {
             message: "Error al actualizar la estación de servicio",
+            success: false,
+            error: error instanceof Error ? error.message : String(error)
+        }
+    }
+}
+
+export const deleteEstacion = async (estacionId: string):
+    Promise<{ message: string, success: boolean, error?: string }> => {
+    try {
+        if (!estacionId || estacionId.trim() === "") {
+            throw new Error("El ID de la estación no puede estar vacío.");
+        }
+        const estacionSchema = EstacionDeServicioSchema.safeParse({ id: estacionId })
+        if (!estacionSchema.success) {
+            const errorMessages = estacionSchema.error.errors.map(err => err.message).join(", ");
+            throw new Error(`Errores de validación: ${errorMessages}`);
+        }
+
+        const estacionesRef = doc(db, "estacionServicio", estacionId)
+        await deleteDoc(estacionesRef)
+        
+        return {
+            message: "Estación de servicio eliminada con éxito",
+            success: true
+        }
+    } catch (error) {
+        console.log(error);
+        return {
+            message: "Error al eliminar la estación de servicio",
             success: false,
             error: error instanceof Error ? error.message : String(error)
         }

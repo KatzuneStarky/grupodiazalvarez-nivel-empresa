@@ -29,6 +29,7 @@ const MainDashboardLogistica = () => {
         mesActual,
         totalM3Week,
         totalFleteSemana,
+        rutasCount
     } = useDashboardDataLogistica()
     const router = useRouter()
 
@@ -111,7 +112,7 @@ const MainDashboardLogistica = () => {
                     icon={Users}
                     title="Clientes"
                     label=""
-                    value={clientesCount}
+                    value={clientesCount || 0}
                     color="orange"
                 />
 
@@ -127,7 +128,7 @@ const MainDashboardLogistica = () => {
                     icon={"tdesign:map-connection-filled"}
                     title="Rutas"
                     label=""
-                    value={100}
+                    value={rutasCount || 0}
                     color="blue"
                 />
             </div>
