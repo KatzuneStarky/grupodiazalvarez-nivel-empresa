@@ -133,6 +133,7 @@ export const useOperadoresFilters = ({
         dateRange,
         setDateRange,
         tipoSange,
-        setTipoSangre
+        setTipoSangre,
+        operadores
     }
 }

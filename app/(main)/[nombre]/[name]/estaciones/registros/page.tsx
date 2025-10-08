@@ -136,7 +136,12 @@ const RegistrosEstacionesPage = () => {
                                                 {estacion.activo ? "Activa" : "Inactiva"}
                                             </Badge>
 
-                                            <EstacionActions directLink={directLink} estacionId={estacion.id} />
+                                            <EstacionActions
+                                                directLink={directLink}
+                                                estacionId={estacion.id}
+                                                setSelectedStation={setSelectedStation}
+                                                selectedStation={estacion}
+                                            />
                                         </div>
                                     </div>
                                 </CardHeader>
