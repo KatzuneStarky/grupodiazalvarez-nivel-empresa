@@ -9,8 +9,8 @@ import { Building2, Plus, Search } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useEffect, useState } from "react"
-import { toast } from "sonner"
 import { useRouter } from "next/navigation"
+import { toast } from "sonner"
 
 const EmpresasPage = () => {
     const [filteredEmpresas, setFilderesEmpresas] = useState<Empresa[]>([])

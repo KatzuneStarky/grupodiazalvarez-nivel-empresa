@@ -7,6 +7,10 @@ export const relacionContactoMap = Object.entries({
     "HERMANO": "HERMANO",
     "AMIGO": "AMIGO",
     "TRABAJO": "TRABAJO",
+    "ESPOSA": "ESPOSA",
+    "ESPOSO": "ESPOSO",
+    "HIJO": "HIJO",
+    "HIJA": "HIJA",
     "OTRO": "OTRO"
 }).map(([key, value]) => ({ key, value }))
 

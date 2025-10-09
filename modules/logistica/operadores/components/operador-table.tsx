@@ -1,15 +1,12 @@
 "use client"
 
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Operador } from "../../bdd/operadores/types/operadores"
-import { Edit, MoreHorizontal, Trash2 } from "lucide-react"
-import OperadorDetails from "./operador-details"
+import OperatorActions from "./operator-actions"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card } from "@/components/ui/card"
-import OperatorActions from "./operator-actions"
 
 type SortField = "nombres" | "numLicencia"
 
