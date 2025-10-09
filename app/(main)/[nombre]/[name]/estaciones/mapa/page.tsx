@@ -1,14 +1,21 @@
 "use client"
 
+import { exportEstaciones } from '@/functions/excel-export/estaciones/export/export-estaciones';
 import { useEstaciones } from '@/modules/logistica/estaciones/hooks/use-estaciones';
 import { EstacionServicio } from '@/modules/logistica/estaciones/types/estacion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useDirectLink } from '@/hooks/use-direct-link';
 import PageTitle from '@/components/custom/page-title';
 import { Separator } from '@/components/ui/separator';
-import { MapPin, User } from 'lucide-react';
+import { IconFileExport } from '@tabler/icons-react';
+import { MapPin, Plus, User } from 'lucide-react';
+import { useArea } from '@/context/area-context';
+import { Button } from '@/components/ui/button';
+import { useRouter } from 'next/navigation';
 import Icon from '@/components/global/icon';
 import { useRef, useState } from 'react';
 import dynamic from 'next/dynamic';
+import { toast } from 'sonner';
 
 const EstacionesCoverageMap
     = dynamic(() => import('../../../../../../modules/logistica/estaciones/components/map/coverage-map'),
@@ -27,7 +34,10 @@ const EstacionesMap = () => {
     const mapInstanceRef = useRef<L.Map | null>(null);
     const markersRef = useRef<Map<string, L.Marker>>(new Map());
     const leafletLoadedRef = useRef(false);
-    const { estaciones, isLoading } = useEstaciones()
+    const { directLink } = useDirectLink("/estaciones")
+    const { estaciones } = useEstaciones()
+    const router = useRouter()
+    const { area } = useArea()
 
     const handleStationClick = (station: EstacionServicio) => {
         if (!station.ubicacion || !mapInstanceRef.current) return;
@@ -40,9 +50,20 @@ const EstacionesMap = () => {
         setSelectedStation(station.id);
     };
 
-    const validStations = estaciones.filter(
-        (station) => station.ubicacion?.lat && station.ubicacion?.lng
-    );
+    const handleExportEstaciones = async () => {
+        try {
+            toast.promise(exportEstaciones(estaciones, area?.nombre || ""), {
+                loading: "Exportando datos...",
+                success: "Datos exportados con éxito",
+                error: "Error al exportar datos"
+            })
+        } catch (error) {
+            console.log(error);
+            toast.error("Error al exportar datos")
+        }
+    }
+
+    const validStations = estaciones.filter((station) => station.ubicacion?.lat && station.ubicacion?.lng);
 
     return (
         <div className="container mx-auto py-8 px-6">
@@ -50,10 +71,30 @@ const EstacionesMap = () => {
                 icon={<Icon iconName='tabler:map-2' className='w-12 h-12' />}
                 title='Mapa de cobertura'
                 description='Visualice el mapa de cobertura actual de sus estaciones'
+                hasActions
+                actions={
+                    <>
+                        <Button
+                            className="sm:w-auto"
+                            onClick={() => handleExportEstaciones()}
+                        >
+                            <IconFileExport className="w-4 h-4 mr-2" />
+                            Exportar Datos
+                        </Button>
+
+                        <Button
+                            className="sm:w-auto"
+                            onClick={() => router.push(`${directLink}/nuevo`)}
+                        >
+                            <Plus className="w-4 h-4 mr-2" />
+                            Nueva estacion
+                        </Button>
+                    </>
+                }
             />
             <Separator className='my-4' />
 
-            <div className="flex gap-4 h-[600px]">
+            <div className="flex gap-4 h-full pb-4">
                 <aside className="w-96 overflow-y-auto space-y-4 pr-2">
                     <div className="sticky top-0 bg-background/95 backdrop-blur-sm py-3 z-10 border-b">
                         <h2 className="text-xl font-bold">Estaciones de Servicio</h2>
@@ -127,15 +168,13 @@ const EstacionesMap = () => {
                     </div>
                 </aside>
 
-                {validStations.length > 0 &&(
-                    <EstacionesCoverageMap
-                        leafletLoadedRef={leafletLoadedRef}
-                        mapInstanceRef={mapInstanceRef}
-                        estaciones={validStations}
-                        markersRef={markersRef}
-                        mapRef={mapRef}
-                    />
-                )}
+                <EstacionesCoverageMap
+                    leafletLoadedRef={leafletLoadedRef}
+                    mapInstanceRef={mapInstanceRef}
+                    estaciones={validStations}
+                    markersRef={markersRef}
+                    mapRef={mapRef}
+                />
             </div>
         </div>
     )

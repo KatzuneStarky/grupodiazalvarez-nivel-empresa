@@ -1,6 +1,7 @@
 "use client"
 
 import { useEstacionesFilters } from "@/modules/logistica/estaciones/hooks/use-estaciones-filters"
+import { exportEstaciones } from "@/functions/excel-export/estaciones/export/export-estaciones"
 import { ChevronLeft, ChevronRight, Droplets, Fuel, MapPin, Plus, User } from "lucide-react"
 import { EstacionDialog } from "@/modules/logistica/estaciones/components/estacion-dialog"
 import EstacionActions from "@/modules/logistica/estaciones/components/estacion-actions"
@@ -8,13 +9,16 @@ import EstacionesFilters from "@/modules/logistica/estaciones/components/filtros
 import { EstacionServicio } from "@/modules/logistica/estaciones/types/estacion"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useDirectLink } from "@/hooks/use-direct-link"
+import PageTitle from "@/components/custom/page-title"
 import { Separator } from "@/components/ui/separator"
-import { IconGasStation } from "@tabler/icons-react"
+import { IconFileExport, IconGasStation } from "@tabler/icons-react"
+import { useArea } from "@/context/area-context"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
 import { useState } from "react"
+import { toast } from "sonner"
 
 const RegistrosEstacionesPage = () => {
     const [currentFuelSlides, setCurrentFuelSlides] = useState<Record<string, number>>({})
@@ -22,6 +26,7 @@ const RegistrosEstacionesPage = () => {
 
     const { directLink } = useDirectLink("/estaciones")
     const router = useRouter()
+    const { area } = useArea()
     const {
         searchTerm,
         setSearchTerm,
@@ -37,7 +42,8 @@ const RegistrosEstacionesPage = () => {
         setFilterCombustible,
         capacidadRange,
         setSelectCapacidadRange,
-        selectCapacidadRage
+        selectCapacidadRage,
+        estaciones
     } = useEstacionesFilters()
 
     const getFuelTypeColor = (tipo: string) => {
@@ -73,29 +79,47 @@ const RegistrosEstacionesPage = () => {
         }))
     }
 
+    const handleExportEstaciones = async () => {
+        try {
+            toast.promise(exportEstaciones(estaciones, area?.nombre || ""), {
+                loading: "Exportando datos...",
+                success: "Datos exportados con éxito",
+                error: "Error al exportar datos"
+            })
+        } catch (error) {
+            console.log(error);
+            toast.error("Error al exportar datos")
+        }
+    }
+
     return (
         <div className="container mx-auto px-4 py-8">
-            <div className="flex items-center justify-between w-full">
-                <div className="flex items-center gap-3">
-                    <div className="p-2 bg-primary/10 rounded-lg">
-                        <IconGasStation className="h-12 w-12 text-primary" />
-                    </div>
-                    <div>
-                        <h1 className="text-3xl font-bold">Estaciones de servicio</h1>
-                        <p className="text-muted-foreground">
-                            Administre la informacion de sus estaciones de servicio
-                        </p>
-                    </div>
-                </div>
+            <PageTitle
+                icon={<IconGasStation className="h-12 w-12 text-primary" />}
+                title='Estaciones de servicio'
+                description='Administre la informacion de sus estaciones de servicio'
+                hasActions
+                actions={
+                    <>
+                        <Button
+                            className="sm:w-auto"
+                            onClick={() => handleExportEstaciones()}
+                        >
+                            <IconFileExport className="w-4 h-4 mr-2" />
+                            Exportar Datos
+                        </Button>
 
-                <Button
-                    className="sm:w-auto"
-                    onClick={() => router.push(`${directLink}/nuevo`)}
-                >
-                    <Plus className="w-4 h-4 mr-2" />
-                    Nueva estacion
-                </Button>
-            </div>
+                        <Button
+                            className="sm:w-auto"
+                            onClick={() => router.push(`${directLink}/nuevo`)}
+                        >
+                            <Plus className="w-4 h-4 mr-2" />
+                            Nueva estacion
+                        </Button>
+                    </>
+                }
+            />
+
             <Separator className="mt-4 mb-8" />
             <EstacionesFilters
                 searchTerm={searchTerm}

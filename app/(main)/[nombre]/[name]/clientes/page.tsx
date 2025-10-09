@@ -2,20 +2,40 @@
 
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import DeleteClientDialog from "@/modules/logistica/clientes/components/delete-cliente-dialog"
+import { exportClientes } from "@/functions/excel-export/clientes/export/export-clientes"
 import { useClientes } from "@/modules/logistica/bdd/clientes/hooks/use-clientes"
 import { Edit, Mail, MapPin, Phone, Plus, Trash, User } from "lucide-react"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { useDirectLink } from "@/hooks/use-direct-link"
-import { Separator } from "@/components/ui/separator"
-import { Button } from "@/components/ui/button"
-import { useRouter } from "next/navigation"
-import { Badge } from "@/components/ui/badge"
 import PageTitle from "@/components/custom/page-title"
+import { Separator } from "@/components/ui/separator"
+import { IconFileExport } from "@tabler/icons-react"
+import { useArea } from "@/context/area-context"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import { useRouter } from "next/navigation"
+import { toast } from "sonner"
 
 const ClientsPage = () => {
     const { directLink } = useDirectLink("/clientes")
     const { clientes } = useClientes()
     const router = useRouter()
+    const { area } = useArea()
+
+    const handleExportClientes = async () => {
+        try {
+            toast.promise(exportClientes(clientes || [], area?.nombre || ""), {
+                loading: "Exportando datos...",
+                success: "Datos exportados existosamente",
+                error: "Error al exportar los datos"
+            })
+        } catch (error) {
+            console.error(error)
+            toast.error("Error al exportar los datos", {
+                description: `${error}`
+            })
+        }
+    }
 
     return (
         <div className="container mx-auto py-8 px-4">
@@ -25,10 +45,19 @@ const ClientsPage = () => {
                 icon={<User className="h-12 w-12 text-primary" />}
                 hasActions
                 actions={
-                    <Button onClick={() => router.push(`${directLink}/nuevo`)} className="flex items-center gap-2 bg-primary hover:bg-primary/90">
-                        <Plus className="h-4 w-4" />
-                        Nuevo Cliente
-                    </Button>
+                    <>
+                        <Button
+                            className="sm:w-auto"
+                            onClick={() => handleExportClientes()}
+                        >
+                            <IconFileExport className="w-4 h-4 mr-2" />
+                            Exportar Datos
+                        </Button>
+                        <Button onClick={() => router.push(`${directLink}/nuevo`)} className="flex items-center gap-2 bg-primary hover:bg-primary/90">
+                            <Plus className="h-4 w-4" />
+                            Nuevo Cliente
+                        </Button>
+                    </>
                 }
             />
             <Separator className="my-4" />
