@@ -1,17 +1,19 @@
 "use client"
 
+import { ChevronLeft, ChevronRight, Droplets, Fuel, Import, MapPin, Plus, User } from "lucide-react"
 import { useEstacionesFilters } from "@/modules/logistica/estaciones/hooks/use-estaciones-filters"
+import { importEstaciones } from "@/functions/excel-export/estaciones/import/import-estaciones"
 import { exportEstaciones } from "@/functions/excel-export/estaciones/export/export-estaciones"
-import { ChevronLeft, ChevronRight, Droplets, Fuel, MapPin, Plus, User } from "lucide-react"
 import { EstacionDialog } from "@/modules/logistica/estaciones/components/estacion-dialog"
 import EstacionActions from "@/modules/logistica/estaciones/components/estacion-actions"
 import EstacionesFilters from "@/modules/logistica/estaciones/components/filtros"
 import { EstacionServicio } from "@/modules/logistica/estaciones/types/estacion"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { IconFileExport, IconGasStation } from "@tabler/icons-react"
+import ImportDialog from "@/components/custom/import-dialog"
 import { useDirectLink } from "@/hooks/use-direct-link"
 import PageTitle from "@/components/custom/page-title"
 import { Separator } from "@/components/ui/separator"
-import { IconFileExport, IconGasStation } from "@tabler/icons-react"
 import { useArea } from "@/context/area-context"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -23,6 +25,7 @@ import { toast } from "sonner"
 const RegistrosEstacionesPage = () => {
     const [currentFuelSlides, setCurrentFuelSlides] = useState<Record<string, number>>({})
     const [selectedStation, setSelectedStation] = useState<EstacionServicio | null>(null)
+    const [open, setOpen] = useState<boolean>(false)
 
     const { directLink } = useDirectLink("/estaciones")
     const router = useRouter()
@@ -101,6 +104,13 @@ const RegistrosEstacionesPage = () => {
                 hasActions
                 actions={
                     <>
+                        <Button
+                            className="sm:w-auto"
+                            onClick={() => setOpen(!open)}
+                        >
+                            <Import className="w-4 h-4 mr-2" />
+                            Importar Datos
+                        </Button>
                         <Button
                             className="sm:w-auto"
                             onClick={() => handleExportEstaciones()}
@@ -273,6 +283,15 @@ const RegistrosEstacionesPage = () => {
                 selectedStation={selectedStation}
                 setSelectedStation={setSelectedStation}
                 getFuelLevelColor={getFuelLevelColor}
+            />
+
+            <ImportDialog
+                open={open}
+                onOpenChange={setOpen}
+                title="Importar estaciones"
+                description="Suba un archivo excel con los datos solicitados para cada registro de una estacion"
+                onImport={importEstaciones}
+                acceptedFormats=".xlsx,.xls"
             />
         </div>
     )

@@ -4,7 +4,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import DeleteClientDialog from "@/modules/logistica/clientes/components/delete-cliente-dialog"
 import { exportClientes } from "@/functions/excel-export/clientes/export/export-clientes"
 import { useClientes } from "@/modules/logistica/bdd/clientes/hooks/use-clientes"
-import { Edit, Mail, MapPin, Phone, Plus, Trash, User } from "lucide-react"
+import { Edit, Mail, MapPin, Phone, Plus, User } from "lucide-react"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { useDirectLink } from "@/hooks/use-direct-link"
 import PageTitle from "@/components/custom/page-title"

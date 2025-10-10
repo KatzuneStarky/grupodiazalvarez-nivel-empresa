@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
+import PageTitle from "@/components/custom/page-title"
 
 const RegistroEquiposPage = () => {
     const { directLink } = useDirectLink("equipos/registros/nuevo")
@@ -58,9 +59,9 @@ const RegistroEquiposPage = () => {
     const inMaintenanceEquipos = equipos.filter((e) => e.estado === EstadoEquipos.EN_TALLER).length
     const inavtiveEquipos = equipos.filter((e) => e.estado === EstadoEquipos.FUERA_DE_SERVICIO).length
 
-    const exportEquiposData = async() => {
+    const exportEquiposData = async () => {
         try {
-            toast.promise(exportEquipos(equipos, area?.nombre || ""),{
+            toast.promise(exportEquipos(equipos, area?.nombre || ""), {
                 loading: "Exportando datos...",
                 success: "Datos exportados con éxito",
                 error: "Error al exportar datos"
@@ -75,38 +76,33 @@ const RegistroEquiposPage = () => {
         <div className="container mx-auto px-4 py-8">
             <div className="flex flex-col gap-6">
                 <div className="flex flex-col gap-4">
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                        <div className="flex items-center gap-3">
-                            <div className="p-2 bg-primary/10 rounded-lg">
-                                <Truck className="h-12 w-12 text-primary" />
-                            </div>
-                            <div>
-                                <h1 className="text-3xl font-bold">Parque vehicular</h1>
-                                <p className="text-muted-foreground">
-                                    Administración y gestion de vehículos
-                                </p>
-                            </div>
-                        </div>
-                        <div className="flex gap-2">
-                            <Button variant="outline" className="sm:w-auto">
-                                <Import className="w-4 h-4 mr-2" />
-                                Importar Datos
-                            </Button>
-                            <Button variant="outline" className="sm:w-auto" onClick={() => exportEquiposData()}>
-                                <IconFileExport className="w-4 h-4 mr-2" />
-                                Exportar Datos
-                            </Button>
-                            <Button
-                                className="sm:w-auto"
-                                onClick={() => router.push(directLink)}
-                            >
-                                <Plus className="w-4 h-4 mr-2" />
-                                Registrar Vehículo
-                            </Button>
-                        </div>
-                    </div>
+                    <PageTitle
+                        icon={<Truck className="h-12 w-12 text-primary" />}
+                        title="Parque vehicular"
+                        description="Administración y gestion de vehículos"
+                        hasActions={true}
+                        actions={
+                            <>
+                                <Button className="sm:w-auto">
+                                    <Import className="w-4 h-4 mr-2" />
+                                    Importar Datos
+                                </Button>
+                                <Button className="sm:w-auto" onClick={() => exportEquiposData()}>
+                                    <IconFileExport className="w-4 h-4 mr-2" />
+                                    Exportar Datos
+                                </Button>
+                                <Button
+                                    className="sm:w-auto"
+                                    onClick={() => router.push(directLink)}
+                                >
+                                    <Plus className="w-4 h-4 mr-2" />
+                                    Registrar Vehículo
+                                </Button>
+                            </>
+                        }
+                    />
 
-                    <Separator />
+                    <Separator className="my-4" />
 
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                         <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-4 rounded-lg">
@@ -250,7 +246,7 @@ const RegistroEquiposPage = () => {
                     </CardContent>
                 </Card>
 
-                <EquiposGrid 
+                <EquiposGrid
                     equipos={filteredAndSortedEquipos}
                     loading={isLoading}
                     handleCardClick={handleCardClick}
