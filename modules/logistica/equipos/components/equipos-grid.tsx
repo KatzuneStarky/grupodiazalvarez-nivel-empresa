@@ -103,7 +103,7 @@ const EquiposGrid = ({
                             {!equipo.imagen && (
                                 <div className="aspect-[4/3] relative overflow-hidden rounded-xl bg-muted/30 border border-border/30 group-hover:border-primary/20 transition-colors duration-300">
                                     <img
-                                        src={equipo.imagen || "/placeholder.svg"}
+                                        src={equipo.imagen || "https://images.unsplash.com/photo-1601584115197-04ecc0da31d7"}
                                         alt={`${equipo.marca} ${equipo.modelo}`}
                                         className="object-cover w-full h-full group-hover:scale-110 transition-transform duration-700 ease-out"
                                     />

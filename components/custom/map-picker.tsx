@@ -1,13 +1,15 @@
 "use client"
 
-import { useFormContext } from 'react-hook-form'
 import React, { useEffect, useRef } from 'react'
 
-const MapPicker = () => {
+interface MapPickerProps {
+    lat?: number
+    lng?: number
+    onLocationSelect?: (lat: number, lng: number) => void
+}
+
+const MapPicker = ({ lat, lng, onLocationSelect }: MapPickerProps) => {
     const mapRef = useRef<HTMLDivElement | null>(null)
-    const { setValue, watch } = useFormContext()
-    const lat = watch("ubicacion.lat")
-    const lng = watch("ubicacion.lng")
 
     useEffect(() => {
         const loadMap = async () => {
@@ -24,7 +26,8 @@ const MapPicker = () => {
             })
 
             if (mapRef.current && !mapRef.current.hasChildNodes()) {
-                const map = L.map(mapRef.current).setView([24.155, -110.245], 15)
+                const initialPosition: [number, number] = lat && lng ? [lat, lng] : [24.155, -110.245]
+                const map = L.map(mapRef.current).setView(initialPosition, 15)
 
                 L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
                     attribution: "© OpenStreetMap contributors",
@@ -32,22 +35,26 @@ const MapPicker = () => {
 
                 let marker: L.Marker | null = null
 
+                // Si ya hay coordenadas iniciales, muestra el marcador
+                if (lat && lng) {
+                    marker = L.marker([lat, lng]).addTo(map)
+                }
+
                 map.on("click", (e: L.LeafletMouseEvent) => {
                     const { lat, lng } = e.latlng
-                    setValue("ubicacion.lat", lat, { shouldValidate: true })
-                    setValue("ubicacion.lng", lng, { shouldValidate: true })
-
                     if (marker) {
                         marker.setLatLng([lat, lng])
                     } else {
                         marker = L.marker([lat, lng]).addTo(map)
                     }
+
+                    onLocationSelect?.(lat, lng)
                 })
             }
         }
 
         loadMap()
-    }, [setValue])
+    }, [lat, lng, onLocationSelect])
 
     return (
         <div className="w-full h-[700px] rounded-lg overflow-hidden border">

@@ -2,21 +2,27 @@
 
 import { EquiposSchema, EquiposSchemaType } from "@/modules/logistica/equipos/schemas/equipo.schema"
 import { EstadoEquipos } from "@/modules/logistica/bdd/equipos/enum/estado-equipos"
+import { useEquipos } from "@/modules/logistica/bdd/equipos/hooks/use-equipos"
 import EquipoForm from "@/modules/logistica/equipos/components/equipo-form"
-import { writeEquipo } from "@/modules/logistica/equipos/actions/write"
+import { updateEquipo, writeEquipo } from "@/modules/logistica/equipos/actions/write"
 import SubmitButton from "@/components/global/submit-button"
+import { useRouter, useSearchParams } from "next/navigation"
 import PageTitle from "@/components/custom/page-title"
 import { Separator } from "@/components/ui/separator"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useRouter } from "next/navigation"
+import { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
 import { Truck } from "lucide-react"
-import { useState } from "react"
 import { toast } from "sonner"
 
-const NuevoEquipoPage = () => {
+const EditarEquipoPage = () => {
     const [isSubmitting, setIsSubmiting] = useState<boolean>(false)
+    const searchParams = useSearchParams()
+    const { equipos } = useEquipos()
     const router = useRouter()
+
+    const equipoId = searchParams.get("equipoId")
+    const equipo = equipos.find((equipo) => equipo.id === equipoId)
 
     const form = useForm<EquiposSchemaType>({
         resolver: zodResolver(EquiposSchema),
@@ -64,8 +70,8 @@ const NuevoEquipoPage = () => {
         try {
             setIsSubmiting(true)
 
-            toast.promise(writeEquipo(data), {
-                loading: "Creando registro de equipo, favor de esperar...",
+            toast.promise(updateEquipo(data, equipoId || ""), {
+                loading: `Actualizando el equipo ${equipo?.numEconomico}, favor de esperar...`,
                 success: (result) => {
                     if (result.success) {
                         return result.message;
@@ -74,25 +80,53 @@ const NuevoEquipoPage = () => {
                     }
                 },
                 error: (error) => {
-                    return error.message || "Error al registrar el equipo.";
+                    return error.message || "Error al actualizar el equipo.";
                 },
             })
 
             form.reset()
             router.back()
         } catch (error) {
-            toast.error("Error al guardar el equipo")
+            toast.error("Error al actualizar el equipo")
             console.log(error);
         } finally {
             setIsSubmiting(false)
         }
     }
 
+    useEffect(() => {
+        if (!equipo) return
+
+        const currentValues = form.getValues()
+
+        if (!currentValues.numEconomico) {
+            form.setValue("numEconomico", equipo.numEconomico)
+            form.setValue("marca", equipo.marca)
+            form.setValue("modelo", equipo.modelo)
+            form.setValue("year", equipo.year)
+            form.setValue("m3", equipo.m3 ?? 0)
+            form.setValue("tipoUnidad", equipo.tipoUnidad)
+            form.setValue("placas", equipo.placas)
+            form.setValue("serie", equipo.serie)
+            form.setValue("tipoTanque", equipo.tipoTanque)
+            form.setValue("activo", equipo.activo)
+            form.setValue("estado", equipo.estado)
+            form.setValue("ultimaUbicacion", equipo.ultimaUbicacion)
+            form.setValue("gpsActivo", equipo.gpsActivo)
+            form.setValue("rendimientoPromedioKmPorLitro", equipo.rendimientoPromedioKmPorLitro)
+            form.setValue("ultimoConsumo", equipo.ultimoConsumo)
+            form.setValue("seguro", equipo.seguro)
+            form.setValue("permisoSCT", equipo.permisoSCT)
+            form.setValue("idOperador", equipo.idOperador)
+            form.setValue("grupoUnidad", equipo.grupoUnidad)
+        }
+    }, [equipo, form])
+
     return (
         <div className="container mx-auto px-4 py-8">
             <PageTitle
-                description={"Ingrese la información necesaria para generar el nuevo registro de un nuevo equipo"}
-                title={"Nuevo registro de equipo"}
+                description={"Edite la información necesaria para actualizar el equipo actual"}
+                title={`Actualizar los datos del equipo ${equipo?.numEconomico}`}
                 icon={<Truck className="h-12 w-12 text-primary" />}
             />
             <Separator className="mt-4" />
@@ -100,11 +134,12 @@ const NuevoEquipoPage = () => {
                 form={form}
                 isSubmiting={isSubmitting}
                 onSubmit={onSubmit}
+                equipoId={equipoId || ""}
                 submitButton={
                     <SubmitButton
                         isSubmiting={isSubmitting}
-                        text="Crear nuevo equipo"
-                        loadingText="Creando nuevo equipo..."
+                        text="Actualizar el equipo"
+                        loadingText="Actualizando el equipo..."
                     />
                 }
             />
@@ -112,4 +147,4 @@ const NuevoEquipoPage = () => {
     )
 }
 
-export default NuevoEquipoPage
+export default EditarEquipoPage

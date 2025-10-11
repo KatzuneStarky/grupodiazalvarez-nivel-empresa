@@ -47,6 +47,9 @@ const EstacionesForm = ({
         }
     })
 
+    const lat = form.watch("ubicacion.lat")
+    const lng = form.watch("ubicacion.lng")
+
     return (
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit, (errors) => {
@@ -712,7 +715,14 @@ const EstacionesForm = ({
                                 </CardDescription>
                             </CardHeader>
                             <CardContent>
-                                <MapPicker />
+                                <MapPicker
+                                    lat={lat}
+                                    lng={lng}
+                                    onLocationSelect={(lat, lng) => {
+                                        form.setValue("ubicacion.lat", lat, { shouldValidate: true })
+                                        form.setValue("ubicacion.lng", lng, { shouldValidate: true })
+                                    }}
+                                />
                             </CardContent>
                         </Card>
                     </div>
