@@ -1,3 +1,4 @@
+import { VersionWatcher } from "@/components/global/version-watcher";
 import { ThemeProvider } from "@/providers/theme-provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/context/auth-context";
@@ -39,6 +40,7 @@ export default function RootLayout({
             <YearProvider>
               <TooltipProvider>
                 <TourProvider>
+                  <VersionWatcher />
                   {children}
                   <Toaster />
                 </TourProvider>
