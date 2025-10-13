@@ -1,0 +1,19 @@
+export enum NotificationType {
+    Message = "message",
+    Reminder = "reminder",
+    Task = "task",
+    System = "system",
+    Folder = "Folder",
+    Equipo = "Equipo",
+    Tanque = "Tanque",
+    Mantenimiento = "Mantenimiento",
+    Revision = "Revision",
+    ReporteViaje = "ReporteViaje",
+    Invitacion = "Invitacion",
+    Archivo = "Archivo",
+    Certificado = "Certificado",
+    ArchivosVencimiento = "ArchivosVencimiento",
+    Operador = "Operador",
+    Estacion = "Estacion",
+    InventarioEstacion = "Inventario Estacion"
+}

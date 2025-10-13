@@ -8,6 +8,7 @@ import { DateProvider } from "@/context/date-context";
 import { AreaProvider } from "@/context/area-context"
 import { use } from "react";
 import { AutoLockWrapper } from "@/components/global/auto-lock-wrapper";
+import { NotificationsProvider } from "@/context/notification-context";
 
 const AreaLayout = ({
     children,
@@ -27,19 +28,21 @@ const AreaLayout = ({
                     empresaName={empresaDecodedName}
                     areaName={areaDecodedName}
                 >
-                    <TimeProvider>
-                        <DateProvider>
-                            <SidebarProvider>
-                                <AreaSidebar />
-                                <SidebarInset>
-                                    <AreaNavbar companyName={empresaDecodedName} />
-                                    <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-                                        {children}
-                                    </div>
-                                </SidebarInset>
-                            </SidebarProvider>
-                        </DateProvider>
-                    </TimeProvider>
+                    <NotificationsProvider>
+                        <TimeProvider>
+                            <DateProvider>
+                                <SidebarProvider>
+                                    <AreaSidebar />
+                                    <SidebarInset>
+                                        <AreaNavbar companyName={empresaDecodedName} />
+                                        <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
+                                            {children}
+                                        </div>
+                                    </SidebarInset>
+                                </SidebarProvider>
+                            </DateProvider>
+                        </TimeProvider>
+                    </NotificationsProvider>
                 </AreaProvider>
             </AutoLockWrapper>
         </div>
