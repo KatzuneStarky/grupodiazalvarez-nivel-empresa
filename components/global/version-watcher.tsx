@@ -1,32 +1,38 @@
 "use client"
 
-import { useEffect } from "react"
+import { doc, onSnapshot } from "firebase/firestore"
+import { useEffect, useRef } from "react"
+import { db } from "@/firebase/client"
+import { toast } from "sonner"
 
 export function VersionWatcher() {
+    const currentVersion = useRef<number | null>(null)
+
     useEffect(() => {
-        let currentVersion: string | null = null
+        const unsub = onSnapshot(doc(db, "configuracion", "version"), (snapshot) => {
+            const data = snapshot.data()
+            if (!data) return
 
-        async function checkVersion() {
-            try {
-                const res = await fetch("/version.json", { cache: "no-store" })
-                const data = await res.json()
-
-                if (!currentVersion) {
-                    currentVersion = data.version
-                } else if (currentVersion !== data.version) {
-                    if (confirm("Hay una nueva versión disponible. ¿Deseas recargar?")) {
-                        window.location.reload()
-                    }
-                }
-            } catch (e) {
-                console.error("Error checking version:", e)
+            const remoteVersion = data.version
+            if (currentVersion.current === null) {
+                currentVersion.current = remoteVersion
+                return
             }
-        }
 
-        const interval = setInterval(checkVersion, 30000)
-        checkVersion()
+            if (remoteVersion !== currentVersion.current) {
+                currentVersion.current = remoteVersion
 
-        return () => clearInterval(interval)
+                toast.info("Nueva versión disponible 🚀", {
+                    description: "Haz clic en el botón para actualizar la aplicación",
+                    action: {
+                        label: "Recargar",
+                        onClick: () => window.location.reload(),
+                    },
+                })
+            }
+        })
+
+        return () => unsub()
     }, [])
 
     return null
