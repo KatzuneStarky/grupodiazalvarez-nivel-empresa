@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
+    "postbuild": "node scripts/updateVersion.js",
     "start": "next start",
     "lint": "next lint",
     "deploy": "npm run build && node scripts/updateVersion.js"
