@@ -7,6 +7,9 @@ import NotificationItem from "./notification-item"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Bell } from "lucide-react"
+import { useRouter } from "next/navigation"
+import { useDirectLink } from "@/hooks/use-direct-link"
+import { useState } from "react"
 
 interface NavbarNotificationProps {
     notifications: NotificationInterface[]
@@ -14,6 +17,7 @@ interface NavbarNotificationProps {
     onMarkAsRead: (id: string) => void
     maxDisplayed?: number
     unreadCount: number
+    loadMore: () => void
 }
 
 const NotificationsNavbar = ({
@@ -21,8 +25,21 @@ const NotificationsNavbar = ({
     currentUserId,
     onMarkAsRead,
     maxDisplayed = 5,
-    unreadCount
+    unreadCount,
+    loadMore
 }: NavbarNotificationProps) => {
+    const [selectedNotification, setSelectedNotification] = useState<NotificationInterface>()
+
+    const { directLink } = useDirectLink("/notificaciones")
+    const router = useRouter()
+    const maxNotifications = notifications.slice(0, maxDisplayed)
+
+    const moreNotifications = () => {
+        if (notifications > maxNotifications) {
+            loadMore()
+        }
+    }
+
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -65,17 +82,24 @@ const NotificationsNavbar = ({
                                     ¡Ya estás al día! Te avisaremos cuando llegue algo nuevo.
                                 </p>
                             </div>
+
+                            <Button
+                                className="w-full text-sm mt-4"
+                                onClick={() => router.push(directLink)}
+                            >
+                                <Bell className="h-8 w-8" />
+                                Ver otras notificaciones
+                            </Button>
                         </div>
                     </div>
                 ) : (
                     <ScrollArea className="h-[400px]">
                         <div className="divide-y divide-border">
-                            {notifications.map((notification) => (
+                            {maxNotifications.map((notification) => (
                                 <div key={notification.id} className="relative group">
                                     <NotificationItem
                                         notification={notification}
                                         currentUserId={currentUserId}
-                                        //onClick={(e) => handleNotificationClick(notification, e)}
                                     />
                                     <Button
                                         variant="ghost"
@@ -83,9 +107,7 @@ const NotificationsNavbar = ({
                                         className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity h-7 px-2 text-xs"
                                         onClick={(e) => {
                                             e.stopPropagation()
-                                            //setSelectedNotification(notification)
-                                            //setDetailDialogOpen(true)
-                                            //setOpen(false)
+                                            setSelectedNotification(notification)
                                         }}
                                     >
                                         Ver datos
@@ -97,14 +119,15 @@ const NotificationsNavbar = ({
                 )}
 
                 {notifications.length > 0 && (
-                    <div className="p-2 border-t border-border">
+                    <div className="flex items-center p-2 border-t border-border w-full">
+                        <Button onClick={() => moreNotifications()} className="text-sm">
+                            Cargar mas
+                        </Button>
+
                         <Button
                             variant="ghost"
                             className="w-full text-sm"
-                            onClick={() => {
-                                //setOpen(false)
-                                //onViewAll()
-                            }}
+                            onClick={() => router.push(directLink)}
                         >
                             Ver todas las notificaciones
                         </Button>

@@ -1,9 +1,6 @@
 "use client"
 
 import NotificationsNavbar from "@/modules/notificaciones/components/notifications-navbar"
-import { NotificationInterface } from "@/modules/notificaciones/types/notifications"
-import { NotificationType } from "@/modules/notificaciones/enum/notification-type"
-import { getNotificationTypeIcon } from "@/functions/get-notification-type-icon"
 import { AnimatedToggleMode } from "@/components/global/animated-toggle-mode"
 import { useNotifications } from "@/context/notification-context"
 import YearCombobox from "@/components/global/year-combobox"
@@ -17,28 +14,9 @@ interface AppNavbarProps {
     companyName?: string
 }
 
-const notificationProp: NotificationInterface[] = [
-    {
-        id: "1",
-        title: "Notificación 1",
-        message: "Mensaje de la notificación 1",
-        type: NotificationType.Message,
-        createdAt: new Date(),
-        readBy: ["1"],
-        actionUrl: "",
-        createdBy: "1",
-        dialogData: "",
-        expiresAt: new Date(),
-        icon: getNotificationTypeIcon(NotificationType.Message),
-        priority: "medium",
-        relatedId: "1",
-        systemGenerated: false,
-        visibleTo: ["1"]
-    }
-]
 
 const AreaNavbar = ({ companyName }: AppNavbarProps) => {
-    const { unreadCount, currentUser, markAsRead } = useNotifications()
+    const { unreadCount, currentUser, markAsRead, notifications, loadMore } = useNotifications()
     const { ipAddress, isLoading, error } = useIpAddress()
     const { formattedTime } = useTime()
     const { formattedDate } = useDate()
@@ -85,10 +63,11 @@ const AreaNavbar = ({ companyName }: AppNavbarProps) => {
                 <YearCombobox />
                 <NotificationsNavbar 
                     currentUserId={currentUser?.id || ""}
-                    notifications={notificationProp}
+                    notifications={notifications}
                     unreadCount={unreadCount}
                     onMarkAsRead={markAsRead}
                     maxDisplayed={5}
+                    loadMore={loadMore}
                 />
                 <AnimatedToggleMode />
             </div>

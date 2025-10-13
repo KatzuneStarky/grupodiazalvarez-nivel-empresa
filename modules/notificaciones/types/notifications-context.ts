@@ -8,4 +8,6 @@ export interface NotificationsContextProps {
   markAllAsRead: () => Promise<void>;
   markAsRead: (id: string) => Promise<void>;
   reloadNotifications: () => Promise<void>;
+  hasMore: boolean,
+  loadMore: () => void
 }

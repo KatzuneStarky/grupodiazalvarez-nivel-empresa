@@ -15,7 +15,7 @@ export const NotificationsProvider
     = ({ children }: { children: React.ReactNode }) => {
         const [notifications, setNotifications] = useState<NotificationInterface[]>([]);
         const [currentUser, setCurrentUser] = useState<SystemUser | null>(null);
-        const { notifications: fetchedNotifications } = useAllNotifications({})
+        const { notifications: fetchedNotifications, hasMore, loadMore } = useAllNotifications({})
 
         const { userBdd } = useAuth()
         const { area } = useArea()
@@ -64,6 +64,8 @@ export const NotificationsProvider
                     markAllAsRead,
                     markAsRead,
                     reloadNotifications: fetchNotifications,
+                    hasMore,
+                    loadMore
                 }}
             >
                 {children}

@@ -9,6 +9,7 @@ import { EstadoEquipos } from "@/modules/logistica/bdd/equipos/enum/estado-equip
 import EquiposGrid from "@/modules/logistica/equipos/components/equipos-grid"
 import { Card, CardContent } from "@/components/ui/card"
 import { useDirectLink } from "@/hooks/use-direct-link"
+import PageTitle from "@/components/custom/page-title"
 import { Separator } from "@/components/ui/separator"
 import { IconFileExport } from "@tabler/icons-react"
 import { useArea } from "@/context/area-context"
@@ -16,7 +17,6 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
-import PageTitle from "@/components/custom/page-title"
 
 const RegistroEquiposPage = () => {
     const { directLink } = useDirectLink("equipos/registros/nuevo")
