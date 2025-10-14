@@ -119,17 +119,14 @@ const NotificationsNavbar = ({
                 )}
 
                 {notifications.length > 0 && (
-                    <div className="flex items-center p-2 border-t border-border w-full">
+                    <div className="flex items-center justify-center p-4 border-t border-border gap-2">
                         <Button onClick={() => moreNotifications()} className="text-sm">
                             Cargar mas
                         </Button>
 
-                        <Button
-                            variant="ghost"
-                            className="w-full text-sm"
-                            onClick={() => router.push(directLink)}
+                        <Button className="text-sm" onClick={() => router.push(directLink)}
                         >
-                            Ver todas las notificaciones
+                            Ver todo
                         </Button>
                     </div>
                 )}

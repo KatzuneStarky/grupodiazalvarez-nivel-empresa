@@ -1,3 +1,4 @@
+import EmailTemplate from "@/components/custom/email-template";
 import { NextResponse } from "next/server";
 import { Resend } from "resend"
 
@@ -5,7 +6,18 @@ const resend = new Resend(process.env.RESEND_API_KEY!)
 
 export async function POST(req: Request) {
     try {
-        const { to, subject } = await req.json()
+        const {
+            to,
+            subject,
+            priority,
+            systemGenerated,
+            type,
+            description,
+            jsonData,
+            createdBy,
+            createdAt,
+            title
+        } = await req.json()
 
         if (!to || !subject) {
             return NextResponse.json({ message: "Faltan datos" }, { status: 400 });
@@ -15,7 +27,16 @@ export async function POST(req: Request) {
             from: 'Grupo Diaz Alvarez <no-reply@grupodiazalvarez.com>',
             to,
             subject,
-            text: "test"
+            react: EmailTemplate({
+                createdAt,
+                createdBy,
+                description,
+                jsonData,
+                priority,
+                systemGenerated,
+                title,
+                type
+            })
         })
 
         if (error) {

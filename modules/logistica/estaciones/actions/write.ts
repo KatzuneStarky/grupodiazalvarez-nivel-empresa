@@ -1,12 +1,12 @@
 import { EstacionDeServicioSchema } from "../schemas/estacion-servicio.schema";
-import { EstacionServicio } from "../types/estacion";
 import { deleteDoc, doc, setDoc, updateDoc } from "firebase/firestore";
+import { EstacionServicio } from "../types/estacion";
 import { db } from "@/firebase/client";
 import { v4 as uuidv4 } from "uuid";
 
 export const writeEstacion = async (
     dataEstacion: Omit<EstacionServicio, "id" | "createdAt" | "updatedAt">
-): Promise<{ message: string, success: boolean, error?: string }> => {
+): Promise<{ message: string, success: boolean, data?: EstacionServicio, error?: string }> => {
     try {
         const newId = uuidv4()
         const now = new Date();
@@ -36,7 +36,8 @@ export const writeEstacion = async (
         await setDoc(estacionesRef, estacionDoc)
         return {
             message: "Estación de servicio guardada con éxito",
-            success: true
+            success: true,
+            data: estacionDoc
         }
     } catch (error) {
         console.log(error);

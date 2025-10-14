@@ -33,8 +33,6 @@ const NotificationItem = ({
             ? priorityColors[notification.priority]
             : priorityColors.medium
 
-
-
     return (
         <button
             onClick={onClick}
@@ -61,8 +59,8 @@ const NotificationItem = ({
                         {notification.message}
                     </p>
 
-                    <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
-                        <time dateTime={notification.createdAt.toISOString()}>
+                    <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground capitalize">
+                        <time dateTime={parseFirebaseDate(notification.createdAt).toString()}>
                             {formatDistanceToNow(parseFirebaseDate(notification.createdAt), {
                                 addSuffix: true,
                                 locale: es
@@ -71,7 +69,10 @@ const NotificationItem = ({
                         {notification.priority && notification.priority !== "medium" && (
                             <>
                                 <span aria-hidden="true">•</span>
-                                <span className={cn("capitalize", priorityColor)}>{notification.priority} priority</span>
+                                <span className={cn("capitalize", priorityColor)}>
+                                    Prioridad{" "}
+                                    {notification.priority === "high" ? "alta" : "baja"}
+                                </span>
                             </>
                         )}
                     </div>

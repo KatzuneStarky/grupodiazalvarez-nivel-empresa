@@ -2,12 +2,17 @@
 
 import { EstacionDeServicioSchema, EstacionDeServicioType } from "@/modules/logistica/estaciones/schemas/estacion-servicio.schema"
 import EstacionesForm from "@/modules/logistica/estaciones/components/estaciones-form"
+import { NotificationType } from "@/modules/notificaciones/enum/notification-type"
+import { EstacionServicio } from "@/modules/logistica/estaciones/types/estacion"
 import { writeEstacion } from "@/modules/logistica/estaciones/actions/write"
+import { sendNotificationEmail } from "@/functions/send-notification-email"
+import { writeNotification } from "@/modules/notificaciones/actions/write"
 import SubmitButton from "@/components/global/submit-button"
 import PageTitle from "@/components/custom/page-title"
 import { Separator } from "@/components/ui/separator"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { IconGasStation } from "@tabler/icons-react"
+import { useAuth } from "@/context/auth-context"
 import { useRouter } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { useState } from "react"
@@ -15,6 +20,8 @@ import { toast } from "sonner"
 
 const NuevaEstacionPage = () => {
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
+    const [data, setData] = useState<EstacionServicio>()
+    const { userBdd } = useAuth()
     const router = useRouter()
 
     const form = useForm<EstacionDeServicioType>({
@@ -94,6 +101,7 @@ const NuevaEstacionPage = () => {
                 loading: "Creando registro de estacion de servicio, favor de esperar...",
                 success: (result) => {
                     if (result.success) {
+                        setData(result.data)
                         return result.message;
                     } else {
                         throw new Error(result.message);
@@ -105,6 +113,28 @@ const NuevaEstacionPage = () => {
                 finally: () => {
                     setIsSubmitting(false)
                 }
+            })
+
+            await writeNotification({
+                title: "Nueva estacion generada",
+                message: `Se genero un nuevo registro de estacion con el nombre ${data.razonSocial}`,
+                readBy: [],
+                type: NotificationType.Estacion,
+                createdBy: `${userBdd?.uidFirebase || ""}`,
+                priority: "low",                
+            })
+
+            await sendNotificationEmail({
+                to: `${userBdd?.email}`,
+                createdAt: new Date(),
+                createdBy: `${userBdd?.nombre}`,
+                title: "Nueva estacion generada",
+                description: `Se genero un nuevo registro de estacion con el nombre ${data.razonSocial}`,
+                type: NotificationType.Estacion,
+                priority: "low",
+                subject: "Nuevo registro de estacion",
+                systemGenerated: false,
+                jsonData: JSON.stringify(data)
             })
 
             form.reset()
