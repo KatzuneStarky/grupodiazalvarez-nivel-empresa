@@ -37,7 +37,7 @@ const NotificationItem = ({
         <button
             onClick={onClick}
             className={cn(
-                "w-full text-left p-4 hover:bg-accent transition-colors focus:outline-none focus:bg-accent",
+                "w-full text-left p-4 hover:bg-accent cursor-pointer transition-colors focus:outline-none focus:bg-accent",
                 isUnread && "bg-muted/50",
             )}
             aria-label={`${notification.title}. ${isUnread ? "Unread" : "Read"}`}
