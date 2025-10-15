@@ -9,7 +9,7 @@ interface UseNotificationsOptions {
     itemsPerPage?: number;
 }
 
-export const useAllNotifications = ({ type, itemsPerPage = 10 }: UseNotificationsOptions) => {
+export const useAllNotifications = ({ type, itemsPerPage }: UseNotificationsOptions) => {
     const [lastVisible, setLastVisible] = useState<QueryDocumentSnapshot<DocumentData> | null>(null);
     const [notifications, setNotifications] = useState<NotificationInterface[]>([]);
     const [error, setError] = useState<string | null>(null);
@@ -24,7 +24,7 @@ export const useAllNotifications = ({ type, itemsPerPage = 10 }: UseNotification
             let q = query(
                 notificationsRef,
                 orderBy("createdAt", "desc"),
-                limit(itemsPerPage)
+                limit(itemsPerPage || notifications.length)
             );
 
             if (type) q = query(q, where("type", "==", type));

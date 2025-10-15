@@ -83,21 +83,12 @@ const NotificationDialogItem = ({
                     <div className="mt-4">
                         <h4 className="text-sm font-semibold mb-2">Notificacion completa</h4>
                         <pre className="bg-muted p-3 rounded-md text-xs overflow-x-auto">
-                            {JSON.stringify(
-                                {
-                                    ...notification,
-                                    dialogData: "",
-                                    priority:
-                                        notification.priority === "low"
-                                            ? "baja"
-                                            : notification.priority === "medium"
-                                                ? "media"
-                                                : "alta",
-                                    createdAt: format(parseFirebaseDate(notification.createdAt), "PPP", { locale: es }),
-                                },
-                                null,
-                                2
-                            )}
+                            {JSON.stringify({
+                                ...notification,
+                                dialogData: "",
+                                priority: notification.priority === "low" ? "baja" : notification.priority === "medium" ? "media" : "baja",
+                                createdAt: format(parseFirebaseDate(notification.createdAt), "PPP", { locale: es }),
+                            }, null, 2)}
                         </pre>
                     </div>
                 </ScrollArea>

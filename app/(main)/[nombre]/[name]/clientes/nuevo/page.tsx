@@ -84,7 +84,8 @@ const NuevoClientePage = () => {
                 dialogData: JSON.stringify(data, null, 2)
             });
 
-            await sendNotificationEmail({
+            {/**
+                await sendNotificationEmail({
                 to: `${userBdd?.email}`,
                 createdAt: new Date(),
                 createdBy: `${userBdd?.nombre}`,
@@ -95,7 +96,7 @@ const NuevoClientePage = () => {
                 subject: "Nuevo cliente generado",
                 systemGenerated: false,
                 jsonData: JSON.stringify(data, null, 2)
-            })
+            }) */}
 
             form.reset()
             router.back()
