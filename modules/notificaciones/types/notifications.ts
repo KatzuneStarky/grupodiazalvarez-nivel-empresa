@@ -18,5 +18,5 @@ export interface NotificationInterface {
   visibleTo?: string[]          
   setOpenDialog?: React.Dispatch<React.SetStateAction<boolean>>
   openDialog?: boolean
-  dialogData?: React.ReactNode
+  dialogData?: string
 }

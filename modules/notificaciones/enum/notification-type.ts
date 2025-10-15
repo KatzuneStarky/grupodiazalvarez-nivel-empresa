@@ -15,5 +15,6 @@ export enum NotificationType {
     ArchivosVencimiento = "ArchivosVencimiento",
     Operador = "Operador",
     Estacion = "Estacion",
-    InventarioEstacion = "Inventario Estacion"
+    InventarioEstacion = "Inventario Estacion",
+    Cliente = "Cliente"
 }

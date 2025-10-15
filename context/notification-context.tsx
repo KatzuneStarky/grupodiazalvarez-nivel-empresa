@@ -5,19 +5,19 @@ import { NotificationsContextProps } from "@/modules/notificaciones/types/notifi
 import { useAllNotifications } from "@/modules/notificaciones/hooks/use-notificaciones";
 import { NotificationInterface } from "@/modules/notificaciones/types/notifications";
 import { createContext, useContext, useEffect, useState } from "react";
-import { SystemUser } from "@/types/usuario";
 import { useAuth } from "./auth-context";
 import { useArea } from "./area-context";
+import { parseFirebaseDate } from "@/utils/parse-timestamp-date";
 
 const NotificationContext = createContext<NotificationsContextProps | undefined>(undefined);
 
 export const NotificationsProvider
     = ({ children }: { children: React.ReactNode }) => {
         const [notifications, setNotifications] = useState<NotificationInterface[]>([]);
-        const [currentUser, setCurrentUser] = useState<SystemUser | null>(null);
         const { notifications: fetchedNotifications, hasMore, loadMore } = useAllNotifications({})
 
         const { userBdd } = useAuth()
+        
         const { area } = useArea()
 
         const fetchNotifications = async () => {
@@ -26,41 +26,36 @@ export const NotificationsProvider
         };
 
         useEffect(() => {
-            if (!userBdd?.id) return;
-            setCurrentUser(userBdd)
-        }, [userBdd]);
-
-        useEffect(() => {
             fetchNotifications();
         }, [area?.id]);
 
         const markAsRead = async (id: string) => {
-            if (!currentUser?.id) return;
-            await markNotificationAsRead(id, userBdd?.id || "");
+            if (!userBdd?.uidFirebase) return;
+            await markNotificationAsRead(id, userBdd?.uidFirebase || "");
             setNotifications((prev) =>
                 prev.map((notif) =>
-                    notif.id === id ? { ...notif, readBy: Array.from(new Set([...notif.readBy, userBdd?.id || ""])) } : notif
+                    notif.id === id ? { ...notif, readBy: Array.from(new Set([...notif.readBy, userBdd?.uidFirebase || ""])) } : notif
                 )
             );
         };
 
         const markAllAsRead = async () => {
-            if (!currentUser?.id) return;
-            await markAllNotificationsAsRead(userBdd?.id || "");
+            if (!userBdd?.uidFirebase) return;
+            await markAllNotificationsAsRead(userBdd?.uidFirebase || "");
             setNotifications((prev) =>
-                prev.map((notif) => ({ ...notif, readBy: Array.from(new Set([...notif.readBy, userBdd?.id || ""])) }))
+                prev.map((notif) => ({ ...notif, readBy: Array.from(new Set([...notif.readBy, userBdd?.uidFirebase || ""])) }))
             );
         };
 
-        const unreadCount = notifications.filter((notif) => !notif.readBy.includes(currentUser?.id || "")).length;
-        const sortedNotifications = [...notifications].sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+        const unreadCount = notifications.filter((notif) => !notif.readBy.includes(userBdd?.uidFirebase || "")).length;
+        const sortedNotifications = [...notifications].sort((a, b) => parseFirebaseDate(b.createdAt).getTime() - parseFirebaseDate(a.createdAt).getTime());
 
         return (
             <NotificationContext.Provider
                 value={{
                     notifications: sortedNotifications,
                     unreadCount,
-                    currentUser,
+                    currentUser: userBdd,
                     markAllAsRead,
                     markAsRead,
                     reloadNotifications: fetchNotifications,

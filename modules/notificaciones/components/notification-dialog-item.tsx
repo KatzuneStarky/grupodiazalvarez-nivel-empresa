@@ -4,11 +4,11 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { getNotificationTypeIcon } from "@/functions/get-notification-type-icon"
 import { parseFirebaseDate } from "@/utils/parse-timestamp-date"
 import { NotificationInterface } from "../types/notifications"
+import { ScrollArea } from "@/components/ui/scroll-area"
 import { format, formatDistanceToNow } from "date-fns"
 import { Badge } from "@/components/ui/badge"
 import Icon from "@/components/global/icon"
 import { es } from "date-fns/locale"
-import { ScrollArea } from "@/components/ui/scroll-area"
 
 interface NotificationDetailDialogProps {
     notification: NotificationInterface | null
@@ -49,7 +49,7 @@ const NotificationDialogItem = ({
                     </DialogDescription>
                 </DialogHeader>
 
-                <ScrollArea className="max-h-[70vh] pr-4">
+                <ScrollArea className="max-h-[70vh] p-4">
                     <div className="space-y-4">
                         <div>
                             <h4 className="text-sm font-semibold mb-2">Notificacion</h4>
@@ -75,7 +75,7 @@ const NotificationDialogItem = ({
                         <div className="mt-4">
                             <h4 className="text-sm font-semibold mb-2">Datos de la notificacion</h4>
                             <pre className="bg-muted p-3 rounded-md text-xs overflow-x-auto">
-                                {notification.dialogData ? JSON.stringify(notification.dialogData, null, 2): "No hay datos para mostrar"}
+                                {notification.dialogData ? JSON.stringify(JSON.parse(notification.dialogData), null, 2) : "No hay datos para mostrar"}
                             </pre>
                         </div>
                     )}
@@ -83,11 +83,21 @@ const NotificationDialogItem = ({
                     <div className="mt-4">
                         <h4 className="text-sm font-semibold mb-2">Notificacion completa</h4>
                         <pre className="bg-muted p-3 rounded-md text-xs overflow-x-auto">
-                            {JSON.stringify({
-                                ...notification,
-                                priority: notification.priority === "low" ? "baja" : notification.priority === "medium" ? "media" : "baja",
-                                createdAt: format(parseFirebaseDate(notification.createdAt), "PPP", { locale: es }),
-                            }, null, 2)}
+                            {JSON.stringify(
+                                {
+                                    ...notification,
+                                    dialogData: "",
+                                    priority:
+                                        notification.priority === "low"
+                                            ? "baja"
+                                            : notification.priority === "medium"
+                                                ? "media"
+                                                : "alta",
+                                    createdAt: format(parseFirebaseDate(notification.createdAt), "PPP", { locale: es }),
+                                },
+                                null,
+                                2
+                            )}
                         </pre>
                     </div>
                 </ScrollArea>

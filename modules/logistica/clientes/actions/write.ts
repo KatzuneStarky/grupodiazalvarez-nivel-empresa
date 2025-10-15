@@ -5,7 +5,7 @@ import { db } from "@/firebase/client";
 import { v4 as uuidv4 } from "uuid";
 
 export const WriteCliente = async (clienteData: Omit<Clientes, "id" | "createdAt" | "updatedAt">):
-    Promise<{ success: boolean, message: string, error?: Error }> => {
+    Promise<{ success: boolean,data?: Clientes, message: string, error?: Error }> => {
     try {
         const newId = uuidv4()
         const now = new Date();
@@ -35,6 +35,7 @@ export const WriteCliente = async (clienteData: Omit<Clientes, "id" | "createdAt
 
         return {
             success: true,
+            data: clienteDoc,
             message: "Cliente guardado con éxito"
         }
     } catch (error) {

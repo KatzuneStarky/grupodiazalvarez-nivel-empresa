@@ -1,16 +1,16 @@
 "use client"
 
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import NotificationDialogItem from "./notification-dialog-item"
 import { NotificationInterface } from "../types/notifications"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { useDirectLink } from "@/hooks/use-direct-link"
 import NotificationItem from "./notification-item"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Bell } from "lucide-react"
 import { useRouter } from "next/navigation"
-import { useDirectLink } from "@/hooks/use-direct-link"
+import { Bell } from "lucide-react"
 import { useState } from "react"
-import NotificationDialogItem from "./notification-dialog-item"
 
 interface NavbarNotificationProps {
     notifications: NotificationInterface[]

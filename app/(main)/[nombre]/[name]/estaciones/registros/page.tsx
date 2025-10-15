@@ -266,7 +266,7 @@ const RegistrosEstacionesPage = () => {
 
                                                 <div className="text-center">
                                                     <span className="text-xs text-muted-foreground">
-                                                        {currentFuelSlide.tanks.length} tanque{currentFuelSlide.tanks.length !== 1 ? "s" : ""}
+                                                        {estacion.tanques.length} tanque{estacion.tanques.length !== 1 ? "s" : ""}
                                                     </span>
                                                 </div>
                                             </motion.div>

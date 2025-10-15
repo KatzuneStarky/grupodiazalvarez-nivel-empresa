@@ -61,7 +61,7 @@ const AreaNavbar = ({ companyName }: AppNavbarProps) => {
             <div className="flex items-center gap-2">
                 <YearCombobox />
                 <NotificationsNavbar 
-                    currentUserId={currentUser?.id || ""}
+                    currentUserId={currentUser?.uidFirebase || ""}
                     notifications={notifications}
                     unreadCount={unreadCount}
                     onMarkAsRead={markAsRead}

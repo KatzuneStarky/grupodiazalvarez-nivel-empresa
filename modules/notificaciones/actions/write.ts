@@ -3,7 +3,8 @@ import { doc, setDoc } from "firebase/firestore";
 import { db } from "@/firebase/client";
 import { v7 as uuidv7 } from "uuid";
 
-export const writeNotification = async (data: Omit<NotificationInterface, "id" | "icon" | "createdAt">) => {
+export const writeNotification = async (data: Omit<NotificationInterface, "id" | "icon" | "createdAt">):
+    Promise<{ success: boolean; id?: string; error?: string }> => {
     try {
         const newId = uuidv7()
         const now = new Date();
@@ -14,15 +15,27 @@ export const writeNotification = async (data: Omit<NotificationInterface, "id" |
         if (!data.title?.trim() || !data.title)
             throw new Error("El título de la notificación es requerido");
 
-        const notificacionRef = doc(db, "notificaciones", newId)
-        const notificacionDoc = {
-            ...data,
-            createdAt: now,
-            id: newId
-        }
+        const cleanData = Object.fromEntries(
+            Object.entries({
+                ...data,
+                createdAt: now,
+                id: newId,
+            }).filter(([_, v]) => v !== undefined)
+        );
 
-        await setDoc(notificacionRef, notificacionDoc)
+        console.log("🟡 Guardando notificación:", cleanData);
+
+        const notificacionRef = doc(db, "notificaciones", newId);
+        await setDoc(notificacionRef, cleanData);
+
+        console.log("✅ Notificación guardada con éxito:", newId);
+
+        return { success: true, id: newId };
     } catch (error) {
-        console.log(error);
+        console.error("❌ Error al guardar la notificación:", error);
+        return {
+            success: false,
+            error: error instanceof Error ? error.message : String(error),
+        };
     }
 }

@@ -20,7 +20,7 @@ import { toast } from "sonner"
 
 const NuevaEstacionPage = () => {
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
-    const [data, setData] = useState<EstacionServicio>()
+    const [jsonData, setData] = useState<EstacionServicio>()
     const { userBdd } = useAuth()
     const router = useRouter()
 
@@ -115,13 +115,16 @@ const NuevaEstacionPage = () => {
                 }
             })
 
+            const jsonData = JSON.stringify(data, null, 2)
+
             await writeNotification({
                 title: "Nueva estacion generada",
                 message: `Se genero un nuevo registro de estacion con el nombre ${data.razonSocial}`,
                 readBy: [],
                 type: NotificationType.Estacion,
-                createdBy: `${userBdd?.uidFirebase || ""}`,
-                priority: "low",                
+                createdBy: `${userBdd?.nombre}`,
+                priority: "low",      
+                dialogData: JSON.parse(jsonData)          
             })
 
             await sendNotificationEmail({
@@ -134,7 +137,7 @@ const NuevaEstacionPage = () => {
                 priority: "low",
                 subject: "Nuevo registro de estacion",
                 systemGenerated: false,
-                jsonData: JSON.stringify(data)
+                jsonData: JSON.parse(jsonData)
             })
 
             form.reset()

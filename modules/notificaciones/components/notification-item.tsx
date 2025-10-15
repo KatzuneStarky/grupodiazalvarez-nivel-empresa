@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils"
 interface NotificationItemProps {
     notification: NotificationInterface
     currentUserId: string
-    onClick?: (event: React.MouseEvent) => void
+    onClick: (id: string) => void
     showFullMessage?: boolean
 }
 
@@ -35,7 +35,7 @@ const NotificationItem = ({
 
     return (
         <button
-            onClick={onClick}
+            onClick={() => onClick(notification.id || "")}
             className={cn(
                 "w-full text-left p-4 hover:bg-accent cursor-pointer transition-colors focus:outline-none focus:bg-accent",
                 isUnread && "bg-muted/50",

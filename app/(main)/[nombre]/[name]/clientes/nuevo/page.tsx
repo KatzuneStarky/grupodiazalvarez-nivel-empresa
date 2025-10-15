@@ -1,12 +1,17 @@
 "use client"
 
 import { ClienteSchema, ClienteSchemaType } from "@/modules/logistica/clientes/schemas/client.schema"
+import { NotificationType } from "@/modules/notificaciones/enum/notification-type"
 import ClienteForm from "@/modules/logistica/clientes/components/clientes-form"
+import { sendNotificationEmail } from "@/functions/send-notification-email"
+import { writeNotification } from "@/modules/notificaciones/actions/write"
+import { Clientes } from "@/modules/logistica/bdd/clientes/types/clientes"
 import { WriteCliente } from "@/modules/logistica/clientes/actions/write"
 import SubmitButton from "@/components/global/submit-button"
 import PageTitle from "@/components/custom/page-title"
 import { Separator } from "@/components/ui/separator"
 import { zodResolver } from "@hookform/resolvers/zod"
+import { useAuth } from "@/context/auth-context"
 import { useRouter } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { User } from "lucide-react"
@@ -15,6 +20,7 @@ import { toast } from "sonner"
 
 const NuevoClientePage = () => {
     const [isSubmiting, setIsSubmiting] = useState<boolean>(false)
+    const { userBdd } = useAuth()
     const router = useRouter()
 
     const form = useForm<ClienteSchemaType>({
@@ -49,7 +55,7 @@ const NuevoClientePage = () => {
         try {
             setIsSubmiting(true)
 
-            toast.promise(WriteCliente({
+            const clientePromise = WriteCliente({
                 activo: data.activo,
                 contactos: data.contactos,
                 curp: data.curp,
@@ -60,18 +66,35 @@ const NuevoClientePage = () => {
                 correo: data.correo,
                 grupo: data.grupo,
                 nombreCorto: data.nombreCorto,
-            }), {
+            })
+
+            toast.promise(clientePromise, {
                 loading: "Creando registro de cliente, favor de esperar...",
-                success: (result) => {
-                    if (result.success) {
-                        return result.message;
-                    } else {
-                        throw new Error(result.message);
-                    }
-                },
-                error: (error) => {
-                    return error.message || "Error al registrar el cliente.";
-                },
+                success: (res) => res.message,
+                error: (err) => err.message,
+            });
+
+            await writeNotification({
+                title: "Nuevo cliente generado",
+                message: `Se generó un nuevo registro de cliente con el nombre ${data.nombreFiscal}`,
+                readBy: [],
+                type: NotificationType.Cliente,
+                createdBy: userBdd?.nombre ?? "Sistema",
+                priority: "low",
+                dialogData: JSON.stringify(data, null, 2)
+            });
+
+            await sendNotificationEmail({
+                to: `${userBdd?.email}`,
+                createdAt: new Date(),
+                createdBy: `${userBdd?.nombre}`,
+                title: "Nuevo cliente generado",
+                description: `Se genero un nuevo registro de cliente con el nombre ${data.nombreFiscal}`,
+                type: NotificationType.Cliente,
+                priority: "low",
+                subject: "Nuevo cliente generado",
+                systemGenerated: false,
+                jsonData: JSON.stringify(data, null, 2)
             })
 
             form.reset()

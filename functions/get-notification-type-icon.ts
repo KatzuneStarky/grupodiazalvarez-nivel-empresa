@@ -34,5 +34,7 @@ export const getNotificationTypeIcon = (type: NotificationType) => {
             return "mdi:account"
         case "Estacion":
             return "mingcute:gas-station-fill"
+        case "Cliente":
+            return "mdi:account-group"
     }
 }
