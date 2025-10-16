@@ -2,12 +2,16 @@
 
 import { EquiposSchema, EquiposSchemaType } from "@/modules/logistica/equipos/schemas/equipo.schema"
 import { EstadoEquipos } from "@/modules/logistica/bdd/equipos/enum/estado-equipos"
+import { NotificationType } from "@/modules/notificaciones/enum/notification-type"
 import EquipoForm from "@/modules/logistica/equipos/components/equipo-form"
+import { writeNotification } from "@/modules/notificaciones/actions/write"
 import { writeEquipo } from "@/modules/logistica/equipos/actions/write"
 import SubmitButton from "@/components/global/submit-button"
+import { useDirectLink } from "@/hooks/use-direct-link"
 import PageTitle from "@/components/custom/page-title"
 import { Separator } from "@/components/ui/separator"
 import { zodResolver } from "@hookform/resolvers/zod"
+import { useAuth } from "@/context/auth-context"
 import { useRouter } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { Truck } from "lucide-react"
@@ -15,7 +19,10 @@ import { useState } from "react"
 import { toast } from "sonner"
 
 const NuevoEquipoPage = () => {
+    const [equipoId, setEquipoId] = useState<string | undefined>(undefined)
     const [isSubmitting, setIsSubmiting] = useState<boolean>(false)
+    const { directLink } = useDirectLink("equipos")
+    const { userBdd } = useAuth()
     const router = useRouter()
 
     const form = useForm<EquiposSchemaType>({
@@ -64,10 +71,13 @@ const NuevoEquipoPage = () => {
         try {
             setIsSubmiting(true)
 
-            toast.promise(writeEquipo(data), {
+            const resultData = writeEquipo(data)
+
+            toast.promise(resultData, {
                 loading: "Creando registro de equipo, favor de esperar...",
                 success: (result) => {
                     if (result.success) {
+                        setEquipoId(result.id);
                         return result.message;
                     } else {
                         throw new Error(result.message);
@@ -77,6 +87,17 @@ const NuevoEquipoPage = () => {
                     return error.message || "Error al registrar el equipo.";
                 },
             })
+
+            await writeNotification({
+                title: "Nuevo equipo generado",
+                message: `Se generó un nuevo registro de equipo con numero economico ${data.numEconomico}`,
+                readBy: [],
+                type: NotificationType.Equipo,
+                createdBy: userBdd?.nombre ?? "Sistema",
+                priority: "medium",
+                dialogData: JSON.stringify(data, null, 2),
+                actionUrl: `${directLink}/${(await resultData).id}`
+            });
 
             form.reset()
             router.back()

@@ -12,6 +12,7 @@ import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
+import { parseFirebaseDate } from "@/utils/parse-timestamp-date"
 
 const NotificacionesPage = () => {
     const [selectedNotification, setSelectedNotification] = useState<NotificationInterface | null>(null)
@@ -35,7 +36,7 @@ const NotificacionesPage = () => {
 
             return matchesSearch && matchesTab
         })
-        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+        .sort((a, b) => parseFirebaseDate(b.createdAt).getTime() - parseFirebaseDate(a.createdAt).getTime())
 
     return (
         <div className="min-h-screen bg-background">
@@ -101,9 +102,9 @@ const NotificacionesPage = () => {
                     {filteredNotifications.length === 0 ? (
                         <div className="text-center py-12">
                             <Filter className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-50" />
-                            <h3 className="text-lg font-semibold mb-2">No notifications found</h3>
+                            <h3 className="text-lg font-semibold mb-2">No se encontraron notificaciones</h3>
                             <p className="text-sm text-muted-foreground">
-                                {searchQuery ? "Try adjusting your search query" : "You're all caught up!"}
+                                {searchQuery ? "Prueba cambiando tu busqueda" : "Estas al dia!"}
                             </p>
                         </div>
                     ) : (

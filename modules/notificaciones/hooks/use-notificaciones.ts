@@ -24,7 +24,6 @@ export const useAllNotifications = ({ type, itemsPerPage }: UseNotificationsOpti
             let q = query(
                 notificationsRef,
                 orderBy("createdAt", "desc"),
-                limit(itemsPerPage || notifications.length)
             );
 
             if (type) q = query(q, where("type", "==", type));

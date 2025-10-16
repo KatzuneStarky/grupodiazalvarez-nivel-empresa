@@ -6,7 +6,7 @@ import { v4 as uuidv4 } from "uuid";
 
 export const writeEquipo = async (
     equipoData: Omit<Equipo, "id" | "createdAt" | "updatedAt" | "tanque" | "mantenimiento" | "Revisiones" | "archivos" | "Certificado" | "ArchivosVencimiento">
-): Promise<{ success: boolean, message: string, error?: Error }> => {
+): Promise<{ success: boolean, message: string, id?: string, error?: Error }> => {
     try {
         const newId = uuidv4()
         const now = new Date();
@@ -34,6 +34,7 @@ export const writeEquipo = async (
         await setDoc(equipoRef, equipoDoc)
 
         return {
+            id: newId,
             success: true,
             message: "El equipo se ha creado correctamente",
         }

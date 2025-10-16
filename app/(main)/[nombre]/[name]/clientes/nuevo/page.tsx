@@ -81,7 +81,7 @@ const NuevoClientePage = () => {
                 type: NotificationType.Cliente,
                 createdBy: userBdd?.nombre ?? "Sistema",
                 priority: "low",
-                dialogData: JSON.stringify(data, null, 2)
+                dialogData: JSON.stringify(data, null, 2) ?? "No hay informacion que mostrar"
             });
 
             {/**
