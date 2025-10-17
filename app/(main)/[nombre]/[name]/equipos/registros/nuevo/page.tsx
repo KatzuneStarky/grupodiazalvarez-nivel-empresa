@@ -19,7 +19,6 @@ import { useState } from "react"
 import { toast } from "sonner"
 
 const NuevoEquipoPage = () => {
-    const [equipoId, setEquipoId] = useState<string | undefined>(undefined)
     const [isSubmitting, setIsSubmiting] = useState<boolean>(false)
     const { directLink } = useDirectLink("equipos")
     const { userBdd } = useAuth()
@@ -77,7 +76,6 @@ const NuevoEquipoPage = () => {
                 loading: "Creando registro de equipo, favor de esperar...",
                 success: (result) => {
                     if (result.success) {
-                        setEquipoId(result.id);
                         return result.message;
                     } else {
                         throw new Error(result.message);
@@ -93,10 +91,11 @@ const NuevoEquipoPage = () => {
                 message: `Se generó un nuevo registro de equipo con numero economico ${data.numEconomico}`,
                 readBy: [],
                 type: NotificationType.Equipo,
-                createdBy: userBdd?.nombre ?? "Sistema",
+                createdBy: userBdd?.nombre,
                 priority: "medium",
                 dialogData: JSON.stringify(data, null, 2),
-                actionUrl: `${directLink}/${(await resultData).id}`
+                actionUrl: `${directLink}/${(await resultData).id}`,
+                systemGenerated: userBdd ? false : true
             });
 
             form.reset()

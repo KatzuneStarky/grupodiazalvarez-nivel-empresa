@@ -3,15 +3,18 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { EstadoEquipos } from "../../bdd/equipos/enum/estado-equipos"
-import { Calendar, MapPin, Shield, Truck } from "lucide-react"
 import { parseFirebaseDate } from "@/utils/parse-timestamp-date"
+import { Calendar, MapPin, Shield, Truck } from "lucide-react"
 import { Equipo } from "../../bdd/equipos/types/equipos"
+import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { QRCodeCanvas } from "qrcode.react"
 import Icon from "@/components/global/icon"
 import { es } from "date-fns/locale"
 import { format } from "date-fns"
 import { useRef } from "react"
+import DialogImage from "./dialog-image"
+import DeailogQr from "./dialog-qr"
 
 interface EquipoGridProps {
     equipos: Equipo[]
@@ -185,30 +188,34 @@ const EquiposGrid = ({
 
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 py-6">
                         <div className="lg:col-span-1 space-y-6">
-                            {!selectedEquipo?.imagen && (
-                                <div className="aspect-square relative overflow-hidden rounded-xl bg-muted/50 border border-border">
-                                    <img
-                                        src={selectedEquipo?.imagen || "/placeholder.svg"}
-                                        alt={`${selectedEquipo?.marca} ${selectedEquipo?.modelo}`}
-                                        className="object-cover w-full h-full"
-                                    />
-                                </div>
-                            )}
+                            <h3 className="text-lg font-semibold text-primary flex items-center gap-2">
+                                <div className="h-1 w-8 bg-primary rounded-full" />
+                                Acciones
+                            </h3>
 
-                            <div ref={qrCodeRef} className="rounded-xl">
-                                <QRCodeCanvas
-                                    value={`https://www.grupodiazalvarez.com/protegido/equipo?equipoId=${selectedEquipo?.id}`}
-                                    className="border-4 rounded-xl"
-                                    size={300}
-                                />
+                            <div>
+                                <Button>
+                                    Ver Docs
+                                </Button>
                             </div>
+
+                            <DialogImage
+                                imagen={selectedEquipo?.imagen || ""}
+                                marca={selectedEquipo?.marca || ""}
+                                modelo={selectedEquipo?.modelo || ""}
+                            />
+
+                            <DeailogQr
+                                id={selectedEquipo?.id || ""}
+                                numEconomico={selectedEquipo?.numEconomico || ""}
+                                serie={selectedEquipo?.serie || ""}
+                                qrCodeRef={qrCodeRef}
+                            />
 
                             <div className="flex items-center justify-center gap-3 p-4 rounded-lg bg-muted/30 border border-border">
                                 <div className={`h-3 w-3 rounded-full ${selectedEquipo?.gpsActivo ? "bg-primary" : "bg-destructive"}`} />
                                 <span className="text-sm font-medium">GPS {selectedEquipo?.gpsActivo ? "Conectado" : "Desconectado"}</span>
                             </div>
-
-                            
                         </div>
 
                         <div className="lg:col-span-2 space-y-8">
