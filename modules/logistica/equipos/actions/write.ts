@@ -1,6 +1,6 @@
+import { doc, setDoc, updateDoc } from "firebase/firestore";
 import { EquiposSchema } from "../schemas/equipo.schema";
 import { Equipo } from "../../bdd/equipos/types/equipos";
-import { doc, setDoc, updateDoc } from "firebase/firestore";
 import { db } from "@/firebase/client";
 import { v4 as uuidv4 } from "uuid";
 

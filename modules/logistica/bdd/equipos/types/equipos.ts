@@ -58,6 +58,8 @@ export interface Equipo {
     archivos: Archivo[];
     Certificado: Certificado[];
     ArchivosVencimiento: ArchivosVencimiento[];
+
+    kmAlMomento?: string
 }
 
 export interface EquipoRevision {
