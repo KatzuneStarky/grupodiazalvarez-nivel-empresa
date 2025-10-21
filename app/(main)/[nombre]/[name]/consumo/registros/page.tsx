@@ -10,9 +10,9 @@ import PageTitle from "@/components/custom/page-title"
 import { Separator } from "@/components/ui/separator"
 import { Badge } from "@/components/ui/badge"
 import Icon from "@/components/global/icon"
+import { es } from "date-fns/locale"
 import { format } from "date-fns"
 import { useState } from "react"
-import { es } from "date-fns/locale"
 
 const ConsumoPage = () => {
     const currentMont = getCurrentMonthCapitalized()
@@ -50,7 +50,7 @@ const ConsumoPage = () => {
                     const litros = entry.litrosCargados ?? 0
                     const costo = entry.costoTotal ?? 0
 
-                    const isEfficient = eficiencia >= 8
+                    const isEfficient = eficiencia >= 1
                     const isInefficient = eficiencia < 6
 
                     return (
@@ -58,7 +58,7 @@ const ConsumoPage = () => {
                             <CardContent className="pt-6 space-y-3">
                                 <div className="flex items-start justify-between">
                                     <div>
-                                        <p className="font-semibold text-sm">{entry.equipo?.numEconomico || "Unknown Truck"}</p>
+                                        <p className="font-semibold text-sm">{entry.equipo?.numEconomico || "Desconocido"}</p>
                                         <p className="text-xs text-muted-foreground">{format(parseFirebaseDate(entry.fecha), "MMM dd, yyyy", { locale: es })}</p>
                                     </div>
                                     <Badge
@@ -100,7 +100,7 @@ const ConsumoPage = () => {
                                     </div>
                                     <div className="space-y-1">
                                         <p className="text-muted-foreground">Operador</p>
-                                        <p className="font-semibold truncate">{entry.operador?.nombres || "Unknown"}</p>
+                                        <p className="font-semibold truncate">{`${entry.operador?.nombres} ${entry.operador?.apellidos}` || "Desconocido"}</p>
                                     </div>
                                 </div>
 

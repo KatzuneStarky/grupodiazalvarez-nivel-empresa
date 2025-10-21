@@ -1,25 +1,22 @@
 "use client"
 
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { ReporteViajes } from "../../reportes-viajes/types/reporte-viajes"
 import { DatePickerForm } from "@/components/custom/date-picker-form"
 import { Operador } from "../../bdd/operadores/types/operadores"
+import { parseFirebaseDate } from "@/utils/parse-timestamp-date"
 import { ConsumoSchemaType } from "../schema/consumo.schema"
 import { Equipo } from "../../bdd/equipos/types/equipos"
-import { Separator } from "@/components/ui/separator"
 import { Check, ChevronsUpDown } from "lucide-react"
+import { Textarea } from "@/components/ui/textarea"
 import { UseFormReturn } from "react-hook-form"
 import { Button } from "@/components/ui/button"
 import { Timestamp } from "firebase/firestore"
+import { Input } from "@/components/ui/input"
 import { useEffect, useState } from "react"
 import { cn } from "@/lib/utils"
-import { parseFirebaseDate } from "@/utils/parse-timestamp-date"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
 
 interface ConsumoFormProps {
     isSubmiting: boolean
@@ -152,7 +149,7 @@ const ConsumoForm = ({
                                     <Popover>
                                         <PopoverTrigger asChild>
                                             <FormControl>
-                                                <Button variant="outline" className="w-full justify-between">
+                                                <Button variant="outline" className="w-full justify-between truncate">
                                                     {field.value ?
                                                         `${operadores.find((o) => o.id === field.value)?.nombres}
                                                                 ${operadores.find((o) => o.id === field.value)?.apellidos}`
@@ -209,10 +206,10 @@ const ConsumoForm = ({
                                     <Popover>
                                         <PopoverTrigger asChild>
                                             <FormControl>
-                                                <Button variant="outline" className="w-full justify-between">
+                                                <Button variant="outline" className="w-full justify-between truncate">
                                                     {field.value ?
                                                         `${parseFirebaseDate(viajesFiltrados.find((o) => o.id === field.value)?.Fecha).toLocaleDateString()}
-                                                                - ${viajesFiltrados.find((o) => o.id === field.value)?.Equipo}`
+                                                                - ${viajesFiltrados.find((o) => o.id === field.value)?.Equipo} - ${viajesFiltrados.find((o) => o.id === field.value)?.DescripcionDelViaje}`
                                                         : "Seleccionar viaje"}
                                                     <ChevronsUpDown className="ml-2 opacity-50" />
                                                 </Button>

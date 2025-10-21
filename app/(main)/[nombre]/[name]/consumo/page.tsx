@@ -1,8 +1,11 @@
 "use client"
 
 import LowPerformanceTruckCard from "@/modules/logistica/consumo/components/low-performance-truck-card"
+import { detectEfficiencyDrops } from "@/modules/logistica/consumo/functions/detect-efficiency-drops"
 import { calculateTruckRanking } from "@/modules/logistica/consumo/functions/calculate-truck-ranking"
+import EfficencyLineChart from "@/modules/logistica/consumo/components/charts/efficency-line-chart"
 import PerformanceRanking from "@/modules/logistica/consumo/components/performance-ranking"
+import CostPieChart from "@/modules/logistica/consumo/components/charts/cost-pie-chart"
 import { ConsumoData } from "@/modules/logistica/consumo/types/consumo-data"
 import MetricCard from "@/modules/logistica/consumo/components/metric-card"
 import { useConsumo } from "@/modules/logistica/consumo/hooks/use-consumo"
@@ -13,6 +16,7 @@ import PageTitle from "@/components/custom/page-title"
 import { Separator } from "@/components/ui/separator"
 import Icon from "@/components/global/icon"
 import { useMemo, useState } from "react"
+import ConsumoAlertsDialog from "@/modules/logistica/consumo/components/consumo-alerts-dialog"
 
 const ConsumoPage = () => {
     const currentMont = getCurrentMonthCapitalized()
@@ -31,6 +35,7 @@ const ConsumoPage = () => {
     
     const consumoFiltrado = filterConsumo(consumo ?? [], mes);
     const rankings = useMemo(() => calculateTruckRanking(consumoFiltrado), [consumo])
+    const alerts = useMemo(() => detectEfficiencyDrops(consumoFiltrado), [consumo])
     const consumoTotal = consumoFiltrado?.reduce((acc, curr) => acc + curr.litrosCargados, 0)
     const distanciaTotal = consumoFiltrado?.reduce((acc, curr) => acc + (curr?.kmRecorridos ?? 0), 0)
     const eficienciaMedia = consumoFiltrado?.reduce((acc, curr) => acc + (curr.rendimientoKmL ?? 0), 0) / consumoFiltrado?.length
@@ -44,6 +49,12 @@ const ConsumoPage = () => {
                 description="Gestine y administre el consumo de la flota"
                 icon={
                     <Icon iconName="picon:fuel" className="w-12 h-12" />
+                }
+                hasActions={true}
+                actions={
+                    <div className="flex items-center gap-2">
+                        <ConsumoAlertsDialog alerts={alerts} />
+                    </div>
                 }
             />
 
@@ -85,7 +96,7 @@ const ConsumoPage = () => {
                 />
                 <MetricCard
                     title="Costo por kilometro"
-                    value={20.5}
+                    value={26.99}
                     icon="solar:hand-money-linear"
                     format="currency"
                     trend={calculateTrend(0, 0)}
@@ -104,6 +115,11 @@ const ConsumoPage = () => {
             <div className="grid gap-6 md:grid-cols-3 mt-4">
                 <PerformanceRanking rankings={rankings} />
                 <LowPerformanceTruckCard rankings={rankings} />
+            </div>
+
+            <div className="grid gap-6 md:grid-cols-2 mt-4">
+                <CostPieChart data={consumoFiltrado || []} />
+                <EfficencyLineChart data={consumoFiltrado || []} />
             </div>
         </div>
     )
