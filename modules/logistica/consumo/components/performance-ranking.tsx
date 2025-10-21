@@ -9,19 +9,19 @@ interface PerformanceRankingProps {
 }
 
 const PerformanceRanking = ({ rankings }: PerformanceRankingProps) => {
-    const topTrucks = rankings.slice(0, 5)
+    const topTrucks = rankings.slice(0, 3)
 
     return (
         <Card className='col-span-2'>
             <CardHeader>
-                <CardTitle>Top 5 camiones mas eficientes</CardTitle>
-                <CardDescription>La mejor eficioncia en base a los camiones de la flota</CardDescription>
+                <CardTitle>Top 3 camiones mas eficientes</CardTitle>
+                <CardDescription>La mejor eficiencia en base a los camiones de la flota</CardDescription>
             </CardHeader>
             <CardContent>
                 {topTrucks.length === 0 ? (
                     <div className="text-center text-muted-foreground py-8">No hay datos disponibles</div>
                 ) : (
-                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                         {topTrucks.map((ranking, index) => (
                             <div key={index}>
                                 <Card className="relative overflow-hidden hover:shadow-lg transition-shadow">
@@ -62,14 +62,14 @@ const PerformanceRanking = ({ rankings }: PerformanceRankingProps) => {
                                             <div className="text-2xl font-bold text-primary">
                                                 {ranking.averageEfficiency.toLocaleString("es-MX", { minimumFractionDigits: 2 })}
                                             </div>
-                                            <div className="text-xs text-muted-foreground">km/L</div>
+                                            <div className="text-xs text-muted-foreground">KM/L</div>
                                         </div>
 
                                         <div className="space-y-2 text-sm">
                                             <div className="flex items-center justify-between">
                                                 <div className="flex items-center gap-1.5 text-muted-foreground">
                                                     <FuelIcon className="h-3.5 w-3.5" />
-                                                    <span>Carga total</span>
+                                                    <span>Consumo total</span>
                                                 </div>
                                                 <span className="font-medium">
                                                     {ranking.totalFuelUsed.toLocaleString("es-MX", { maximumFractionDigits: 0 })} L

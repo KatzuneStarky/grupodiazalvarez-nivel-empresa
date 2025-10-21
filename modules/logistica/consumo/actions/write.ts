@@ -5,7 +5,7 @@ import { db } from "@/firebase/client";
 import { v7 as uuidv7 } from "uuid";
 
 export const writeConsumo = async (data: Omit<ConsumoCombustible, "id" | "createdAt" | "updatedAt">):
-    Promise<{ message: string, data?: ConsumoCombustible, sucess: boolean, error?: Error }> => {
+    Promise<{ message: string, data?: ConsumoCombustible, success: boolean, error?: Error }> => {
     try {
         const newId = uuidv7()
         const now = new Date();
@@ -35,13 +35,13 @@ export const writeConsumo = async (data: Omit<ConsumoCombustible, "id" | "create
         return {
             message: "Consumo creado correctamente",
             data: consumoData,
-            sucess: true
+            success: true
         }
     } catch (error) {
         console.log(error);
         return {
             message: "Error al crear el consumo",
-            sucess: false,
+            success: false,
             error: error as Error
         };
     }

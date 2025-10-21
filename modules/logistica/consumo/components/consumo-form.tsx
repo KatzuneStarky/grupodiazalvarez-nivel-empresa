@@ -211,7 +211,7 @@ const ConsumoForm = ({
                                             <FormControl>
                                                 <Button variant="outline" className="w-full justify-between">
                                                     {field.value ?
-                                                        `${viajesFiltrados.find((o) => o.id === field.value)?.Fecha}
+                                                        `${parseFirebaseDate(viajesFiltrados.find((o) => o.id === field.value)?.Fecha).toLocaleDateString()}
                                                                 - ${viajesFiltrados.find((o) => o.id === field.value)?.Equipo}`
                                                         : "Seleccionar viaje"}
                                                     <ChevronsUpDown className="ml-2 opacity-50" />
