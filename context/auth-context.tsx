@@ -1,7 +1,8 @@
 "use client"
 
-import { createUserWithEmailAndPassword, getIdTokenResult, GoogleAuthProvider, onAuthStateChanged, ParsedToken, signInWithEmailAndPassword, signInWithPopup, User } from "firebase/auth"
+import { getAuth, getIdTokenResult, GoogleAuthProvider, isSignInWithEmailLink, onAuthStateChanged, ParsedToken, signInWithEmailAndPassword, signInWithEmailLink, signInWithPopup, updatePassword, User } from "firebase/auth"
 import { createContext, useContext, useEffect, useState } from "react"
+import { updateUsedInvitation } from "@/actions/invitaciones/write"
 import { doc, getDoc } from "firebase/firestore"
 import { RolUsuario } from "@/enum/user-roles"
 import { FirebaseError } from "firebase/app"
@@ -130,7 +131,20 @@ export const AuthProvider = ({
     const registerWithEmail = async (email: string, password: string, invitacionId: string) => {
         setIsLoading(true);
         try {
-            await createUserWithEmailAndPassword(auth, email, password);
+            const auth = getAuth();
+            const link = window.location.href;
+
+            if (!isSignInWithEmailLink(auth, link)) {
+                throw new Error("El enlace de registro no es válido o ha expirado.");
+            }
+
+            await signInWithEmailLink(auth, email, link);
+
+            if (auth.currentUser) {
+                await updatePassword(auth.currentUser, password);
+            }
+
+            await updateUsedInvitation(invitacionId);
 
             toast.success("Registro exitoso", {
                 description: "Tu cuenta ha sido creada. Redirigiendo...",
@@ -163,7 +177,7 @@ export const AuthProvider = ({
             toast.error("Error de autenticación", { description: message });
 
             console.log(error);
-            
+
         } finally {
             setIsLoading(false);
         }

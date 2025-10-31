@@ -50,3 +50,30 @@ export const inviteNewUser = async (data: Omit<Invitacion, "id" | "creadaEn" | "
         };
     }
 }
+
+export const updateUsedInvitation = async (invitationId: string): Promise<{ success: boolean, message: string }> => {
+    try {
+        const invitationRef = doc(db, "invitaciones", invitationId);
+        const invitationSnap = await getDoc(invitationRef);
+
+        if (!invitationSnap.exists()) {
+            return {
+                success: false,
+                message: "La invitación no existe.",
+            };
+        }
+
+        await setDoc(invitationRef, { usada: true }, { merge: true });
+
+        return {
+            success: true,
+            message: "Invitación marcada como usada correctamente.",
+        };
+    } catch (error) {
+        console.error("Error al actualizar la invitación:", error);
+        return {
+            success: false,
+            message: "Error al actualizar la invitación.",
+        };
+    }
+};
