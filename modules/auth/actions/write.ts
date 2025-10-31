@@ -7,14 +7,15 @@ import { db } from "@/firebase/client";
 export async function writeUser(
     uid: string,
     userData: Omit<SystemUser, "id" | "creadoEn" | "actualizadoEn" | "ultimoAcceso">,
-    email: string
+    email: string,
+    invitacionId: string
 ): Promise<WriteUserResult> {
     try {
         if (!userData || Object.keys(userData).length === 0) {
             throw new Error("Los datos del usuario no pueden estar vacíos.");
         }
 
-        const invitacionRef = doc(db, "invitaciones", email)
+        const invitacionRef = doc(db, "invitaciones", invitacionId)
         const invitacionDoc = await getDoc(invitacionRef)
         const rol = invitacionDoc.exists() ? invitacionDoc.data().rol : RolUsuario.usuario;
 
@@ -30,7 +31,7 @@ export async function writeUser(
             ultimoAcceso: new Date().toISOString(),
         });
 
-        await updateDoc(doc(db, "invitaciones", email), { usada: true });
+        await updateDoc(doc(db, "invitaciones", invitacionId), { usada: true });
 
         return {
             success: true,

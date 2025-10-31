@@ -10,6 +10,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { DatePickerForm } from "@/components/custom/date-picker-form";
 import UploadImage from "@/components/custom/upload-image-firebase";
 import { estadoUsuario } from "@/modules/auth/enum/estado-usuario";
+import { LoadingState } from "@/components/skeleton/loading-state";
 import { LogoutButton } from "@/components/global/logout-button";
 import useUserRegisterBy from "@/hooks/use-user-register-by";
 import { writeUser } from "@/modules/auth/actions/write";
@@ -23,7 +24,7 @@ import { Button } from "@/components/ui/button";
 import { RolUsuario } from "@/enum/user-roles";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -41,8 +42,11 @@ const UsuarioPage = () => {
     const [defaultEmail, setDefaultEmail] = useState<string | null>("")
     const [showFileInfo, setShowFileInfo] = useState(false)
     const [imageUrl, setImageUrl] = useState<string>("")
-    const [useCamera, setUseCamera] = useState(false)        
+    const [useCamera, setUseCamera] = useState(false)    
+    const params = useSearchParams()    
     const router = useRouter()
+
+    const invitacionId = params.get("invitacionId")
 
     const form = useForm<UserSchemaType>({
         resolver: zodResolver(UserSchema),
@@ -80,7 +84,7 @@ const UsuarioPage = () => {
                     empleadoId: "",
                     empresaId: "",
                     nombre: data.nombre,
-                }, defaultEmail || ""), {
+                }, defaultEmail || "", invitacionId || ""), {
                 loading: "Registrando usuario...",
                 success: async (result) => {
                     if (result.success) {
@@ -131,7 +135,7 @@ const UsuarioPage = () => {
         setImageUrl(url)
     }
 
-    if (!auth.userBdd) return <div>Cargando usuario...</div>;
+    if (!auth.currentUser) return <LoadingState message='Verificando usuario' />
 
     return (
         <div className="container mx-auto py-8 px-4">
