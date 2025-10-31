@@ -1,6 +1,7 @@
 "use client"
 
 import { TimeProvider } from "@/context/time-context"
+import { Suspense } from "react"
 
 const UserLayout = ({
     children
@@ -8,9 +9,11 @@ const UserLayout = ({
     children: React.ReactNode
 }) => {
     return (
-        <TimeProvider>
-            {children}
-        </TimeProvider>
+        <Suspense>
+            <TimeProvider>
+                {children}
+            </TimeProvider>
+        </Suspense>
     )
 }
 
