@@ -224,7 +224,6 @@ const AccionesUsuario = () => {
                                 {status === "validating" ? "Validando..." : "Continuar"}
                                 {status === "idle" && <ArrowRight className="w-4 h-4" />}
                             </Button>
-                            {status}
                         </CardContent>
                     </Card>
                 )

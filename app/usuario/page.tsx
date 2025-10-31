@@ -2,6 +2,7 @@
 
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useEmpresaByName } from "@/modules/empresas/hooks/use-empresa-by-name";
 import { registrationTypes } from "@/modules/auth/constants/registration-types";
 import { UserSchema, UserSchemaType } from "@/modules/auth/schema/user.schema";
 import { AnimatedToggleMode } from "@/components/global/animated-toggle-mode";
@@ -30,6 +31,7 @@ import { toast } from "sonner";
 const UsuarioPage = () => {
     const auth = useAuth();
     const { formattedTime } = useTime()
+    const {} = useEmpresaByName("")
     const {
         isRegisterByEmail,
         isRegisterByGoogle,
@@ -43,6 +45,13 @@ const UsuarioPage = () => {
     const [useCamera, setUseCamera] = useState(false)
 
     const router = useRouter()
+
+    useEffect(() => {
+        if(auth.currentUser) {
+            //const isValidEmpresa = empresa?.id === auth.currentUser.uid
+            //if(isValidEmpresa)
+        }
+    })
 
     const form = useForm<UserSchemaType>({
         resolver: zodResolver(UserSchema),

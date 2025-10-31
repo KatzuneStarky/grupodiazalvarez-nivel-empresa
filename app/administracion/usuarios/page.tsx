@@ -15,12 +15,11 @@ import { Button } from "@/components/ui/button"
 import { useAuth } from "@/context/auth-context"
 
 const UsuariosPage = () => {
-    const { usuarios, loading, error } = useUsuarios()
+    const { usuarios } = useUsuarios()
     const {
         ITEMS_PER_PAGE_OPTIONS,
         allSelected,
         currentPage,
-        detailModalOpen,
         filteredAndSortedUsers,
         filters,
         handleClearFilters,
@@ -32,9 +31,7 @@ const UsuariosPage = () => {
         handleViewUser,
         itemsPerPage,
         paginatedUsers,
-        selectedUser,
         selectedUserIds,
-        selectedUsers,
         setItemsPerPage,
         setViewMode,
         setCurrentPage,
@@ -45,8 +42,6 @@ const UsuariosPage = () => {
         totalPages,
         viewMode
     } = useUsuariosDashboard(usuarios)
-
-    const { userBdd } = useAuth()
 
     return (
         <div className="container mx-auto py-8">

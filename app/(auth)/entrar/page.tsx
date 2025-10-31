@@ -11,12 +11,14 @@ import { useAuth } from "@/context/auth-context";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useRouter } from "next/navigation";
 import { Form } from "@/components/ui/form";
+import { useEffect, useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import { useForm } from "react-hook-form";
-import { useState } from "react";
 import Image from "next/image";
 import z from "zod"
+import { LoadingState } from "@/components/skeleton/loading-state";
 
 const LoginSchema = z.object({
     email: z.string().email(),
@@ -28,6 +30,7 @@ const LoginPage = () => {
     const [forgotPasswordOpen, setForgotPasswordOpen] = useState(false)
     const [showPassword, setShowPassword] = useState(false)
     const [rememberMe, setRememberMe] = useState(false)
+    const router = useRouter()
 
     const form = useForm<z.infer<typeof LoginSchema>>({
         resolver: zodResolver(LoginSchema),
@@ -36,6 +39,20 @@ const LoginPage = () => {
             password: ""
         }
     })
+
+    useEffect(() => {
+        if (currentUser) {
+            router.push("/usuario")
+        }
+    }, [currentUser])
+
+    if (isLoading) {
+        return <LoadingState message='Verificando permisos' />
+    }
+
+    if (currentUser) {
+        return <LoadingState message='Verificando permisos' />
+    }
 
     const handleForgotPasswordSubmit = (e: React.FormEvent) => {
         e.preventDefault()
@@ -52,7 +69,11 @@ const LoginPage = () => {
     }
 
     const onSubmit = async (data: z.infer<typeof LoginSchema>) => {
-        await loginWithEmail(data.email, data.password);
+        try {
+            await loginWithEmail(data.email, data.password);
+        } catch (error) {
+            console.log(error)
+        }
     };
 
     return (

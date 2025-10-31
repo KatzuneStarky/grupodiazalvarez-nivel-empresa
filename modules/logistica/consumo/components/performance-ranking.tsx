@@ -24,7 +24,7 @@ const PerformanceRanking = ({ rankings }: PerformanceRankingProps) => {
                     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                         {topTrucks.map((ranking, index) => (
                             <div key={index}>
-                                <Card className="relative overflow-hidden hover:shadow-lg transition-shadow">
+                                <Card className="relative overflow-hidden hover:shadow-lg transition-shadow h-full">
                                     <div className="absolute top-3 right-3">
                                         <div
                                             className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold ${index === 0

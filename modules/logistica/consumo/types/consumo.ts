@@ -22,3 +22,11 @@ export interface ConsumoCombustible {
     createdAt: Date;
     updatedAt: Date;
 }
+
+export type ConsumoEventProps = ConsumoCombustible & {
+    equipoNumEconomico?: string,
+    nombreOperador?: string,
+    nombreViaje?: string
+}
+
+export type SelectedEvent = ConsumoEventProps | null

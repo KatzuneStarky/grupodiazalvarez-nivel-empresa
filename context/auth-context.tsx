@@ -14,7 +14,7 @@ type AuthContextType = {
     currentUser: User | null,
     logout: () => Promise<void>,
     loginWithGoogle: () => Promise<void>,
-    registerWithEmail: (email: string, password: string) => Promise<void>;
+    registerWithEmail: (email: string, password: string, invitacionId: string) => Promise<void>;
     loginWithEmail: (email: string, password: string) => Promise<void>;
     customClaims: ParsedToken | null
     lastSignInTime: string | null
@@ -32,13 +32,13 @@ export const AuthProvider = ({
 }: {
     children: React.ReactNode
 }) => {
-    const [currentUser, setCurrentUser] = useState<User | null>(null)
-    const [userBdd, setUserBdd] = useState<SystemUser | null>(null)
     const [customClaims, setCustomClaims] = useState<ParsedToken | null>(null)
     const [lastSignInTime, setLastSignInTime] = useState<string | null>(null)
-    const [isLoading, setIsLoading] = useState<boolean>(false);
     const [emailVerified, setEmailVerified] = useState<boolean>(false)
-    const [userRol, setUserRol] = useState<RolUsuario | null>(null);
+    const [currentUser, setCurrentUser] = useState<User | null>(null)
+    const [userRol, setUserRol] = useState<RolUsuario | null>(null)
+    const [userBdd, setUserBdd] = useState<SystemUser | null>(null)
+    const [isLoading, setIsLoading] = useState<boolean>(false)
 
     const router = useRouter()
 
@@ -100,6 +100,8 @@ export const AuthProvider = ({
                 ),
                 duration: 5000,
             });
+
+            router.push("/usuario");
         } catch (error) {
             let message
             if (error instanceof FirebaseError) {
@@ -125,16 +127,16 @@ export const AuthProvider = ({
         }
     };
 
-    const registerWithEmail = async (email: string, password: string) => {
+    const registerWithEmail = async (email: string, password: string, invitacionId: string) => {
         setIsLoading(true);
         try {
-            const { user } = await createUserWithEmailAndPassword(auth, email, password);
+            await createUserWithEmailAndPassword(auth, email, password);
 
             toast.success("Registro exitoso", {
                 description: "Tu cuenta ha sido creada. Redirigiendo...",
             });
 
-            router.push("/usuario");
+            router.push(`/usuario?invitacionId=${invitacionId}`);
         } catch (error) {
             let message = "No se pudo registrar el usuario";
             if (error instanceof Error) message = error.message;
@@ -159,6 +161,9 @@ export const AuthProvider = ({
             if (error instanceof Error) message = error.message;
 
             toast.error("Error de autenticación", { description: message });
+
+            console.log(error);
+            
         } finally {
             setIsLoading(false);
         }

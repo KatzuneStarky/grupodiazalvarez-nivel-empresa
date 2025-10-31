@@ -1,35 +1,30 @@
 "use client"
 
-import { ConsumoData } from "@/modules/logistica/consumo/types/consumo-data"
+import { useConsumoFilters } from "@/modules/logistica/consumo/hooks/use-consumo-filters"
+import ConsumoFilters from "@/modules/logistica/consumo/components/consumo-filters"
 import { DollarSign, Gauge, TrendingDown, TrendingUp } from "lucide-react"
-import { useConsumo } from "@/modules/logistica/consumo/hooks/use-consumo"
-import { getCurrentMonthCapitalized } from "@/functions/monts-functions"
 import { parseFirebaseDate } from "@/utils/parse-timestamp-date"
 import { Card, CardContent } from "@/components/ui/card"
+import SelectMes from "@/components/global/select-mes"
 import PageTitle from "@/components/custom/page-title"
 import { Separator } from "@/components/ui/separator"
+import { Skeleton } from "@/components/ui/skeleton"
 import { Badge } from "@/components/ui/badge"
 import Icon from "@/components/global/icon"
 import { es } from "date-fns/locale"
 import { format } from "date-fns"
-import { useState } from "react"
 
 const ConsumoPage = () => {
-    const currentMont = getCurrentMonthCapitalized()
-    const { consumo } = useConsumo()
-
-    const [mes, setMes] = useState<string>("Julio")
-
-    const filterConsumo = (consumo: ConsumoData[], mes: string) => {
-        return consumo.filter((item) => {
-            const fecha = parseFirebaseDate(item.fecha);
-            const nombreMes = fecha.toLocaleString("es-MX", { month: "long" });
-            const capitalized = nombreMes.charAt(0).toUpperCase() + nombreMes.slice(1);
-            return capitalized === mes;
-        });
-    };
-
-    const consumoFiltrado = filterConsumo(consumo ?? [], mes);
+    const {
+        consumoFiltrado,
+        loading,
+        mes,
+        searchTerm,
+        setMes,
+        setSearchTerm,
+        dateRange,
+        setDateRange
+    } = useConsumoFilters()
 
     return (
         <div className="container mx-auto px-8 py-6">
@@ -39,11 +34,27 @@ const ConsumoPage = () => {
                 icon={
                     <Icon iconName="picon:fuel" className="w-12 h-12" />
                 }
+                hasActions={true}
+                actions={
+                    <div className="flex items-center">
+                        <SelectMes value={mes} onChange={setMes} />
+                    </div>
+                }
             />
-
             <Separator className="my-4" />
 
+            <ConsumoFilters
+                searchTerm={searchTerm}
+                setSearchTerm={setSearchTerm}
+                setDateRange={setDateRange}
+                dateRange={dateRange}
+            />
+            <Separator className="my-8" />
+
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {loading || consumoFiltrado.length === 0 && [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((index) => (
+                    <Skeleton className="h-[300px]" key={index} />
+                ))}
                 {consumoFiltrado.map((entry, index) => {
                     const eficiencia = entry.rendimientoKmL ?? 0
                     const kilometros = entry.kmRecorridos ?? 0

@@ -1,7 +1,7 @@
 "use client"
 
-import { AlertCircleIcon, AlertTriangleIcon, BellIcon, CheckCircleIcon } from "lucide-react"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { AlertCircleIcon, AlertTriangleIcon, BellIcon, CheckCircleIcon } from "lucide-react"
 import { parseFirebaseDate } from "@/utils/parse-timestamp-date"
 import { AlertaConsumo } from "../types/alertas-consumo"
 import { Button } from "@/components/ui/button"

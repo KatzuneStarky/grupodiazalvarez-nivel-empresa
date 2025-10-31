@@ -27,6 +27,9 @@ interface ConsumoFormProps {
     operadores: Operador[]
     viajes: ReporteViajes[]
     consumoId?: string
+    isInDialog?: boolean
+    calendarDateConsumo?: Date | null
+    openDialog?: boolean
 }
 
 const ConsumoForm = ({
@@ -37,11 +40,14 @@ const ConsumoForm = ({
     equipos,
     operadores,
     viajes,
-    consumoId
+    consumoId,
+    isInDialog,
+    calendarDateConsumo,
+    openDialog
 }: ConsumoFormProps) => {
     const [viajesFiltrados, setViajesFiltrados] = useState<ReporteViajes[]>([]);
     const litrosCargados = form.watch("litrosCargados") ?? 0;
-    const fechaConsumo = form.watch("fecha") ?? new Date();
+    const fechaConsumo = form.watch("fecha")
     const costoLitro = form.watch("costoLitro") ?? 0;
     const kmInicial = form.watch("kmInicial") ?? 0;
     const kmFinal = form.watch("kmFinal") ?? 0;
@@ -49,6 +55,14 @@ const ConsumoForm = ({
     const kmRecorridos = kmFinal - kmInicial;
     const rendimiento = kmRecorridos / litrosCargados;
     const costoTotal = litrosCargados * costoLitro;
+
+    useEffect(() => {
+        if (openDialog && isInDialog && calendarDateConsumo) {
+            form.setValue("fecha", calendarDateConsumo)
+        } else if (openDialog && isInDialog && !calendarDateConsumo) {
+            form.setValue("fecha", new Date())
+        }
+    }, [calendarDateConsumo, isInDialog, openDialog])
 
     useEffect(() => {
         if (kmInicial > 0 && kmFinal > 0) {
@@ -89,7 +103,10 @@ const ConsumoForm = ({
     return (
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)}>
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-4">
+                <div className={cn(
+                    "grid gap-4 mt-4",
+                    isInDialog ? "grid-rows-1 lg:grid-rows-3" : "grid-cols-1 lg:grid-cols-3"
+                )}>
                     <div className="p-6 border rounded-lg grid grid-cols-2 gap-4">
                         <FormField
                             control={form.control}

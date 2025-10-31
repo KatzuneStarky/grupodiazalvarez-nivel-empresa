@@ -4,16 +4,17 @@ import { AnimatedToggleMode } from "@/components/global/animated-toggle-mode"
 import { SocialLoginButtons } from "@/components/global/social-login-buttons"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Check, Eye, EyeOff, X } from "lucide-react"
+import { useSearchParams } from "next/navigation"
 import { useAuth } from "@/context/auth-context"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { useEffect, useState } from "react"
+import { Form } from "@/components/ui/form"
 import { useForm } from "react-hook-form"
 import { cn } from "@/lib/utils"
-import { useEffect, useState } from "react"
 import Image from "next/image"
 import { z } from "zod"
-import { Form } from "@/components/ui/form"
 
 interface PasswordRequirement {
     id: string
@@ -44,6 +45,10 @@ const RegisterPage = () => {
     const [showConfirmPassword, setShowConfirmPassword] = useState<boolean>(false)
     const [passwordMatch, setPasswordMatch] = useState<boolean>(true)
     const [showPassword, setShowPassword] = useState<boolean>(false)
+    const params = useSearchParams()
+
+    const invitationId = params.get("invitationId")
+    const email = params.get("email")
 
     const form = useForm<RegisterSchemaType>({
         resolver: zodResolver(RegisterSchema),
@@ -77,6 +82,12 @@ const RegisterPage = () => {
         },
     ]
 
+    useEffect(() => {
+        if(email) {
+            form.setValue("email", email)
+        }
+    }, [params, email])
+
     const passwordValue = form.watch("password") ?? "";
 
     useEffect(() => {
@@ -87,15 +98,15 @@ const RegisterPage = () => {
     }, [form.watch]);
 
     const onSubmit = async(data: RegisterSchemaType) => {
-        await auth?.registerWithEmail(data.email, data.password)
+        await auth?.registerWithEmail(data.email, data.password, invitationId || "")
     }
 
     return (
         <div className="flex min-h-screen flex-col md:flex-row">
             <div className="absolute top-2 left-2">
                 <AnimatedToggleMode />
+            {email} - {invitationId}
             </div>
-
 
             <div className="flex flex-1 md:w-1/2 items-center justify-center p-6 md:p-12">
                 <div className="w-full max-w-md space-y-8 transition-all duration-300 ease-in-out">
