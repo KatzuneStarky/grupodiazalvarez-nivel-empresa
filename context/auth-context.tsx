@@ -132,17 +132,12 @@ export const AuthProvider = ({
         setIsLoading(true);
         try {
             const auth = getAuth();
-            const link = window.location.href;
 
-            if (!isSignInWithEmailLink(auth, link)) {
-                throw new Error("El enlace de registro no es válido o ha expirado.");
+            if (!auth.currentUser) {
+                throw new Error("No hay un usuario autenticado. Por favor, revisa el enlace del correo.");
             }
 
-            await signInWithEmailLink(auth, email, link);
-
-            if (auth.currentUser) {
-                await updatePassword(auth.currentUser, password);
-            }
+            await updatePassword(auth.currentUser, password);
 
             await updateUsedInvitation(invitacionId);
 
