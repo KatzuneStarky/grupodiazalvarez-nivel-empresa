@@ -10,6 +10,7 @@ import { filterMenusByRole } from "@/modules/menus/actions/read"
 import { useAreasByEmpresa } from "../../hooks/use-areas"
 import { useEmpresa } from "@/context/empresa-context"
 import { Separator } from "@/components/ui/separator"
+import { useLastArea } from "@/hooks/use-last-area"
 import { useArea } from "@/context/area-context"
 import { useAuth } from "@/context/auth-context"
 import { Button } from "@/components/ui/button"
@@ -21,6 +22,7 @@ import { Area } from "../../types/areas"
 
 const AreaSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
     const { userBdd, logout } = useAuth()
+    const { updateArea } = useLastArea(userBdd?.uidFirebase);
     const { area } = useArea()
     const { empresa } = useEmpresa()
     const { areas } = useAreasByEmpresa(empresa?.id || "")
@@ -31,8 +33,16 @@ const AreaSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
     const router = useRouter()
 
     useEffect(() => {
-        setSelectedArea(orderedAreas && orderedAreas[0])
-    }, [orderedAreas])
+        if (orderedAreas && orderedAreas.length > 0 && !selectedArea) {
+            setSelectedArea(orderedAreas[0]);
+        }
+    }, [orderedAreas]);
+
+    useEffect(() => {
+        if (selectedArea && userBdd?.uidFirebase) {
+            updateArea(selectedArea.id);
+        }
+    }, [selectedArea, userBdd?.uidFirebase, updateArea]);
 
     return (
         <Sidebar collapsible="icon" {...props}>
@@ -67,8 +77,8 @@ const AreaSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
                                 {orderedAreas?.map((area) => (
                                     <DropdownMenuItem key={area.id} onClick={() => {
                                         setSelectedArea(area)
-                                        router.replace(`/${empresa?.nombre}/${area.nombre}`)
-                                        router.refresh()
+                                        router.replace(`/${empresa?.nombre}/${area.nombre}`);
+                                        router.refresh();
                                     }} className="gap-2 p-2">
                                         <div className="flex size-6 items-center justify-center rounded-sm border">
                                             <Building2 className="size-4 shrink-0" />

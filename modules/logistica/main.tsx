@@ -9,7 +9,6 @@ import MetricCard from "./components/metric-card"
 import StatusCard from "./components/status-card"
 import MainCharts from "./components/main-charts"
 import { useYear } from "@/context/year-context"
-import { useRouter } from "next/navigation"
 import dynamic from "next/dynamic";
 
 const Map = dynamic(() => import('../root/components/coverage/map'), { ssr: false });
@@ -31,7 +30,6 @@ const MainDashboardLogistica = () => {
         totalFleteSemana,
         rutasCount
     } = useDashboardDataLogistica()
-    const router = useRouter()
 
     return (
         <div className="flex-1 space-y-6 p-6">

@@ -87,7 +87,6 @@ export const useDashboardDataLogistica = () => {
 
         const fetchTotalM3 = async () => {
             const total = await getTotalM3ForCurrentMonth("Julio", selectedYear || 0);
-            console.log(total);
             setTotalM3(total);
         };
 

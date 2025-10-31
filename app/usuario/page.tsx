@@ -2,7 +2,7 @@
 
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { useEmpresaByName } from "@/modules/empresas/hooks/use-empresa-by-name";
+import { useRedirectUserByCompanyArea } from "@/hooks/use-redirect-user-to-area";
 import { registrationTypes } from "@/modules/auth/constants/registration-types";
 import { UserSchema, UserSchemaType } from "@/modules/auth/schema/user.schema";
 import { AnimatedToggleMode } from "@/components/global/animated-toggle-mode";
@@ -31,7 +31,6 @@ import { toast } from "sonner";
 const UsuarioPage = () => {
     const auth = useAuth();
     const { formattedTime } = useTime()
-    const {} = useEmpresaByName("")
     const {
         isRegisterByEmail,
         isRegisterByGoogle,
@@ -42,16 +41,8 @@ const UsuarioPage = () => {
     const [defaultEmail, setDefaultEmail] = useState<string | null>("")
     const [showFileInfo, setShowFileInfo] = useState(false)
     const [imageUrl, setImageUrl] = useState<string>("")
-    const [useCamera, setUseCamera] = useState(false)
-
+    const [useCamera, setUseCamera] = useState(false)        
     const router = useRouter()
-
-    useEffect(() => {
-        if(auth.currentUser) {
-            //const isValidEmpresa = empresa?.id === auth.currentUser.uid
-            //if(isValidEmpresa)
-        }
-    })
 
     const form = useForm<UserSchemaType>({
         resolver: zodResolver(UserSchema),
@@ -65,7 +56,9 @@ const UsuarioPage = () => {
             avatarUrl: imageUrl || auth?.currentUser?.photoURL || "",
             rol: RolUsuario.usuario
         }
-    });
+    });    
+
+    useRedirectUserByCompanyArea();
 
     const onSubmit = async (data: UserSchemaType) => {
         try {
@@ -115,7 +108,7 @@ const UsuarioPage = () => {
                 error: (error) => {
                     return error.message || "Error al registrar el usuario.";
                 },
-            })            
+            })
         } catch (error) {
             toast.error("error", {
                 description: "No se pudo crear el usuario"
@@ -138,10 +131,7 @@ const UsuarioPage = () => {
         setImageUrl(url)
     }
 
-    const handleCancel = () => {
-        console.log("Form cancelled")
-        window.location.reload()
-    }
+    if (!auth.userBdd) return <div>Cargando usuario...</div>;
 
     return (
         <div className="container mx-auto py-8 px-4">

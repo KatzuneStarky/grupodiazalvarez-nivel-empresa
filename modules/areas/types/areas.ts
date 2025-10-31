@@ -7,10 +7,10 @@ export interface Area {
   descripcion?: string;
   correoContacto?: string;
   empresaId: string;
-  usuarios?: SystemUser[];
+  usuarios?: string[];
   fechaCreacion: Date;
   fechaActualizacion: Date;
-  responsable?: SystemUser
+  responsable?: string
   responsableId?: string;
   menus?: Menu[];
 }
