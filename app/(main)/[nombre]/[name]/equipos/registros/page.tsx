@@ -2,11 +2,16 @@
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { SortField, useEquiposFilter } from "@/modules/logistica/equipos/hooks/use-equipos-filter"
+import { exportCollectionToJson } from "@/functions/json-export/export-collection-to-json"
 import { exportEquipos } from "@/functions/excel-export/equipos/export/export-equipos"
 import NoEquiposFilter from "@/modules/logistica/equipos/components/no-equipos-filter"
 import { Filter, Import, Plus, Search, SortAsc, SortDesc, Truck } from "lucide-react"
+import { importJsonToCollection } from "@/functions/json-import/import-json-to-data"
 import { EstadoEquipos } from "@/modules/logistica/bdd/equipos/enum/estado-equipos"
 import EquiposGrid from "@/modules/logistica/equipos/components/equipos-grid"
+import { Equipo } from "@/modules/logistica/bdd/equipos/types/equipos"
+import { downloadJson } from "@/functions/json-export/download-json"
+import ImportDialog from "@/components/global/import-dialog"
 import { Card, CardContent } from "@/components/ui/card"
 import { useDirectLink } from "@/hooks/use-direct-link"
 import PageTitle from "@/components/custom/page-title"
@@ -15,6 +20,7 @@ import { IconFileExport } from "@tabler/icons-react"
 import { useArea } from "@/context/area-context"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import Icon from "@/components/global/icon"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 
@@ -59,6 +65,21 @@ const RegistroEquiposPage = () => {
     const inMaintenanceEquipos = equipos.filter((e) => e.estado === EstadoEquipos.EN_TALLER).length
     const inavtiveEquipos = equipos.filter((e) => e.estado === EstadoEquipos.FUERA_DE_SERVICIO).length
 
+    const importEquiposDataJson = async (data: Equipo[]) => {
+        try {
+            toast.promise(importJsonToCollection<Equipo>(data, "equipos", {
+                convertDates: true,
+                overwrite: true,
+            }), {
+                loading: "Importando datos...",
+                success: "Datos importados con éxito",
+                error: "Error al importar datos"
+            })
+        } catch (error) {
+
+        }
+    }
+
     const exportEquiposData = async () => {
         try {
             toast.promise(exportEquipos(equipos, area?.nombre || ""), {
@@ -66,6 +87,18 @@ const RegistroEquiposPage = () => {
                 success: "Datos exportados con éxito",
                 error: "Error al exportar datos"
             })
+        } catch (error) {
+            console.log(error);
+            toast.error("Error al exportar datos")
+        }
+    }
+
+    const exportEquiposDataJson = async () => {
+        try {
+            const equipos = await exportCollectionToJson<Equipo>("equipos");
+            downloadJson(equipos, "Parque vehicular");
+
+            toast.success("Datos exportados con éxito")
         } catch (error) {
             console.log(error);
             toast.error("Error al exportar datos")
@@ -83,13 +116,18 @@ const RegistroEquiposPage = () => {
                         hasActions={true}
                         actions={
                             <>
-                                <Button className="sm:w-auto">
-                                    <Import className="w-4 h-4 mr-2" />
-                                    Importar Datos
-                                </Button>
+                                <ImportDialog<Equipo>
+                                    onImport={importEquiposDataJson}
+                                    title="Import Users"
+                                    triggerLabel="Import Users"
+                                />
                                 <Button className="sm:w-auto" onClick={() => exportEquiposData()}>
                                     <IconFileExport className="w-4 h-4 mr-2" />
                                     Exportar Datos
+                                </Button>
+                                <Button className="sm:w-auto" onClick={() => exportEquiposDataJson()}>
+                                    <Icon iconName="si:json-fill" className="w-4 h-4 mr-2" />
+                                    Exportar Json
                                 </Button>
                                 <Button
                                     className="sm:w-auto"

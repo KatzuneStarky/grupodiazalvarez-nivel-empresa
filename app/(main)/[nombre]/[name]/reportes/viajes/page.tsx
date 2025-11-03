@@ -134,7 +134,7 @@ const ReporteViajesPage = () => {
     const groupedData = useMemo(() => {
         const groups: { [key: string]: ReporteViajes[] } = {}
         filteredAndSortedData.forEach((report) => {
-            const key = `${report.Mes} ${report.Year}`
+            const key = `${report.Mes} ${report.Year} ${report.id}`
             if (!groups[key]) groups[key] = []
             groups[key].push(report)
         })

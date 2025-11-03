@@ -15,9 +15,16 @@ export async function writeUser(
             throw new Error("Los datos del usuario no pueden estar vacíos.");
         }
 
-        const invitacionRef = doc(db, "invitaciones", invitacionId)
-        const invitacionDoc = await getDoc(invitacionRef)
-        const rol = invitacionDoc.exists() ? invitacionDoc.data().rol : RolUsuario.usuario;
+        let rol: RolUsuario = RolUsuario.usuario;
+
+        if (invitacionId && invitacionId.trim() !== "") {
+            const invitacionRef = doc(db, "invitaciones", invitacionId);
+            const invitacionDoc = await getDoc(invitacionRef);
+
+            if (invitacionDoc.exists()) {
+                rol = invitacionDoc.data().rol;
+            }
+        }
 
         const userRef = doc(db, "usuarios", uid);
 
@@ -25,18 +32,20 @@ export async function writeUser(
             ...userData,
             uidFirebase: uid,
             estado: "activo",
-            rol: rol as RolUsuario,
+            rol: rol as RolUsuario ? rol : RolUsuario.usuario,
             creadoEn: new Date().toISOString(),
             actualizadoEn: new Date().toISOString(),
             ultimoAcceso: new Date().toISOString(),
         });
 
-        await updateDoc(doc(db, "invitaciones", invitacionId), { usada: true });
+        if (invitacionId && invitacionId.trim() !== "") {
+            await updateDoc(doc(db, "invitaciones", invitacionId), { usada: true });
+        }
 
         return {
             success: true,
             message: "Usuario registrado correctamente.",
-            rol: rol as RolUsuario
+            rol: rol ? rol : RolUsuario.usuario,
         };
     } catch (error) {
         console.error("Error al registrar el usuario:", error);

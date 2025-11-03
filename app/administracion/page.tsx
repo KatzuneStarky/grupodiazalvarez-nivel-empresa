@@ -1,8 +1,10 @@
-"use client"
+import ExportFirebaseDatabutton from "@/components/custom/export-firebase-data-button"
 
 const AdministracionPage = () => {
     return (
-        <div>AdministracionPage</div>
+        <div>
+            <ExportFirebaseDatabutton />
+        </div>
     )
 }
 

@@ -42,8 +42,8 @@ const UsuarioPage = () => {
     const [defaultEmail, setDefaultEmail] = useState<string | null>("")
     const [showFileInfo, setShowFileInfo] = useState(false)
     const [imageUrl, setImageUrl] = useState<string>("")
-    const [useCamera, setUseCamera] = useState(false)    
-    const params = useSearchParams()    
+    const [useCamera, setUseCamera] = useState(false)
+    const params = useSearchParams()
     const router = useRouter()
 
     const invitacionId = params.get("invitacionId")
@@ -60,7 +60,7 @@ const UsuarioPage = () => {
             avatarUrl: imageUrl || auth?.currentUser?.photoURL || "",
             rol: RolUsuario.usuario
         }
-    });    
+    });
 
     useRedirectUserByCompanyArea();
 
