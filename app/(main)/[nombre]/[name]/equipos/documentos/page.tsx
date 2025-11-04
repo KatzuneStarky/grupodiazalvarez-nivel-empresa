@@ -11,9 +11,14 @@ import { Separator } from "@/components/ui/separator"
 import { Input } from "@/components/ui/input"
 import { Card } from "@/components/ui/card"
 import { Search } from "lucide-react"
+import PageTitle from "@/components/custom/page-title"
+import Icon from "@/components/global/icon"
+import { NewDocumentDialog } from "@/modules/logistica/equipos/documentos/components/new-document-dialog"
+import { Button } from "@/components/ui/button"
+import DocumentCardV2 from "@/modules/logistica/equipos/documentos/components/document-card/document-card-v2"
 
 const DocumentosEquiposPage = () => {
-    const { 
+    const {
         equipos,
         isLoading: isLoadingEquipos,
         error: errorEquipos
@@ -31,47 +36,71 @@ const DocumentosEquiposPage = () => {
     } = useDocumentsDashboard()
 
     return (
-        <div className="container mx-auto space-y-4 my-6">
+        <div className="space-y-4 m-6">
+            <PageTitle
+                title="Documentacion de equipos"
+                description="Administre y maneje la documentacion del parque vehicular"
+                icon={
+                    <Icon iconName="streamline-ultimate:coding-apps-website-data-conversion-documents-1" className="h-12 w-12" />
+                }
+                hasActions={true}
+                actions={
+                    <>
+                        <NewDocumentDialog>
+                            <Button className="sm:w-auto">
+                                <Icon iconName="famicons:documents" className="w-4 h-4 mr-2" />
+                                Agregar documento
+                            </Button>
+                        </NewDocumentDialog>
+                    </>
+                }
+            />
+
+            <Separator className="my-4" />
             <div className="flex flex-col lg:flex-row gap-6">
-                <div className="lg:w-2/3 space-y-6">
-                    <section className="mb-12">
-                        <h2 className="text-2xl font-semibold mb-4">Carpetas recientes</h2>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 2xl:grid-cols-3 gap-4">
+                <div className="space-y-6">
+                    <section className="mb-12 grid grid-cols-4 gap-6">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 2xl:grid-cols-3 gap-4 col-span-3">
                             {first6Folders.map((folder, index) => (
                                 <FolderCard key={`${folder.id} - ${index}`} folder={folder} />
                             ))}
 
                             <MoreEquiposCard equipos={equipos} />
                         </div>
+
+                        <div className="grid grid-rows-2 gap-6">
+                            <div className="relative space-y-4">
+                                <Card className="p-4 mb-4">
+                                    <div className="relative">
+                                        <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                                        <Input placeholder="Buscar archivos" className="pl-8" />
+                                    </div>
+                                </Card>
+
+                                <DocumentsChart />
+                            </div>
+                            <ArchivosChart />
+                        </div>
                     </section>
 
                     <Separator />
 
-                    <section>
-                        <h2 className="text-2xl font-semibold mb-4">Archivos recientes</h2>
-                        <div className="space-y-2 p-4">
-                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <section className="space-y-6">
+                        <PageTitle 
+                            title="Archivos recientes"
+                            description="Listado de los archivos mas recientes subidos al sistema"
+                            icon={
+                                <Icon iconName="fontisto:file-1" className="h-12 w-12" />
+                            }
+                        />
+                        <div className="space-y-2">
+                            <div className="grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-5 gap-6">
                                 {first18Archivos.map((a, index) => (
-                                    <DocumentCard file={a} key={`${a.id} - ${index}`} />
+                                    <DocumentCardV2 file={a} key={`${a.id} - ${index}`} />
                                 ))}
                             </div>
                         </div>
                     </section>
-                </div>
-
-                <div className="lg:w-1/3 space-y-6">
-                    <Card className="p-4">
-                        <div className="flex items-center justify-end w-full">
-                            {/** <CreateNewFile /> */}
-                        </div>
-                        <div className="relative mt-4">
-                            <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                            <Input placeholder="Search files..." className="pl-8" />
-                        </div>
-                    </Card>
-
-                    <DocumentsChart />
-                    <ArchivosChart />
                 </div>
             </div>
         </div>

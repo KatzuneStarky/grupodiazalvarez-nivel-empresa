@@ -2,7 +2,7 @@
 
 import { ArchivosSchemaType, ArchivosVencimientoSchemaType, CertificadoSchemaType } from "../schemas/documentos.schema";
 import { Path, PathValue, UseFormReturn } from "react-hook-form";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 type AllowedFormTypes =
     | ArchivosSchemaType
@@ -18,35 +18,52 @@ export function useFileUpload<T extends AllowedFormTypes>(
 ) {
     const [imagePreviews, setImagePreviews] = useState<string[]>([]);
     const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
-    const [error, setError] = useState<string | null>(null);    
+    const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+        return () => {
+            imagePreviews.forEach((url) => URL.revokeObjectURL(url));
+        };
+    }, [imagePreviews]);
 
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         if (!event.target.files) return;
 
         const newFiles = Array.from(event.target.files);
+        let hasError = false;
 
         const validFiles = newFiles.filter((file) => {
             const ext = file.name.split(".").pop()?.toLowerCase();
             if (!ext || !ALLOWED_EXTENSIONS.includes(ext)) {
                 setError(`Formato no permitido: ${file.name}`);
+                hasError = true;
                 return false;
             }
             if (file.size > MAX_FILE_SIZE) {
-                setError(`El archivo ${file.name} supera ${MAX_FILE_SIZE_MB}MB`);
+                setError(`El archivo ${file.name} supera ${MAX_FILE_SIZE_MB} MB`);
+                hasError = true;
                 return false;
             }
             return true;
         });
 
+        if (hasError) return; // no continuar si hay errores
+
         const uniqueFiles = validFiles.filter(
             (file) =>
                 !selectedFiles.some(
-                    (f) => f.name === file.name && f.size === file.size
+                    (f) =>
+                        f.name === file.name &&
+                        f.size === file.size &&
+                        f.lastModified === file.lastModified
                 )
         );
 
+        if (uniqueFiles.length === 0) return;
+
         const updatedFiles = [...selectedFiles, ...uniqueFiles];
         setSelectedFiles(updatedFiles);
+
         form.setValue("files" as Path<T>, updatedFiles as PathValue<T, Path<T>>);
 
         const newImageUrls = uniqueFiles
@@ -58,6 +75,7 @@ export function useFileUpload<T extends AllowedFormTypes>(
     };
 
     const handleRemoveFile = (index: number) => {
+        // liberar URL de preview
         URL.revokeObjectURL(imagePreviews[index]);
 
         const updatedFiles = selectedFiles.filter((_, i) => i !== index);

@@ -47,13 +47,15 @@ const ArchivosForm = ({ equipoId, fileCategory }: { equipoId?: string, fileCateg
 
     const schema = fileSchemas[fileCategory];
 
+    const defaultValues: Partial<z.infer<typeof schema>> =
+        fileCategory === "archivos"
+            ? { equipoId: equipoId ?? "", files: [] }
+            : { equipoId: equipoId ?? "", files: [], fecha: new Date(), nombre: "" };
+
     const form = useForm<z.infer<typeof schema>>({
         resolver: zodResolver(schema),
-        defaultValues: {
-            equipoId,
-            files: []
-        }
-    })
+        defaultValues,
+    });
 
     const {
         imagePreviews,
@@ -65,43 +67,41 @@ const ArchivosForm = ({ equipoId, fileCategory }: { equipoId?: string, fileCateg
     } = useFileUpload(form);
 
     const onSubmitArchivos = async (data: z.infer<typeof schema>) => {
-        try {
-            setIsSubmitting(true)
-            setIsUploading(true)
-            setUploadStatus("idle")
+        setIsSubmitting(true)
+        setIsUploading(true)
+        setUploadStatus("idle")
 
-            toast.promise(uploadFiles(selectedFiles, equipoId ? equipoId : data.equipoId, fileCategory), {
-                success: (result: [Archivo[],
-                    { success: boolean, message: string, error?: Error }
-                ]) => {
+        try {
+            const uploadPromise = uploadFiles(
+                selectedFiles,
+                equipoId ?? data.equipoId,
+                fileCategory
+            );
+
+            toast.promise(uploadPromise, {
+                success: (result) => {
+                    const [, meta] = result;
                     setUploadStatus("success");
-                    setUploadMessage(result[1].message);
+                    setUploadMessage(meta.message);
+                    form.reset({ equipoId, files: [] });
+                    router.refresh();
                     return "Archivos subidos exitosamente";
                 },
                 loading: "Subiendo documentos...",
                 error: (error: Error) => {
                     setUploadStatus("error");
                     setUploadMessage(error.message);
-                    form.reset({
-                        equipoId,
-                        files: []
-                    })
+                    form.reset({ equipoId, files: [] });
                     return "Error al subir documentos";
                 },
-            })
-
-            form.reset({
-                equipoId,
-                files: []
-            })
-            router.refresh()
+            });
         } catch (error) {
-            console.log(error)
+            console.error(error);
         } finally {
-            setIsSubmitting(false)
-            setIsUploading(false)
+            setIsSubmitting(false);
+            setIsUploading(false);
         }
-    }
+    };
 
     return (
         <Form {...form}>

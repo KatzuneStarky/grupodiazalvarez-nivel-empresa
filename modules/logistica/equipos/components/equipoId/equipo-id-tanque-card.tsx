@@ -2,20 +2,11 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tanque } from "@/modules/logistica/bdd/equipos/types/tanque"
-import { Timestamp } from "firebase/firestore";
 import { es } from "date-fns/locale";
 import { format } from "date-fns";
+import { parseFirebaseDate } from "@/utils/parse-timestamp-date";
 
 const EquipoIdTanqueCard = ({ tanque }: { tanque: Tanque | null }) => {
-    const createAtDate
-        = tanque?.createdAt instanceof Timestamp
-            ? tanque?.createdAt.toDate()
-            : new Date(tanque?.createdAt || new Date());
-    const updateAtDate
-        = tanque?.updatedAt instanceof Timestamp
-            ? tanque?.updatedAt.toDate()
-            : new Date(tanque?.updatedAt || new Date());
-
     return (
         <Card className="w-full h-fit flex flex-col">
             <div className="w-full h-48 overflow-hidden p-2">
@@ -55,8 +46,8 @@ const EquipoIdTanqueCard = ({ tanque }: { tanque: Tanque | null }) => {
                 </div>
 
                 <div className="border-t pt-4 text-sm text-muted-foreground">
-                    <p>Creado: {format(createAtDate, "PPP", { locale: es })}</p>
-                    <p>Actualizado: {format(updateAtDate, "PPP", { locale: es })}</p>
+                    <p>Creado: {format(parseFirebaseDate(tanque?.createdAt), "PPP", { locale: es })}</p>
+                    <p>Actualizado: {format(parseFirebaseDate(tanque?.updatedAt), "PPP", { locale: es })}</p>
                 </div>
             </CardContent>
         </Card>

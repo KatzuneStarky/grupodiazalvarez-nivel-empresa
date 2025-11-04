@@ -1,5 +1,6 @@
 "use client"
 
+import { parseFirebaseDate } from "@/utils/parse-timestamp-date";
 import { isWithinLast7Days } from "@/utils/is-recent-folder";
 import { Timestamp } from "firebase/firestore";
 import { Folder } from "../types/folder"
@@ -15,7 +16,7 @@ export const useFolderCard = ({ folder }: { folder: Folder }) => {
             folder.archivosVencimiento.length +
             folder.certificado.length;
 
-        const lastModified = toDate(folder.updatedAt);
+        const lastModified = parseFirebaseDate(folder.updatedAt);
 
         const archivosPesoTotal = folder.archivos.reduce((t, a) => t + a.peso, 0);
         const archivosVencimientoPesoTotal = folder.archivosVencimiento.reduce((t, a) => t + a.peso, 0);

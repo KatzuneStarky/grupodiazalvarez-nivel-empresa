@@ -2,11 +2,10 @@ import { z } from "zod";
 
 const baseSchema = z.object({
   equipoId: z.string({ required_error: "El equipo es requerido" }),
-  fecha: z
-    .union([z.string(), z.date()])
-    .refine((val) => !isNaN(new Date(val).getTime()), "Fecha inválida")
-    .transform((val) => new Date(val))
-    .optional(),
+  fecha: z.preprocess(
+    (val) => (typeof val === "string" || val instanceof Date ? new Date(val) : undefined),
+    z.date({ required_error: "La fecha es requerida" })
+  ),
   nombre: z.string({ required_error: "El nombre es requerido" }).optional(),
   files: z.array(z.instanceof(File)).min(1, "Debes seleccionar al menos un archivo"),
 });

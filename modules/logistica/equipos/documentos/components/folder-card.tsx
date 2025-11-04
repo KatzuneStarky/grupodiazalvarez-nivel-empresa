@@ -1,6 +1,7 @@
 "use client"
 
 import { Clock, FileCheck, Files, FileWarning, Link2Icon } from "lucide-react"
+import { parseFirebaseDate } from "@/utils/parse-timestamp-date"
 import { convertFileSize } from "@/functions/convert-file-size"
 import { useFolderCard } from "../hooks/use-folder-card"
 import { useDirectLink } from "@/hooks/use-direct-link"
@@ -83,7 +84,7 @@ const FolderCard = ({ folder }: { folder: Folder }) => {
             <Separator />
             <div className="space-y-1 text-sm capitalize">
                 <p>Modificado el: {format(lastModified, "PPP", { locale: es })}</p>
-                <p>Creado el: {format(folder.createdAt, 'PPP', { locale: es })}</p>
+                <p>Creado el: {format(parseFirebaseDate(folder.createdAt), 'PPP', { locale: es })}</p>
             </div>
         </Card>
     )

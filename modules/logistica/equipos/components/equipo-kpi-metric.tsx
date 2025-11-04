@@ -1,15 +1,15 @@
 "use client"
 
+import { AlertTriangle, CheckCircle, TrendingDown, TrendingUp, Wrench } from "lucide-react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { getMaintenanceUrgency } from "../../utils/get-maintenance-urgency"
 import { EstadoEquipos } from "../../bdd/equipos/enum/estado-equipos"
-import { Equipo } from "../../bdd/equipos/types/equipos"
-import { getExpiryStatus } from "../../utils/documents-expiricy"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { formatNumber } from "@/utils/format-number"
-import { Badge } from "@/components/ui/badge"
-import { AlertTriangle, CheckCircle, TrendingDown, TrendingUp, Wrench } from "lucide-react"
-import { Progress } from "@/components/ui/progress"
 import { parseFirebaseDate } from "@/utils/parse-timestamp-date"
+import { getExpiryStatus } from "../../utils/documents-expiricy"
+import { Equipo } from "../../bdd/equipos/types/equipos"
+import { formatNumber } from "@/utils/format-number"
+import { Progress } from "@/components/ui/progress"
+import { Badge } from "@/components/ui/badge"
 
 interface KPIMetricsProps {
     fleetData: Equipo[]

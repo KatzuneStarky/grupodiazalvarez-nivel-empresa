@@ -1,6 +1,6 @@
 "use client"
 
-import { getAuth, getIdTokenResult, GoogleAuthProvider, isSignInWithEmailLink, onAuthStateChanged, ParsedToken, signInWithEmailAndPassword, signInWithEmailLink, signInWithPopup, updatePassword, User } from "firebase/auth"
+import { getAuth, getIdTokenResult, GoogleAuthProvider, onAuthStateChanged, ParsedToken, signInWithEmailAndPassword, signInWithEmailLink, signInWithPopup, updatePassword, User } from "firebase/auth"
 import { createContext, useContext, useEffect, useState } from "react"
 import { updateUsedInvitation } from "@/actions/invitaciones/write"
 import { doc, getDoc } from "firebase/firestore"

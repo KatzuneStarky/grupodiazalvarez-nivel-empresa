@@ -1,11 +1,13 @@
 "use client"
 
+import DocumentCardV2 from '@/modules/logistica/equipos/documentos/components/document-card/document-card-v2';
 import EquipoIdTanqueCard from '@/modules/logistica/equipos/components/equipoId/equipo-id-tanque-card';
 import EquipoIdChart from '@/modules/logistica/equipos/components/equipoId/equipo-id-chart';
 import DocumentCard from '@/modules/logistica/equipos/documentos/components/document-card';
 import EquipoIdCard from '@/modules/logistica/equipos/components/equipoId/equipo-id-card';
 import useEquipoDataById from '@/modules/logistica/equipos/hooks/use-equipos-data-by-id';
 import { esArchivoVencimiento, esCertificado } from '@/functions/tipo-archivo-equipo';
+import { motion, AnimatePresence } from "framer-motion"
 import { Button } from '@/components/ui/button';
 import Icon from '@/components/global/icon';
 import React, { use, useState } from 'react'
@@ -100,13 +102,23 @@ const EquipoIdPage = ({ params }: { params: Promise<{ equipoId: string }> }) => 
             </div>
 
             <div className="flex flex-col lg:flex-row gap-6">
-                <div className="lg:w-2/3 space-y-6">
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="lg:w-2/3 space-y-2">
+
+                    <motion.div layout className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <AnimatePresence mode="popLayout">
+                            {filteredFiles.map((file) => (
+                                <DocumentCardV2 key={file.id} file={file} />
+                            ))}
+                        </AnimatePresence>
+                    </motion.div>
+                    {/**
+                     * <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         {filteredFiles.length === 0
                             ? (<p>No hay archivos para mostrar.</p>)
                             : (filteredFiles.map((file) => (<DocumentCard file={file} key={file.id} />)))
                         }
                     </div>
+                     */}
                 </div>
 
                 <div className="lg:w-1/3 space-y-6">

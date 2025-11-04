@@ -12,7 +12,6 @@ import UserCards from "@/modules/usuarios/components/user-card"
 import { Card, CardContent } from "@/components/ui/card"
 import { ViewMode } from "@/modules/usuarios/types/user"
 import { Button } from "@/components/ui/button"
-import { useAuth } from "@/context/auth-context"
 
 const UsuariosPage = () => {
     const { usuarios } = useUsuarios()

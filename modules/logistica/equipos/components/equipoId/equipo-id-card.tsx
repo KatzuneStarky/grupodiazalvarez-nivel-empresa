@@ -2,6 +2,7 @@
 
 import { EquipoConMantenimientos } from "@/modules/logistica/bdd/equipos/types/mantenimiento"
 import { EstadoEquipos } from "@/modules/logistica/bdd/equipos/enum/estado-equipos";
+import { parseFirebaseDate } from "@/utils/parse-timestamp-date";
 import { estadoColores } from "../../constants/colores-estado";
 import { getUltimoMantenimiento } from "../../actions/read";
 import { Separator } from "@/components/ui/separator";
@@ -16,15 +17,6 @@ const EquipoIdCard = ({ equipo }: { equipo: EquipoConMantenimientos | null }) =>
     const ultimoMantenimiento = getUltimoMantenimiento({
         equipoId: equipo?.id || "",
     }, equipo?.mantenimientos);
-
-    const createAtDate
-        = equipo?.createdAt instanceof Timestamp
-            ? equipo?.createdAt.toDate()
-            : new Date(equipo?.createdAt || new Date());
-    const updateAtDate
-        = equipo?.updatedAt instanceof Timestamp
-            ? equipo?.updatedAt.toDate()
-            : new Date(equipo?.updatedAt || new Date());
 
     return (
         <Card className="w-full overflow-hidden flex flex-col">
@@ -99,10 +91,10 @@ const EquipoIdCard = ({ equipo }: { equipo: EquipoConMantenimientos | null }) =>
                 <div className="flex justify-between items-center border-t pt-4">
                     <div>
                         <p className="text-xs text-gray-500 capitalize">
-                            Creado: {format(createAtDate, 'PPP', { locale: es })}
+                            Creado: {format(parseFirebaseDate(equipo?.createdAt), 'PPP', { locale: es })}
                         </p>
                         <p className="text-xs text-gray-500 capitalize">
-                            Actualizado: {format(updateAtDate, 'PPP', { locale: es })}
+                            Actualizado: {format(parseFirebaseDate(equipo?.updatedAt), 'PPP', { locale: es })}
                         </p>
                     </div>
                     <div className="flex items-center space-x-2">

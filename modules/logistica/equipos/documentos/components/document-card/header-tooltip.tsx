@@ -4,7 +4,7 @@ import { convertirFecha, convertirFechaVencimiento } from "@/functions/document-
 import { esArchivoVencimiento, esCertificado } from "@/functions/tipo-archivo-equipo";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { estadoMap, getEstadoArchivo } from "../../constants/estado-map";
-import { Timestamp } from "firebase/firestore";
+import { parseFirebaseDate } from "@/utils/parse-timestamp-date";
 import { FileVariant } from "../document-card";
 import Icon from "@/components/global/icon"
 import { format } from "date-fns";
@@ -24,7 +24,7 @@ const HeaderToolTip = ({ file }: { file: FileVariant }) => {
                         />
                     </TooltipTrigger>
                     <TooltipContent className={bg}>
-                        {texto} {format(file.fecha instanceof Timestamp ? file.fecha.toDate() : file.fecha, "dd/MM/yyyy")} -{" "}
+                        {texto} {format(parseFirebaseDate(file.fecha), "dd/MM/yyyy")} -{" "}
                         {format(convertirFecha(file.fecha), "dd/MM/yyyy")}
                     </TooltipContent>
                 </Tooltip>
@@ -39,7 +39,7 @@ const HeaderToolTip = ({ file }: { file: FileVariant }) => {
                         />
                     </TooltipTrigger>
                     <TooltipContent className={bg}>
-                        {texto} {format(file.fecha instanceof Timestamp ? file.fecha.toDate() : file.fecha, "dd/MM/yyyy")} -{" "}
+                        {texto} {format(parseFirebaseDate(file.fecha), "dd/MM/yyyy")} -{" "}
                         {format(convertirFechaVencimiento(file), "dd/MM/yyyy")}
                     </TooltipContent>
                 </Tooltip>
