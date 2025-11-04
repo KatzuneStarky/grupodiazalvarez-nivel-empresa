@@ -2,10 +2,15 @@
 
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import DeleteClientDialog from "@/modules/logistica/clientes/components/delete-cliente-dialog"
+import { exportCollectionToJson } from "@/functions/json-export/export-collection-to-json"
 import { exportClientes } from "@/functions/excel-export/clientes/export/export-clientes"
+import { importJsonToCollection } from "@/functions/json-import/import-json-to-data"
 import { useClientes } from "@/modules/logistica/bdd/clientes/hooks/use-clientes"
+import { Clientes } from "@/modules/logistica/bdd/clientes/types/clientes"
 import { Edit, Mail, MapPin, Phone, Plus, User } from "lucide-react"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
+import { downloadJson } from "@/functions/json-export/download-json"
+import ImportDialog from "@/components/global/import-dialog"
 import { useDirectLink } from "@/hooks/use-direct-link"
 import PageTitle from "@/components/custom/page-title"
 import { Separator } from "@/components/ui/separator"
@@ -14,6 +19,7 @@ import { useArea } from "@/context/area-context"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { useRouter } from "next/navigation"
+import Icon from "@/components/global/icon"
 import { toast } from "sonner"
 
 const ClientsPage = () => {
@@ -21,6 +27,21 @@ const ClientsPage = () => {
     const { clientes } = useClientes()
     const router = useRouter()
     const { area } = useArea()
+
+    const importClientesDataJson = async (data: Clientes[]) => {
+        try {
+            toast.promise(importJsonToCollection<Clientes>(data, "clientes", {
+                convertDates: true,
+                overwrite: true,
+            }), {
+                loading: "Importando datos...",
+                success: "Datos importados con éxito",
+                error: "Error al importar datos"
+            })
+        } catch (error) {
+
+        }
+    }
 
     const handleExportClientes = async () => {
         try {
@@ -37,6 +58,18 @@ const ClientsPage = () => {
         }
     }
 
+    const exportClientesDataJson = async () => {
+        try {
+            const clientes = await exportCollectionToJson<Clientes>("clientes");
+            downloadJson(clientes, "Clientes");
+
+            toast.success("Datos exportados con éxito")
+        } catch (error) {
+            console.log(error);
+            toast.error("Error al exportar datos")
+        }
+    }
+
     return (
         <div className="container mx-auto py-8 px-4">
             <PageTitle
@@ -46,6 +79,12 @@ const ClientsPage = () => {
                 hasActions
                 actions={
                     <>
+                        <ImportDialog<Clientes>
+                            onImport={importClientesDataJson}
+                            title="Importar clientes"
+                            triggerLabel="Importar Json"
+                        />
+
                         <Button
                             className="sm:w-auto"
                             onClick={() => handleExportClientes()}
@@ -53,6 +92,12 @@ const ClientsPage = () => {
                             <IconFileExport className="w-4 h-4 mr-2" />
                             Exportar Datos
                         </Button>
+
+                        <Button className="sm:w-auto" onClick={() => exportClientesDataJson()}>
+                            <Icon iconName="si:json-fill" className="w-4 h-4 mr-2" />
+                            Exportar Json
+                        </Button>
+
                         <Button onClick={() => router.push(`${directLink}/nuevo`)} className="flex items-center gap-2 bg-primary hover:bg-primary/90">
                             <Plus className="h-4 w-4" />
                             Nuevo Cliente

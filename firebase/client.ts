@@ -4,13 +4,13 @@ import { getApps, initializeApp } from "firebase/app";
 import { Auth, getAuth } from "firebase/auth";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyBRVwj6S4NIX0y8U1Lp2x6a7VaD57WasPg",
-  authDomain: "grupo-diaz-alvarez-hermanos.firebaseapp.com",
-  projectId: "grupo-diaz-alvarez-hermanos",
-  storageBucket: "grupo-diaz-alvarez-hermanos.firebasestorage.app",
-  messagingSenderId: "84098978214",
-  appId: "1:84098978214:web:ef2066d6b26489d36dff67",
-  measurementId: "G-DZ87MYGWZR"
+  apiKey: "AIzaSyCKy-xbk7hWXaJ66m0AM51g71lP-oX4hBc",
+  authDomain: "grupo-diaz-alvarez-herma-f35ff.firebaseapp.com",
+  projectId: "grupo-diaz-alvarez-herma-f35ff",
+  storageBucket: "grupo-diaz-alvarez-herma-f35ff.firebasestorage.app",
+  messagingSenderId: "101278628443",
+  appId: "1:101278628443:web:5a6ec0a732530e2b2ddd7e",
+  measurementId: "G-VPD67WWK73"
 };
 
 const currentApps = getApps()

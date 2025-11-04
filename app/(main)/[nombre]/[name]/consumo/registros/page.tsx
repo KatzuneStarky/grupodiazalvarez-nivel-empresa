@@ -1,18 +1,25 @@
 "use client"
 
+import { exportCollectionToJson } from "@/functions/json-export/export-collection-to-json"
 import { useConsumoFilters } from "@/modules/logistica/consumo/hooks/use-consumo-filters"
+import { importJsonToCollection } from "@/functions/json-import/import-json-to-data"
 import ConsumoFilters from "@/modules/logistica/consumo/components/consumo-filters"
+import { ConsumoData } from "@/modules/logistica/consumo/types/consumo-data"
 import { DollarSign, Gauge, TrendingDown, TrendingUp } from "lucide-react"
+import { downloadJson } from "@/functions/json-export/download-json"
 import { parseFirebaseDate } from "@/utils/parse-timestamp-date"
+import ImportDialog from "@/components/global/import-dialog"
 import { Card, CardContent } from "@/components/ui/card"
 import SelectMes from "@/components/global/select-mes"
 import PageTitle from "@/components/custom/page-title"
 import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
+import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import Icon from "@/components/global/icon"
 import { es } from "date-fns/locale"
 import { format } from "date-fns"
+import { toast } from "sonner"
 
 const ConsumoPage = () => {
     const {
@@ -26,8 +33,36 @@ const ConsumoPage = () => {
         setDateRange
     } = useConsumoFilters()
 
+    const importConsumosDataJson = async (data: ConsumoData[]) => {
+        try {
+            toast.promise(importJsonToCollection<ConsumoData>(data, "consumos", {
+                convertDates: true,
+                overwrite: true,
+            }), {
+                loading: "Importando datos...",
+                success: "Datos importados con éxito",
+                error: "Error al importar datos"
+            })
+        } catch (error) {
+
+        }
+    }
+
+    const exportConsumoDataJson = async () => {
+        try {
+            const consumos = await exportCollectionToJson<ConsumoData>("consumos");
+            downloadJson(consumos, "Consumo");
+
+            toast.success("Datos exportados con éxito")
+        } catch (error) {
+            console.log(error);
+            toast.error("Error al exportar datos")
+        }
+    }
+
     return (
         <div className="container mx-auto px-8 py-6">
+            {mes}
             <PageTitle
                 title="Registros de consumo"
                 description="Gestine y administre el consumo de la flota"
@@ -36,9 +71,20 @@ const ConsumoPage = () => {
                 }
                 hasActions={true}
                 actions={
-                    <div className="flex items-center">
+                    <>
+                        <ImportDialog<ConsumoData>
+                            onImport={importConsumosDataJson}
+                            title="Importar consumos"
+                            triggerLabel="Importar Json"
+                        />
+
+                        <Button className="sm:w-auto" onClick={() => exportConsumoDataJson()}>
+                            <Icon iconName="si:json-fill" className="w-4 h-4 mr-2" />
+                            Exportar Json
+                        </Button>
+
                         <SelectMes value={mes} onChange={setMes} />
-                    </div>
+                    </>
                 }
             />
             <Separator className="my-4" />

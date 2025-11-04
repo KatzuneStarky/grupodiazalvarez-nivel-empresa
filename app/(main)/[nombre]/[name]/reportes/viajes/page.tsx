@@ -7,15 +7,19 @@ import { exportReporteViajes } from "@/functions/excel-export/reportes-viajes/ex
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import UploadViajesDialog from "@/modules/logistica/reportes-viajes/components/upload-viajes-dialog"
 import { useReporteViajes } from "@/modules/logistica/reportes-viajes/hooks/use-reporte-viajes"
+import { exportCollectionToJson } from "@/functions/json-export/export-collection-to-json"
 import { ReporteViajes } from "@/modules/logistica/reportes-viajes/types/reporte-viajes"
+import { importJsonToCollection } from "@/functions/json-import/import-json-to-data"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { downloadJson } from "@/functions/json-export/download-json"
 import { parseFirebaseDate } from "@/utils/parse-timestamp-date"
+import ImportDialog from "@/components/global/import-dialog"
 import { formatNumber } from "@/utils/format-number"
 import { useArea } from "@/context/area-context"
 import { Button } from "@/components/ui/button"
-import { Timestamp } from "firebase/firestore"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
+import Icon from "@/components/global/icon"
 import { useMemo, useState } from "react"
 import { es } from "date-fns/locale"
 import { format } from "date-fns"
@@ -141,7 +145,22 @@ const ReporteViajesPage = () => {
         return groups
     }, [filteredAndSortedData, reporteViajes])
 
-    const exportReportesViajesAction = async(reportes: ReporteViajes[]) => {
+    const importViajesDataJson = async (data: ReporteViajes[]) => {
+        try {
+            toast.promise(importJsonToCollection<ReporteViajes>(data, "reporteViajes", {
+                convertDates: true,
+                overwrite: true,
+            }), {
+                loading: "Importando datos...",
+                success: "Datos importados con éxito",
+                error: "Error al importar datos"
+            })
+        } catch (error) {
+
+        }
+    }
+
+    const exportReportesViajesAction = async (reportes: ReporteViajes[]) => {
         try {
             toast.promise(exportReporteViajes(reportes, area?.nombre || ""), {
                 loading: "Exportando reportes de viajes...",
@@ -152,7 +171,19 @@ const ReporteViajesPage = () => {
                 error: "Error al exportar reportes de viajes"
             })
         } catch (error) {
-            
+
+        }
+    }
+
+    const exportReporteViajesDataJson = async () => {
+        try {
+            const viajes = await exportCollectionToJson<ReporteViajes>("reporteViajes");
+            downloadJson(viajes, "Reporte viajes");
+
+            toast.success("Datos exportados con éxito")
+        } catch (error) {
+            console.log(error);
+            toast.error("Error al exportar datos")
         }
     }
 
@@ -173,7 +204,19 @@ const ReporteViajesPage = () => {
                         <Grid3X3 className="h-4 w-4 mr-2" />
                         Tarjetas
                     </Button>
+
+                    <ImportDialog<ReporteViajes>
+                        onImport={importViajesDataJson}
+                        title="Importar viajes"
+                        triggerLabel="Importar Json"
+                    />
+
                     <UploadViajesDialog />
+
+                    <Button className="sm:w-auto" onClick={() => exportReporteViajesDataJson()}>
+                        <Icon iconName="si:json-fill" className="w-4 h-4 mr-2" />
+                        Exportar Json
+                    </Button>
                     <Button variant="outline" size="sm" onClick={() => exportReportesViajesAction(reporteViajes)}>
                         <Download className="h-4 w-4 mr-2" />
                         Exportar CSV
@@ -349,10 +392,6 @@ const ReporteViajesPage = () => {
                                 </TableHeader>
                                 <TableBody>
                                     {paginatedData.length >= 1 ? paginatedData.map((report, index) => {
-                                        const fecha
-                                            = report?.Fecha instanceof Timestamp
-                                                ? report?.Fecha.toDate()
-                                                : new Date(report?.Fecha || new Date());
 
                                         return (
                                             <TableRow key={report.id} className={index % 2 === 0 ? "bg-muted/20" : ""}>
@@ -360,7 +399,7 @@ const ReporteViajesPage = () => {
                                                 <TableCell>{report.Producto}</TableCell>
                                                 <TableCell>{report.Equipo}</TableCell>
                                                 <TableCell>{report.Operador}</TableCell>
-                                                <TableCell>{format(fecha, "dd/MM/yyyy", { locale: es })}</TableCell>
+                                                <TableCell>{format(parseFirebaseDate(report.Fecha), "dd/MM/yyyy", { locale: es })}</TableCell>
                                                 <TableCell>{report.Municipio}</TableCell>
                                                 <TableCell>{report.LitrosA20?.toLocaleString()}</TableCell>
                                                 <TableCell>{report.LitrosDescargadosEstaciones?.toLocaleString()}</TableCell>

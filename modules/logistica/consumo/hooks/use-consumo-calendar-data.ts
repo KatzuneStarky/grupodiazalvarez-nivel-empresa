@@ -1,6 +1,7 @@
 import { ConsumoCombustible, ConsumoEventProps, SelectedEvent } from "../types/consumo"
 import { DateSelectArg, EventClickArg, EventInput } from "@fullcalendar/core/index.js"
 import { useOperadores } from "../../bdd/operadores/hooks/use-estaciones"
+import { parseFirebaseDate } from "@/utils/parse-timestamp-date"
 import { useEquipos } from "../../bdd/equipos/hooks/use-equipos"
 import { useCallback, useState } from "react"
 import { useConsumo } from "./use-consumo"
@@ -50,7 +51,7 @@ export const useConsumoCalendarData = () => {
         return consumos.map((item) => ({
             id: item.id,
             title: `EQUIPO ${equipos.find((equipo) => equipo.id === item.equipoId)?.numEconomico} — ${item.litrosCargados} L`,
-            start: item.fecha instanceof Date ? item.fecha : item.fecha.toDate(),
+            start: parseFirebaseDate(item.fecha),
             allDay: true,
             backgroundColor: getPerformanceColor(item.rendimientoKmL),
             borderColor: getPerformanceColor(item.rendimientoKmL),

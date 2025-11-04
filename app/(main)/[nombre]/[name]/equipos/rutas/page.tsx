@@ -1,14 +1,23 @@
 "use client"
 
+import { exportCollectionToJson } from "@/functions/json-export/export-collection-to-json"
+import { importJsonToCollection } from "@/functions/json-import/import-json-to-data"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import RoutesManager from "@/modules/logistica/rutas/components/routes-manager"
+import { downloadJson } from "@/functions/json-export/download-json"
 import { useRutas } from "@/modules/logistica/rutas/hooks/use-rutas"
 import { Ruta } from "@/modules/logistica/equipos/types/rutas"
+import ImportDialog from "@/components/global/import-dialog"
 import { useDirectLink } from "@/hooks/use-direct-link"
-import { Plus, Route, Truck } from "lucide-react"
+import PageTitle from "@/components/custom/page-title"
+import { Separator } from "@/components/ui/separator"
+import { IconFileExport } from "@tabler/icons-react"
 import { Button } from "@/components/ui/button"
+import Icon from "@/components/global/icon"
 import { useRouter } from "next/navigation"
+import { Plus, Route } from "lucide-react"
 import { useState } from "react"
+import { toast } from "sonner"
 
 const EquiposRutasPage = () => {
     const [selectedRoute, setSelectedRoute] = useState<Ruta | null>(null)
@@ -23,24 +32,68 @@ const EquiposRutasPage = () => {
     const totalDistance = rutas?.reduce((sum, route) => sum + route.trayecto.kilometros, 0)
     const billableRoutes = rutas?.filter((route) => route.viajeFacturable).length
 
+    const importEquiposDataJson = async (data: Ruta[]) => {
+        try {
+            toast.promise(importJsonToCollection<Ruta>(data, "rutas", {
+                convertDates: true,
+                overwrite: true,
+            }), {
+                loading: "Importando datos...",
+                success: "Datos importados con éxito",
+                error: "Error al importar datos"
+            })
+        } catch (error) {
+
+        }
+    }
+
+    const exportRutasDataJson = async () => {
+        try {
+            const rutas = await exportCollectionToJson<Ruta>("rutas");
+            downloadJson(rutas, "Rutas");
+
+            toast.success("Datos exportados con éxito")
+        } catch (error) {
+            console.log(error);
+            toast.error("Error al exportar datos")
+        }
+    }
+
     return (
         <div className="container mx-auto py-8 px-4">
             <div className="space-y-6">
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                        <div className="p-2 bg-primary/10 rounded-lg">
-                            <Truck className="h-6 w-6 text-primary" />
-                        </div>
-                        <div>
-                            <h1 className="text-3xl font-bold">Gestor de Rutas</h1>
-                            <p className="text-muted-foreground">Administra las rutas de transporte de combustible</p>
-                        </div>
-                    </div>
-                    <Button className="flex items-center gap-2" onClick={() => router.push(`${directLink}/nuevo`)}>
-                        <Plus className="h-4 w-4" />
-                        Nueva Ruta
-                    </Button>
-                </div>
+                <PageTitle
+                    icon={<Route className="h-12 w-12 text-primary" />}
+                    title="Rutas"
+                    description="Administración y gestion de rutas"
+                    hasActions={true}
+                    actions={
+                        <>
+                            <ImportDialog<Ruta>
+                                onImport={importEquiposDataJson}
+                                title="Importar rutas"
+                                triggerLabel="Importar Json"
+                            />
+                            <Button className="sm:w-auto">
+                                <IconFileExport className="w-4 h-4 mr-2" />
+                                Exportar Datos
+                            </Button>
+                            <Button className="sm:w-auto" onClick={() => exportRutasDataJson()}>
+                                <Icon iconName="si:json-fill" className="w-4 h-4 mr-2" />
+                                Exportar Json
+                            </Button>
+                            <Button
+                                className="sm:w-auto"
+                                onClick={() => router.push(`${directLink}/nuevo`)}
+                            >
+                                <Plus className="w-4 h-4 mr-2" />
+                                Nueva ruta
+                            </Button>
+                        </>
+                    }
+                />
+
+                <Separator className="my-4" />
 
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                     <Card>

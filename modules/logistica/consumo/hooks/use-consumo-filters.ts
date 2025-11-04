@@ -1,9 +1,9 @@
+import { endOfDay, endOfMonth, isValid, startOfDay, startOfMonth } from "date-fns";
 import { getCurrentMonthCapitalized } from "@/functions/monts-functions";
 import { parseFirebaseDate } from "@/utils/parse-timestamp-date";
-import { endOfDay, isValid, startOfDay } from "date-fns";
+import { useEffect, useMemo, useState } from "react";
 import { DateRange } from "react-day-picker";
 import { useConsumo } from "./use-consumo";
-import { useMemo, useState } from "react";
 import { meses } from "@/constants/meses";
 
 export const useConsumoFilters = () => {
@@ -11,26 +11,37 @@ export const useConsumoFilters = () => {
     const { consumo, loading } = useConsumo()
 
     const [filterEquipoType, setFilterEquipoType] = useState<string>("Todos")
+    const [dateRange, setDateRange] = useState<DateRange | undefined>();
     const [searchTerm, setSearchTerm] = useState<string>("")
     const [mes, setMes] = useState<string>(currentMont)
 
+    useEffect(() => {
+        if (!mes) return;
+
+        const monthName = mes.toLowerCase();
+        const monthIndex = meses.findIndex((m) => m.toLowerCase() === monthName);
+
+        if (monthIndex === -1) return;
+
+        const now = new Date();
+        const year = now.getFullYear();
+
+        const firstDay = startOfMonth(new Date(year, monthIndex, 1));
+        const lastDay = endOfMonth(new Date(year, monthIndex, 1));
+
+        setDateRange({ from: firstDay, to: lastDay });
+    }, [mes]);
+
     const consumoOrdered = useMemo(() => {
-        return consumo.flatMap((c) => {
-            return c
-        }).sort((a, b) => {
-            return new Date(parseFirebaseDate(b.fecha)).getTime() - new Date(parseFirebaseDate(a.fecha)).getTime()
-        })
+        return consumo
+            .flatMap((c) => c)
+            .sort(
+                (a, b) =>
+                    new Date(parseFirebaseDate(b.fecha)).getTime() -
+                    new Date(parseFirebaseDate(a.fecha)).getTime()
+            );
     }, [consumo])
 
-
-    const [dateRange, setDateRange] = useState<DateRange | undefined>(() => {
-        if (consumo.length === 0) return undefined;
-        const fechas = consumo.map(e => new Date(parseFirebaseDate(e.fecha)).getTime());
-        return {
-            from: new Date(Math.min(...fechas)),
-            to: new Date(Math.max(...fechas)),
-        };
-    });
 
     const filterConsumo = (mes: string) => {
         return consumoOrdered.filter((item) => {
@@ -43,31 +54,28 @@ export const useConsumoFilters = () => {
 
     const consumoFiltrado = useMemo(() => {
         const term = searchTerm.trim().toLowerCase();
-        const consumos = filterConsumo(mes)
 
-        return consumos.filter((item) => {
+        return consumoOrdered.filter((item) => {
             const fecha = parseFirebaseDate(item.fecha);
-            const monthFecha = fecha.getMonth() + 1
-            const dayFecha = fecha.getDate()
-            const yearFecha = fecha.getFullYear()
-            const currentMonthName = getCurrentMonthCapitalized().split("-")[1];
-            const currentMonthNumber = meses.indexOf(currentMonthName) + 1;
-
-
-            const newFecha = new Date()
-            newFecha.setMonth(monthFecha - 1)
-            newFecha.setDate(dayFecha)
-            newFecha.setFullYear(yearFecha)
-
-            const startFechaMes = startOfDay(fecha);
-            const endFechaMes = endOfDay(fecha);
 
             if (!(fecha instanceof Date) || !isValid(fecha)) return false;
 
             if (dateRange?.from && fecha < startOfDay(new Date(dateRange.from))) return false;
             if (dateRange?.to && fecha > endOfDay(new Date(dateRange.to))) return false;
-        })
-    }, [mes, consumoOrdered]);
+
+            {/**
+                if (term) {
+                const match =
+                    item.?.toLowerCase().includes(term) ||
+                    item.Equipo?.toLowerCase().includes(term) ||
+                    item.Operador?.toLowerCase().includes(term) ||
+                    item.Producto?.toLowerCase().includes(term);
+                if (!match) return false;
+            } */}
+
+            return true;
+        });
+    }, [consumoOrdered, dateRange, searchTerm]);
 
 
     return {

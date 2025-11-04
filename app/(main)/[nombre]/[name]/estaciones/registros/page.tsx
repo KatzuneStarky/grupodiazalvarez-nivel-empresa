@@ -2,21 +2,26 @@
 
 import { ChevronLeft, ChevronRight, Droplets, Fuel, Import, MapPin, Plus, User } from "lucide-react"
 import { useEstacionesFilters } from "@/modules/logistica/estaciones/hooks/use-estaciones-filters"
-import { importEstaciones } from "@/functions/excel-export/estaciones/import/import-estaciones"
+//import { importEstaciones } from "@/functions/excel-export/estaciones/import/import-estaciones"
 import { exportEstaciones } from "@/functions/excel-export/estaciones/export/export-estaciones"
+import { exportCollectionToJson } from "@/functions/json-export/export-collection-to-json"
 import { EstacionDialog } from "@/modules/logistica/estaciones/components/estacion-dialog"
 import EstacionActions from "@/modules/logistica/estaciones/components/estacion-actions"
+import { importJsonToCollection } from "@/functions/json-import/import-json-to-data"
 import EstacionesFilters from "@/modules/logistica/estaciones/components/filtros"
 import { EstacionServicio } from "@/modules/logistica/estaciones/types/estacion"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { IconFileExport, IconGasStation } from "@tabler/icons-react"
-import ImportDialog from "@/components/custom/import-dialog"
+import { downloadJson } from "@/functions/json-export/download-json"
+//import ImportDialog from "@/components/custom/import-dialog"
+import ImportDialog from "@/components/global/import-dialog"
 import { useDirectLink } from "@/hooks/use-direct-link"
 import PageTitle from "@/components/custom/page-title"
 import { Separator } from "@/components/ui/separator"
 import { useArea } from "@/context/area-context"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import Icon from "@/components/global/icon"
 import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
 import { useState } from "react"
@@ -82,6 +87,21 @@ const RegistrosEstacionesPage = () => {
         }))
     }
 
+    const importEstacionesDataJson = async (data: EstacionServicio[]) => {
+        try {
+            toast.promise(importJsonToCollection<EstacionServicio>(data, "estacionServicio", {
+                convertDates: true,
+                overwrite: true,
+            }), {
+                loading: "Importando datos...",
+                success: "Datos importados con éxito",
+                error: "Error al importar datos"
+            })
+        } catch (error) {
+
+        }
+    }
+
     const handleExportEstaciones = async () => {
         try {
             toast.promise(exportEstaciones(estaciones, area?.nombre || ""), {
@@ -89,6 +109,18 @@ const RegistrosEstacionesPage = () => {
                 success: "Datos exportados con éxito",
                 error: "Error al exportar datos"
             })
+        } catch (error) {
+            console.log(error);
+            toast.error("Error al exportar datos")
+        }
+    }
+
+    const exportEstacionesDataJson = async () => {
+        try {
+            const estaciones = await exportCollectionToJson<EstacionServicio>("estacionServicio");
+            downloadJson(estaciones, "Estaciones de servicio");
+
+            toast.success("Datos exportados con éxito")
         } catch (error) {
             console.log(error);
             toast.error("Error al exportar datos")
@@ -104,6 +136,12 @@ const RegistrosEstacionesPage = () => {
                 hasActions
                 actions={
                     <>
+                        <ImportDialog<EstacionServicio>
+                            onImport={importEstacionesDataJson}
+                            title="Importar estaciones"
+                            triggerLabel="Importar Json"
+                        />
+
                         <Button
                             className="sm:w-auto"
                             onClick={() => setOpen(!open)}
@@ -117,6 +155,11 @@ const RegistrosEstacionesPage = () => {
                         >
                             <IconFileExport className="w-4 h-4 mr-2" />
                             Exportar Datos
+                        </Button>
+
+                        <Button className="sm:w-auto" onClick={() => exportEstacionesDataJson()}>
+                            <Icon iconName="si:json-fill" className="w-4 h-4 mr-2" />
+                            Exportar Json
                         </Button>
 
                         <Button
@@ -285,7 +328,8 @@ const RegistrosEstacionesPage = () => {
                 getFuelLevelColor={getFuelLevelColor}
             />
 
-            <ImportDialog
+            {/**
+             * <ImportDialog
                 open={open}
                 onOpenChange={setOpen}
                 title="Importar estaciones"
@@ -293,6 +337,7 @@ const RegistrosEstacionesPage = () => {
                 onImport={importEstaciones}
                 acceptedFormats=".xlsx,.xls"
             />
+             */}
         </div>
     )
 }

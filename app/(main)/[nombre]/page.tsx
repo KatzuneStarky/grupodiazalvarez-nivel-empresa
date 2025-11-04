@@ -20,16 +20,16 @@ const MainPage = () => {
     const [elapsedTime, setElapsedTime] = useState(0)
 
     const { empresa, loading } = useEmpresa()
-    const { rol } = useAuth()
+    const { userBdd } = useAuth()
     const router = useRouter()
 
     const isPublic = empresa?.configuraciones.accesoPublico
     useEffect(() => {
         if (!loading) {
-            setIsValidUser(rol === RolUsuario.Super_Admin);
-            setIsAdmin(rol === RolUsuario.Super_Admin)
+            setIsValidUser(userBdd?.rol as RolUsuario === RolUsuario.Super_Admin);
+            setIsAdmin(userBdd?.rol as RolUsuario === RolUsuario.Super_Admin)
         }
-    }, [rol, loading]);
+    }, [userBdd, loading]);
 
     useEffect(() => {
         const contactos = empresa?.contactos

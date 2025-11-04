@@ -171,8 +171,8 @@ const ImportDialog = <T extends Record<string, any>>({
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button variant="outline">
-                    <UploadIcon />
+                <Button className="sm:w-auto">
+                    <UploadIcon className="w-4 h-4 mr-2" />
                     {triggerLabel}
                 </Button>
             </DialogTrigger>
@@ -185,7 +185,6 @@ const ImportDialog = <T extends Record<string, any>>({
                 </DialogHeader>
 
                 <div className="space-y-4">
-                    {/* File Input */}
                     <div className="space-y-2">
                         <Label htmlFor="file-upload">Select File</Label>
                         <Input
@@ -198,7 +197,6 @@ const ImportDialog = <T extends Record<string, any>>({
                         />
                     </div>
 
-                    {/* File Info */}
                     {file && (
                         <div className="flex items-center gap-2 p-3 bg-muted rounded-md">
                             <FileIcon className="size-4 text-muted-foreground" />
@@ -211,7 +209,6 @@ const ImportDialog = <T extends Record<string, any>>({
                         </div>
                     )}
 
-                    {/* Loading State */}
                     {state === "loading" && (
                         <div className="flex items-center justify-center gap-2 p-8">
                             <Loader2Icon className="size-5 animate-spin" />
@@ -219,7 +216,6 @@ const ImportDialog = <T extends Record<string, any>>({
                         </div>
                     )}
 
-                    {/* Error State */}
                     {state === "error" && error && (
                         <Alert variant="destructive">
                             <AlertCircleIcon className="size-4" />
@@ -230,7 +226,6 @@ const ImportDialog = <T extends Record<string, any>>({
                         </Alert>
                     )}
 
-                    {/* Success State */}
                     {state === "success" && (
                         <Alert className="border-green-500 bg-green-50 dark:bg-green-950/20">
                             <CheckCircleIcon className="size-4 text-green-600 dark:text-green-400" />
@@ -241,7 +236,6 @@ const ImportDialog = <T extends Record<string, any>>({
                         </Alert>
                     )}
 
-                    {/* Preview Table */}
                     {state === "preview" && previewData.length > 0 && (
                         <div className="space-y-2">
                             <div className="flex items-center justify-between">
