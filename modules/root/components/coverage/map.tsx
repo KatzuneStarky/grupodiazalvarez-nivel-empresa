@@ -18,10 +18,14 @@ const customIcon = new L.Icon({
 export default function CoverageMap() {
 
     useEffect(() => {
+        const mapContainer = document.getElementById('map');
+        if (!mapContainer) return;
+        if (mapContainer.innerHTML !== "") return;
+
         const map = L.map('map').setView(CENTER, ZOOM_LEVEL);
 
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; OpenStreetMap',
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a>',
         }).addTo(map);
 
         locations.forEach(({ lat, lng, estacion }) => {
@@ -35,5 +39,11 @@ export default function CoverageMap() {
         };
     }, [CENTER, ZOOM_LEVEL, L, locations]);
 
-    return <div id="map" style={{ width: '100%', height: '70%' }} className="rounded-lg mb-6" />
+    return (
+        <div
+            id="map"
+            style={{ width: "100%", height: "400px" }}
+            className="rounded-lg mb-6 shadow-sm border border-muted"
+        />
+    )
 }

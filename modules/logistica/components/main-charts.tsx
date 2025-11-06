@@ -16,7 +16,7 @@ const chartConfig: ChartConfig = {
 }
 
 const chartConfig2: ChartConfig = {
-    desktop: {
+    Total: {
         label: "M3 Total",
         color: "#2563eb",
     },
@@ -28,7 +28,7 @@ const MainCharts = ({
     year: number
 }) => {
     const currentYear = new Date().getFullYear();
-    const { chartData1, chartData2 } = useDashboardLogisticaChartData(year, currentYear);
+    const { chartDataM3, chartDataFlete } = useDashboardLogisticaChartData(year, currentYear);
 
     return (
         <Card>
@@ -48,7 +48,7 @@ const MainCharts = ({
                             className="h-[300px] w-full"
                         >
                             <LineChart
-                                data={chartData2}
+                                data={chartDataM3}
                                 margin={{
                                     top: 5,
                                     right: 10,
@@ -57,7 +57,7 @@ const MainCharts = ({
                                 }}
                             >
                                 <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                                <XAxis dataKey="month"
+                                <XAxis dataKey="Mes"
                                     tickLine={false}
                                     tickMargin={10}
                                     tickFormatter={(value) => value.slice(0, 3)}
@@ -67,11 +67,11 @@ const MainCharts = ({
                                     cursor={false}
                                     content={({ payload }) => {
                                         if (payload && payload.length) {
-                                            const { month, total } = payload[0].payload;
+                                            const { Mes, Total } = payload[0].payload;
                                             return (
                                                 <div className="p-4 bg-white border text-black">
-                                                    <p><strong>Mes:</strong> {month}</p>
-                                                    <p><strong>Total M³:</strong> {formatNumber(total)}M³</p>
+                                                    <p><strong>Mes:</strong> {Mes}</p>
+                                                    <p><strong>Total M³:</strong> {formatNumber(Total)}M³</p>
                                                 </div>
                                             );
                                         }
@@ -79,7 +79,7 @@ const MainCharts = ({
                                     }}
                                 />
                                 <Line
-                                    dataKey="total"
+                                    dataKey="Total"
                                     type="bump"
                                     strokeWidth={2}
                                     dot={true}
@@ -94,7 +94,7 @@ const MainCharts = ({
                             className="h-[300px] w-full"
                         >
                             <LineChart
-                                data={chartData1}
+                                data={chartDataFlete}
                                 margin={{
                                     top: 5,
                                     right: 10,
@@ -115,7 +115,7 @@ const MainCharts = ({
                                     cursor={true}
                                     content={({ payload }) => {
                                         if (payload && payload.length) {
-                                            const { Mes, TotalFlete } = payload[0].payload;
+                                            const { Mes, Total } = payload[0].payload;
                                             return (
                                                 <div className="p-4 bg-white border">
                                                     <div className="flex">
@@ -129,7 +129,7 @@ const MainCharts = ({
                                                         <div className="w-4 h-4 bg-[var(--color-totalFlete)] mr-1" />
                                                         <p className="text-black">
                                                             <span className="font-extrabold">Total Flete: </span>
-                                                            {formatCurrency(TotalFlete)}
+                                                            {formatCurrency(Total)}
                                                         </p>
                                                     </div>
                                                 </div>
@@ -140,7 +140,7 @@ const MainCharts = ({
                                 />
                                 <Line
                                     type="monotone"
-                                    dataKey="TotalFlete"
+                                    dataKey="Total"
                                     stroke="var(--color-totalFlete)"
                                     strokeWidth={2}
                                     dot={false}

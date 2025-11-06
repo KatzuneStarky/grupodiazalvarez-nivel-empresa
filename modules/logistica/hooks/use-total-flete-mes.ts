@@ -10,40 +10,43 @@ export const useTotalFletePorMes = (year: number) => {
     const [error, setError] = useState<Error | null>(null);
 
     useEffect(() => {
+        if (!year) return;
+
         const q = query(
             collection(db, "reporteViajes"),
             where("Year", "==", year)
         );
 
-        const unsubscribe = onSnapshot(q, (querySnapshot) => {
-            const data: ReporteViajes[] = [];
-            querySnapshot.forEach((doc) => {
-                data.push(doc.data() as ReporteViajes);
-            });
+        const unsubscribe = onSnapshot(
+            q,
+            (querySnapshot) => {
+                const data: ReporteViajes[] = [];
 
-            const result = data.reduce((acc, curr) => {
-                const mes = curr.Mes;
-                if (!acc[mes]) {
-                    acc[mes] = 0;
-                }
-                acc[mes] += curr.Flete || 0;
-                return acc;
-            }, {} as { [key: string]: number });
+                querySnapshot.forEach((doc) => {
+                    data.push(doc.data() as ReporteViajes);
+                });
 
-            const totalFletePorMes = meses.map(mes => {
-                return {
+                const result = data.reduce((acc, curr) => {
+                    const mes = curr.Mes?.trim() || "Sin mes";
+                    if (!acc[mes]) acc[mes] = 0;
+                    acc[mes] += curr.Flete || 0;
+                    return acc;
+                }, {} as Record<string, number>);
+
+                const totalFletePorMes = meses.map((mes) => ({
                     Mes: mes,
                     TotalFlete: result[mes] || 0,
-                };
-            });
+                }));
 
-            setTotalFletePorMes(totalFletePorMes);
-            setIsLoading(false);
-        }, (error) => {
-            console.error("Error obteniendo los datos:", error);
-            setError(error);
-            setIsLoading(false);
-        });
+                setTotalFletePorMes(totalFletePorMes);
+                setIsLoading(false);
+            },
+            (error) => {
+                console.error("Error obteniendo los datos:", error);
+                setError(error);
+                setIsLoading(false);
+            }
+        );
 
         return () => unsubscribe();
     }, [year]);

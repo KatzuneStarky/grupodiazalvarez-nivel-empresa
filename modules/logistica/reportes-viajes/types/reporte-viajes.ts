@@ -17,7 +17,7 @@ export interface ClienteViajes {
 export interface ReporteViajes {
     id: string;
     Mes: string;
-    Fecha: Date | Timestamp;
+    Fecha: Date;
     FacturaPemex?: number;
     Cliente: string;
     DescripcionDelViaje: string;

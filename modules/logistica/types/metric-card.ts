@@ -1,12 +1,15 @@
-export interface MetricCardProps {
+import { LucideIcon } from "lucide-react"
+
+export interface KpiCardProps {
     title: string
     value: string | number
-    change?: string
-    changeType?: "positive" | "negative"
-    icon: React.ElementType
-    subtitle?: string
-    progress?: number
-    target?: string
-    additional?: { label: string; value: string }[]
+    icon: LucideIcon
+    textValue?: string
+    initialTextVaule?: string
+    trend?: {
+        value: number
+        isPositive: boolean
+    }
     className?: string
+    colorVariant?: "blue" | "emerald" | "amber" | "purple" | "rose" | "cyan" | "orange" | "teal" | "pink" | "lime"
 }

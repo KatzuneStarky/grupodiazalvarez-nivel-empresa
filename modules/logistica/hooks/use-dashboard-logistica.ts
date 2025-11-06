@@ -34,8 +34,8 @@ export const useDashboardDataLogistica = () => {
     const { rutas } = useRutas()
 
     const semanaActual = getWeek(new Date());
-    const primerDiaSemana = startOfWeek(new Date());
-    const ultimoDiaSemana = endOfWeek(new Date());
+    const primerDiaSemana = startOfWeek(new Date()).toLocaleDateString();
+    const ultimoDiaSemana = endOfWeek(new Date()).toLocaleDateString();
 
     const estacionesCount = estaciones.length;
     const operadoresCount = operadores.length;
@@ -160,6 +160,13 @@ export const useDashboardDataLogistica = () => {
         ultimoDiaSemana,
         totalViajes,
         totalM3CurrentMonth,
-        rutasCount
+        rutasCount,
+        operadores,
+        estaciones,
+        clientes,
+        equipos,
+        rutas,
+        reporteViajes,
+        selectedYear,
     };
 };

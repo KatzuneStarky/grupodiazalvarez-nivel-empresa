@@ -2,59 +2,70 @@
 
 import { getM3ByMonth } from "../reportes-viajes/actions/read";
 import { useTotalFletePorMes } from "./use-total-flete-mes";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
-type ChartDataFlete = { Mes: string; TotalFlete: number };
-type ChartDataM3 = { month: string; total: number };
+type ChartData = { Mes: string; Total: number };
 
 export const useDashboardLogisticaChartData = (year: number, currentYear: number) => {
-    const [chartData1, setChartData1] = useState<ChartDataFlete[]>([]);
-    const [chartData2, setChartData2] = useState<ChartDataM3[]>([]);
-    const [isLoading1, setIsLoading1] = useState<boolean>(true);
-    const [isLoading2, setIsLoading2] = useState<boolean>(true);
-    const [error, setError] = useState<Error | null>(null);
-
     const selectedYear = year || currentYear;
 
-    const { totalFletePorMes, error: errorFlete } = useTotalFletePorMes(selectedYear);
+    const [chartDataM3, setChartDataM3] = useState<ChartData[]>([]);
+    const [isLoadingM3, setIsLoadingM3] = useState(true);
+    const [error, setError] = useState<Error | null>(null);
 
-    useEffect(() => {
-        try {
-            const formatted = totalFletePorMes.map((item) => ({
-                Mes: item.Mes,
-                TotalFlete: item.TotalFlete,
-            }));
-
-            const allZero = formatted.every((item) => item.TotalFlete === 0);
-            setChartData1(allZero ? [] : formatted);
-        } catch (err) {
-            setError(err as Error);
-        } finally {
-            setIsLoading1(false);
-        }
-    }, [totalFletePorMes]);
-
+    const {
+        totalFletePorMes,
+        isLoading: isLoadingFlete,
+        error: errorFlete
+    } = useTotalFletePorMes(selectedYear);
 
     useEffect(() => {
         const fetchData = async () => {
+            setIsLoadingM3(true);
+            setError(null);
+
             try {
                 const data = await getM3ByMonth(selectedYear);
-                const allZero = data.every((item) => item.total === 0);
-                setChartData2(allZero ? [] : data);
+                console.log(data);
+                
+
+                const formatted = data.map((item) => ({
+                    Mes: item.month,
+                    Total: item.total,
+                }));
+
+                const allZero = formatted.every((i) => i.Total === 0);
+                setChartDataM3(allZero ? [] : formatted);
             } catch (err) {
                 setError(err as Error);
+                setChartDataM3([]);
             } finally {
-                setIsLoading2(false);
+                setIsLoadingM3(false);
             }
         };
 
         fetchData();
     }, [selectedYear]);
 
+    const chartDataFlete = useMemo(() => {
+        if (!totalFletePorMes?.length) return [];
+
+        const formatted = totalFletePorMes.map((item) => ({
+            Mes: item.Mes,
+            Total: item.TotalFlete,
+        }));
+
+        const allZero = formatted.every((i) => i.Total === 0);
+        return allZero ? [] : formatted;
+    }, [totalFletePorMes]);
+
+    const isLoading = isLoadingM3 || isLoadingFlete;
+    const combinedError = error || errorFlete;
+
     return {
-        chartData1,
-        chartData2,
-        isLoading: isLoading1 || isLoading2,
-        error: error || errorFlete,
-    }
-}
+        chartDataFlete,
+        chartDataM3,
+        isLoading,
+        error: combinedError,
+    };
+};

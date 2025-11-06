@@ -41,6 +41,26 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+  --color-kpi-blue: var(--kpi-blue);
+  --color-kpi-blue-bg: var(--kpi-blue-bg);
+  --color-kpi-emerald: var(--kpi-emerald);
+  --color-kpi-emerald-bg: var(--kpi-emerald-bg);
+  --color-kpi-amber: var(--kpi-amber);
+  --color-kpi-amber-bg: var(--kpi-amber-bg);
+  --color-kpi-purple: var(--kpi-purple);
+  --color-kpi-purple-bg: var(--kpi-purple-bg);
+  --color-kpi-rose: var(--kpi-rose);
+  --color-kpi-rose-bg: var(--kpi-rose-bg);
+  --color-kpi-cyan: var(--kpi-cyan);
+  --color-kpi-cyan-bg: var(--kpi-cyan-bg);
+  --color-kpi-orange: var(--kpi-orange);
+  --color-kpi-orange-bg: var(--kpi-orange-bg);
+  --color-kpi-teal: var(--kpi-teal);
+  --color-kpi-teal-bg: var(--kpi-teal-bg);
+  --color-kpi-pink: var(--kpi-pink);
+  --color-kpi-pink-bg: var(--kpi-pink-bg);
+  --color-kpi-lime: var(--kpi-lime);
+  --color-kpi-lime-bg: var(--kpi-lime-bg);
 }
 
 :root {
@@ -110,6 +130,26 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.646 0.222 41.116);
+  --kpi-blue: oklch(0.55 0.2 240);
+  --kpi-blue-bg: oklch(0.2 0.08 240);
+  --kpi-emerald: oklch(0.6 0.18 160);
+  --kpi-emerald-bg: oklch(0.2 0.08 160);
+  --kpi-amber: oklch(0.7 0.18 70);
+  --kpi-amber-bg: oklch(0.22 0.08 70);
+  --kpi-purple: oklch(0.65 0.2 280);
+  --kpi-purple-bg: oklch(0.2 0.08 280);
+  --kpi-rose: oklch(0.65 0.2 10);
+  --kpi-rose-bg: oklch(0.2 0.08 10);
+  --kpi-cyan: oklch(0.65 0.18 200);
+  --kpi-cyan-bg: oklch(0.2 0.08 200);
+  --kpi-orange: oklch(0.68 0.2 40);
+  --kpi-orange-bg: oklch(0.22 0.08 40);
+  --kpi-teal: oklch(0.6 0.16 180);
+  --kpi-teal-bg: oklch(0.2 0.08 180);
+  --kpi-pink: oklch(0.65 0.2 340);
+  --kpi-pink-bg: oklch(0.2 0.08 340);
+  --kpi-lime: oklch(0.68 0.18 130);
+  --kpi-lime-bg: oklch(0.22 0.08 130);
 }
 
 @layer base {

@@ -2,57 +2,80 @@ import { getEquipoById, listenArchivosByEquipoId, listenArchivosVencimientoByEqu
 import { ArchivosVencimiento } from "../../bdd/equipos/types/archivos-vencimiento";
 import { EquipoConMantenimientos } from "../../bdd/equipos/types/mantenimiento";
 import { Certificado } from "../../bdd/equipos/types/certificados";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Archivo } from "../../bdd/equipos/types/archivos";
 import { fetchData } from "@/functions/fetch-data";
-import { useEffect, useState } from "react";
 
-const useEquipoDataById = (equipoId: string) => {
-    const [equipo, setEquipo] = useState<EquipoConMantenimientos | null>(null);
-    const [archivosVencimiento, setArchivosVencimiento] = useState<ArchivosVencimiento[]>([]);
-    const [certificados, setCertificados] = useState<Certificado[]>([]);
-    const [archivos, setArchivos] = useState<Archivo[]>([]);
-    const [error, setError] = useState<string | null>(null);
-    const [loading, setLoading] = useState(true);
+interface UseEquipoDataReturn {
+    data: {
+        equipo: EquipoConMantenimientos | null
+        archivos: Archivo[]
+        certificados: Certificado[]
+        archivosVencimiento: ArchivosVencimiento[]
+    }
+    loading: boolean
+    error: Error | null
+}
+
+const useEquipoDataById = (equipoId: string): UseEquipoDataReturn => {
+    const [archivosVencimiento, setArchivosVencimiento] = useState<ArchivosVencimiento[]>([])
+    const [equipo, setEquipo] = useState<EquipoConMantenimientos | null>(null)
+    const [certificados, setCertificados] = useState<Certificado[]>([])
+    const [archivos, setArchivos] = useState<Archivo[]>([])
+    const [error, setError] = useState<Error | null>(null)
+    const [loading, setLoading] = useState(true)
+
+    const handleSetArchivos = useCallback((data: Archivo[]) => setArchivos(data), [])
+    const handleSetCertificados = useCallback((data: Certificado[]) => setCertificados(data), [])
+    const handleSetArchivosVencimiento = useCallback((data: ArchivosVencimiento[]) => setArchivosVencimiento(data), [])
 
     useEffect(() => {
+        if (!equipoId) return
+
+        let isMounted = true
+        setLoading(true)
+        setError(null)
+
         const fetchAllData = async () => {
-            setLoading(true);
-            setError(null);
-
             try {
-                const equipoData = await fetchData(getEquipoById, equipoId);
-                if (equipoData) {
-                    setEquipo(equipoData);
+                const result = await fetchData(getEquipoById, equipoId)
+                if (isMounted && result) setEquipo(result)
+            } catch (err) {
+                if (isMounted) {
+                    const errorObj = err instanceof Error ? err : new Error("Error desconocido al obtener el equipo")
+                    console.error("❌ Error fetching equipo data:", errorObj)
+                    setError(errorObj)
                 }
-            } catch (error) {
-                setError('Error al obtener los datos del equipo.');
-                console.error('Error fetching data:', error);
             } finally {
-                setLoading(false);
+                if (isMounted) setLoading(false)
             }
-        };
+        }
 
-        fetchAllData();
+        fetchAllData()
 
-        const unsubscribeArchivos = listenArchivosByEquipoId(equipoId, setArchivos);
-        const unsubscribeCertificados = listenCertificadosByEquipoId(equipoId, setCertificados);
-        const unsubscribeArchivosVencimiento = listenArchivosVencimientoByEquipoId(equipoId, setArchivosVencimiento);
+        const unsubArchivos = listenArchivosByEquipoId(equipoId, handleSetArchivos)
+        const unsubCertificados = listenCertificadosByEquipoId(equipoId, handleSetCertificados)
+        const unsubArchivosVenc = listenArchivosVencimientoByEquipoId(equipoId, handleSetArchivosVencimiento)
 
         return () => {
-            unsubscribeArchivos();
-            unsubscribeCertificados();
-            unsubscribeArchivosVencimiento();
-        };
-    }, [equipoId]);
+            isMounted = false
+            unsubArchivos?.()
+            unsubCertificados?.()
+            unsubArchivosVenc?.()
+        }
+    }, [equipoId, handleSetArchivos, handleSetCertificados, handleSetArchivosVencimiento])
 
-    return {
-        equipo,
-        archivosVencimiento,
-        certificados,
-        archivos,
-        loading,
-        error,
-    };
+    const data = useMemo(
+        () => ({
+            equipo,
+            archivos,
+            certificados,
+            archivosVencimiento,
+        }),
+        [equipo, archivos, certificados, archivosVencimiento]
+    )
+
+    return { data, loading, error }
 };
 
 export default useEquipoDataById;

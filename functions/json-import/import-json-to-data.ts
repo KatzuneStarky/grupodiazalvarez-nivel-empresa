@@ -1,4 +1,4 @@
-import { collection, doc, setDoc } from "firebase/firestore";
+import { Timestamp, addDoc, collection, doc, setDoc } from "firebase/firestore";
 import { db } from "@/firebase/client";
 
 export async function importJsonToCollection<T extends { id?: string }>(
@@ -12,26 +12,37 @@ export async function importJsonToCollection<T extends { id?: string }>(
     const { convertDates = true, overwrite = true } = options || {};
 
     for (const item of jsonData) {
-        const data = { ...item } as Record<string, any>;
+        let data = { ...item } as Record<string, any>;
 
         if (convertDates) {
-            for (const key in data) {
-                if (typeof data[key] === "string" && /\d{4}-\d{2}-\d{2}T/.test(data[key])) {
-                    data[key] = new Date(data[key]);
-                }
-            }
+            data = convertDatesToTimestamps(data);
         }
 
         if (item.id) {
             const docRef = doc(db, collectionName, item.id);
-            if (overwrite) {
-                await setDoc(docRef, data, { merge: true });
-            } else {
-                await setDoc(docRef, data, { merge: false });
-            }
+            await setDoc(docRef, data, { merge: overwrite });
         } else {
             const colRef = collection(db, collectionName);
-            await setDoc(doc(colRef), data);
+            await addDoc(colRef, data);
         }
     }
+}
+
+function convertDatesToTimestamps(obj: Record<string, any>): Record<string, any> {
+    const result: Record<string, any> = {};
+
+    for (const [key, value] of Object.entries(obj)) {
+        if (typeof value === "string" && /\d{4}-\d{2}-\d{2}T/.test(value)) {
+            // 🔁 Convierte string ISO -> Firebase Timestamp
+            result[key] = Timestamp.fromDate(new Date(value));
+        } else if (value instanceof Date) {
+            result[key] = Timestamp.fromDate(value);
+        } else if (typeof value === "object" && value !== null) {
+            result[key] = convertDatesToTimestamps(value);
+        } else {
+            result[key] = value;
+        }
+    }
+
+    return result;
 }
