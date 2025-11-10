@@ -8,12 +8,12 @@ import { exportEquipos } from "@/functions/excel-export/equipos/export/export-eq
 import { useEquipos } from "@/modules/logistica/bdd/equipos/hooks/use-equipos"
 import PageTitle from "@/components/custom/page-title"
 import { Separator } from "@/components/ui/separator"
+import { IconFileExport } from "@tabler/icons-react"
 import { useArea } from "@/context/area-context"
 import { Button } from "@/components/ui/button"
 import { Truck } from "lucide-react"
 import { useState } from "react"
 import { toast } from "sonner"
-import { IconFileExport } from "@tabler/icons-react"
 
 const EquiposPage = () => {
     const [open, setOpen] = useState<boolean>(false)

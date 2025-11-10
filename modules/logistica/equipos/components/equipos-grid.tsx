@@ -8,13 +8,13 @@ import { Calendar, MapPin, Shield, Truck } from "lucide-react"
 import { Equipo } from "../../bdd/equipos/types/equipos"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { QRCodeCanvas } from "qrcode.react"
+import { useRouter } from "next/navigation"
 import Icon from "@/components/global/icon"
+import DialogImage from "./dialog-image"
 import { es } from "date-fns/locale"
+import DeailogQr from "./dialog-qr"
 import { format } from "date-fns"
 import { useRef } from "react"
-import DialogImage from "./dialog-image"
-import DeailogQr from "./dialog-qr"
 
 interface EquipoGridProps {
     equipos: Equipo[]
@@ -23,6 +23,7 @@ interface EquipoGridProps {
     selectedEquipo: Equipo | null,
     setSelectedEquipo: (equipo: Equipo | null) => void,
     getEstadoBadgeVariant: (estado: EstadoEquipos) => "default" | "secondary" | "destructive" | "outline" | null
+    url: string
 }
 
 const EquiposGrid = ({
@@ -31,9 +32,11 @@ const EquiposGrid = ({
     handleCardClick,
     selectedEquipo,
     setSelectedEquipo,
-    getEstadoBadgeVariant
+    getEstadoBadgeVariant,
+    url
 }: EquipoGridProps) => {
     const qrCodeRef = useRef<HTMLDivElement>(null);
+    const router = useRouter()
 
     return (
         <>
@@ -103,28 +106,26 @@ const EquiposGrid = ({
                         </CardHeader>
 
                         <CardContent className="space-y-4 relative z-10">
-                            {!equipo.imagen && (
-                                <div className="aspect-[4/3] relative overflow-hidden rounded-xl bg-muted/30 border border-border/30 group-hover:border-primary/20 transition-colors duration-300">
-                                    <img
-                                        src={equipo.imagen || "https://images.unsplash.com/photo-1601584115197-04ecc0da31d7"}
-                                        alt={`${equipo.marca} ${equipo.modelo}`}
-                                        className="object-cover w-full h-full group-hover:scale-110 transition-transform duration-700 ease-out"
-                                    />
+                            <div className="aspect-[4/3] relative overflow-hidden rounded-xl bg-muted/30 border border-border/30 group-hover:border-primary/20 transition-colors duration-300">
+                                <img
+                                    src={equipo.imagen || "https://images.unsplash.com/photo-1601584115197-04ecc0da31d7"}
+                                    alt={`${equipo.marca} ${equipo.modelo}`}
+                                    className="object-cover w-full h-full group-hover:scale-110 transition-transform duration-700 ease-out"
+                                />
 
-                                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
-                                    {equipo.tipoUnidad && (
-                                        <div className="absolute bottom-3 left-3 right-3">
-                                            <div className="bg-black/70 backdrop-blur-md rounded-lg px-3 py-1.5 text-xs text-white font-medium border border-white/10">
-                                                <div className="flex items-center gap-2">
-                                                    <Truck className="h-3 w-3" />
-                                                    {equipo.tipoUnidad}
-                                                </div>
+                                {equipo.tipoUnidad && (
+                                    <div className="absolute bottom-3 left-3 right-3">
+                                        <div className="bg-black/70 backdrop-blur-md rounded-lg px-3 py-1.5 text-xs text-white font-medium border border-white/10">
+                                            <div className="flex items-center gap-2">
+                                                <Truck className="h-3 w-3" />
+                                                {equipo.tipoUnidad}
                                             </div>
                                         </div>
-                                    )}
-                                </div>
-                            )}
+                                    </div>
+                                )}
+                            </div>
 
                             <div className="space-y-3">
                                 <div className="grid grid-cols-2 gap-3">
@@ -193,9 +194,15 @@ const EquiposGrid = ({
                                 Acciones
                             </h3>
 
-                            <div>
-                                <Button>
-                                    Ver Docs
+                            <div className="flex items-center gap-4">
+                                <Button onClick={() => router.push(`${url}/${selectedEquipo?.id}`)}>
+                                    <Icon iconName="mingcute:documents-fill" />
+                                    Ver Documentos
+                                </Button>
+
+                                <Button onClick={() => router.push(`${url}/registros/editar?equipoId=${selectedEquipo?.id}`)}>
+                                    <Icon iconName="ic:twotone-edit" />
+                                    Editar
                                 </Button>
                             </div>
 

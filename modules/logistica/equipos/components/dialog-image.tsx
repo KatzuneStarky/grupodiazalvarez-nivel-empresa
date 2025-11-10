@@ -16,7 +16,7 @@ const DialogImage = ({
                 Imagen del equipo
             </h3>
 
-            {!imagen && (
+            {imagen && (
                 <div className="relative overflow-hidden rounded-xl bg-muted/50 border border-border">
                     <img
                         src={imagen || "https://images.unsplash.com/photo-1601584115197-04ecc0da31d7"}

@@ -7,10 +7,12 @@ import useEquipoDataById from '@/modules/logistica/equipos/hooks/use-equipos-dat
 import GeneralTab from '@/modules/logistica/equipos/components/equipoId/tab/general-tab';
 import TanksTab from '@/modules/logistica/equipos/components/equipoId/tab/tanks-tab';
 import TabsIndex from '@/modules/logistica/equipos/components/equipoId/tab';
+import { useDirectLink } from '@/hooks/use-direct-link';
 import React, { use, useState } from 'react'
 
 const EquipoIdPage = ({ params }: { params: Promise<{ equipoId: string }> }) => {
     const { equipoId } = use(params);
+    const { directLink } = useDirectLink(`equipos/registros/editar?equipoId=${equipoId}`)
 
     const [searchTerm, setSearchTerm] = useState<string>("")
     const { data } = useEquipoDataById(equipoId)
@@ -38,6 +40,7 @@ const EquipoIdPage = ({ params }: { params: Promise<{ equipoId: string }> }) => 
                 totalArchivos={totalArchivos}
                 numTanques={numTanques}
                 equipo={data.equipo}
+                url={directLink}
             />
 
             <TabsIndex>
@@ -46,17 +49,17 @@ const EquipoIdPage = ({ params }: { params: Promise<{ equipoId: string }> }) => 
                     isExpired={isExpired}
                     equipo={data.equipo}
                 />
-                <TanksTab 
+                <TanksTab
                     isExpired={isExpired}
                     equipo={data.equipo}
                 />
-                <MaintenanceTab 
+                <MaintenanceTab
                     numMantenimientos={numMantenimientos}
                     setSearchTerm={setSearchTerm}
                     searchTerm={searchTerm}
                     equipo={data.equipo}
                 />
-                <DocumentsTab 
+                <DocumentsTab
                     archivosVencimiento={data.archivosVencimiento}
                     certificado={data.certificados}
                     setSearchTerm={setSearchTerm}

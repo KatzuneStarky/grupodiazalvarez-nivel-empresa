@@ -1,13 +1,15 @@
 "use client"
 
-import { AlertCircle, CheckCircle2, Eye, FileText, Fuel, Radio, Truck, Wrench, XCircle } from "lucide-react"
+import { AlertCircle, CheckCircle2, Edit, FileText, Fuel, Radio, Truck, Wrench, XCircle } from "lucide-react"
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { EstadoEquipos } from "@/modules/logistica/bdd/equipos/enum/estado-equipos"
 import { Equipo } from "@/modules/logistica/bdd/equipos/types/equipos"
 import { getStatusColor } from "../../constants/colores-equipos"
+import EquipoImageDialog from "./equipo-image-dialog"
 import { Separator } from "@/components/ui/separator"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
 
 interface EquipoIdHeaderProps {
@@ -15,6 +17,7 @@ interface EquipoIdHeaderProps {
     numMantenimientos: number
     totalArchivos: number
     numTanques: number
+    url?: string
 }
 
 const EquipoIdHeader = ({
@@ -22,7 +25,10 @@ const EquipoIdHeader = ({
     numTanques,
     totalArchivos,
     numMantenimientos,
+    url
 }: EquipoIdHeaderProps) => {
+    const router = useRouter()
+
     return (
         <Card className="overflow-hidden border-2">
             <CardHeader>
@@ -36,10 +42,7 @@ const EquipoIdHeader = ({
                                     className="w-full lg:w-64 h-64 object-cover rounded-xl shadow-lg ring-2 ring-primary/10"
                                 />
                                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity rounded-xl flex items-center justify-center">
-                                    <Button variant="secondary" size="sm">
-                                        <Eye className="w-4 h-4 mr-2" />
-                                        Ver imagen completa
-                                    </Button>
+                                    <EquipoImageDialog src={equipo.imagen || ""} numEconomico={equipo.numEconomico} />
                                 </div>
                             </div>
                         ) : (
@@ -64,7 +67,11 @@ const EquipoIdHeader = ({
                                     <span className="text-muted-foreground">ID: {equipo?.id}</span>
                                 </CardDescription>
                             </div>
-                            <div className="flex gap-2 flex-wrap">
+                            <div className="flex gap-2 flex-wrap items-center">
+                                <Button size={"sm"} onClick={() => router.push(url || "")}>
+                                    <Edit />
+                                    Editar
+                                </Button>
                                 <Badge variant={equipo?.activo ? "default" : "secondary"} className="h-fit text-sm px-3 py-1.5">
                                     {equipo?.activo ? (
                                         <CheckCircle2 className="w-4 h-4 mr-1.5" />

@@ -15,6 +15,7 @@ import MetricCard from "./components/metric-card"
 import MainCharts from "./components/main-charts"
 import { useYear } from "@/context/year-context"
 import dynamic from "next/dynamic";
+import MainChartPerformance from "./components/main-chat-performance"
 
 const Map = dynamic(() => import('../root/components/coverage/map'), { ssr: false });
 
@@ -135,6 +136,7 @@ const MainDashboardLogistica = () => {
 
                 <div className="mb-6 grid gap-6 lg:grid-cols-2">
                     <MainCharts year={selectedYear || new Date().getFullYear()} />
+                    <MainChartPerformance />
                 </div>
 
                 <Card className="mb-6">

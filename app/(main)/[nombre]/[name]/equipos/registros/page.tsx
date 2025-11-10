@@ -25,7 +25,7 @@ import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 
 const RegistroEquiposPage = () => {
-    const { directLink } = useDirectLink("equipos/registros/nuevo")
+    const { directLink } = useDirectLink("equipos")
     const { area } = useArea()
     const router = useRouter()
 
@@ -131,7 +131,7 @@ const RegistroEquiposPage = () => {
                                 </Button>
                                 <Button
                                     className="sm:w-auto"
-                                    onClick={() => router.push(directLink)}
+                                    onClick={() => router.push(`${directLink}/registros/nuevo`)}
                                 >
                                     <Plus className="w-4 h-4 mr-2" />
                                     Registrar Vehículo
@@ -291,6 +291,7 @@ const RegistroEquiposPage = () => {
                     selectedEquipo={selectedEquipo}
                     setSelectedEquipo={setSelectedEquipo}
                     getEstadoBadgeVariant={getEstadoBadgeVariant}
+                    url={directLink}
                 />
 
                 <NoEquiposFilter

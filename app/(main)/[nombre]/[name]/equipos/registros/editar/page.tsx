@@ -4,7 +4,7 @@ import { EquiposSchema, EquiposSchemaType } from "@/modules/logistica/equipos/sc
 import { EstadoEquipos } from "@/modules/logistica/bdd/equipos/enum/estado-equipos"
 import { useEquipos } from "@/modules/logistica/bdd/equipos/hooks/use-equipos"
 import EquipoForm from "@/modules/logistica/equipos/components/equipo-form"
-import { updateEquipo, writeEquipo } from "@/modules/logistica/equipos/actions/write"
+import { updateEquipo } from "@/modules/logistica/equipos/actions/write"
 import SubmitButton from "@/components/global/submit-button"
 import { useRouter, useSearchParams } from "next/navigation"
 import PageTitle from "@/components/custom/page-title"
@@ -17,6 +17,7 @@ import { toast } from "sonner"
 
 const EditarEquipoPage = () => {
     const [isSubmitting, setIsSubmiting] = useState<boolean>(false)
+    const [imageUrl, setImageUrl] = useState<string | null>(null)
     const searchParams = useSearchParams()
     const { equipos } = useEquipos()
     const router = useRouter()
@@ -66,11 +67,19 @@ const EditarEquipoPage = () => {
         }
     })
 
+    const handleImageUpload = (url: string) => {
+        console.log("Image uploaded:", url)
+        setImageUrl(url)
+    }
+
     const onSubmit = async (data: EquiposSchemaType) => {
         try {
             setIsSubmiting(true)
 
-            toast.promise(updateEquipo(data, equipoId || ""), {
+            toast.promise(updateEquipo({
+                ...data,
+                imagen: imageUrl || equipo?.imagen || "",
+            }, equipoId || ""), {
                 loading: `Actualizando el equipo ${equipo?.numEconomico}, favor de esperar...`,
                 success: (result) => {
                     if (result.success) {
@@ -119,6 +128,7 @@ const EditarEquipoPage = () => {
             form.setValue("permisoSCT", equipo.permisoSCT)
             form.setValue("idOperador", equipo.idOperador)
             form.setValue("grupoUnidad", equipo.grupoUnidad)
+            form.setValue("imagen", equipo.imagen)
         }
     }, [equipo, form])
 
@@ -135,6 +145,9 @@ const EditarEquipoPage = () => {
                 isSubmiting={isSubmitting}
                 onSubmit={onSubmit}
                 equipoId={equipoId || ""}
+                handleImageUpload={handleImageUpload}
+                imageUrl={imageUrl || ""}
+                setImageUrl={setImageUrl}
                 submitButton={
                     <SubmitButton
                         isSubmiting={isSubmitting}

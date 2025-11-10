@@ -20,6 +20,7 @@ import { toast } from "sonner"
 
 const NuevoEquipoPage = () => {
     const [isSubmitting, setIsSubmiting] = useState<boolean>(false)
+    const [imageUrl, setImageUrl] = useState<string | null>(null)
     const { directLink } = useDirectLink("equipos")
     const { userBdd } = useAuth()
     const router = useRouter()
@@ -66,11 +67,19 @@ const NuevoEquipoPage = () => {
         }
     })
 
+    const handleImageUpload = (url: string) => {
+        console.log("Image uploaded:", url)
+        setImageUrl(url)
+    }
+
     const onSubmit = async (data: EquiposSchemaType) => {
         try {
             setIsSubmiting(true)
 
-            const resultData = writeEquipo(data)
+            const resultData = writeEquipo({
+                ...data,
+                imagen: imageUrl || ""
+            })
 
             toast.promise(resultData, {
                 loading: "Creando registro de equipo, favor de esperar...",
@@ -120,6 +129,9 @@ const NuevoEquipoPage = () => {
                 form={form}
                 isSubmiting={isSubmitting}
                 onSubmit={onSubmit}
+                handleImageUpload={handleImageUpload}
+                imageUrl={imageUrl || ""}
+                setImageUrl={setImageUrl}
                 submitButton={
                     <SubmitButton
                         isSubmiting={isSubmitting}

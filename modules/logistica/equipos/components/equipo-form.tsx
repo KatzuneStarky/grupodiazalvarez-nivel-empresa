@@ -30,6 +30,9 @@ interface EquipoFormProps {
     submitButton: React.ReactNode
     onSubmit: (data: EquiposSchemaType) => void
     equipoId?: string
+    handleImageUpload: (url: string) => void
+    imageUrl: string
+    setImageUrl: React.Dispatch<React.SetStateAction<string | null>>
 }
 
 const EquipoForm = ({
@@ -37,16 +40,13 @@ const EquipoForm = ({
     form,
     submitButton,
     onSubmit,
-    equipoId
+    equipoId,
+    handleImageUpload,
+    imageUrl,
+    setImageUrl
 }: EquipoFormProps) => {
-    const [imageUrl, setImageUrl] = useState<string | null>(null)
     const { operadores } = useOperadores()
     const uid = uuidv7()
-
-    const handleImageUpload = (url: string) => {
-        console.log("Image uploaded:", url)
-        setImageUrl(url)
-    }
 
     const numEcconomico = form.watch("numEconomico")
     const lat = form.watch("ultimaUbicacion.latitud")
