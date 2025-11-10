@@ -1,8 +1,8 @@
 "use client"
 
+import type { BddCard as BddCardType } from "../types/bdd-card"
 import { Badge } from "@/components/ui/badge"
 import { Card } from "@/components/ui/card"
-import { BddCard } from "../types/bdd-card"
 import Icon from "@/components/global/icon"
 
 const BddCard = ({
@@ -12,7 +12,7 @@ const BddCard = ({
     title,
     icon,
     id,
-}: BddCard) => {
+}: BddCardType) => {
     return (
         <Card
             key={id}
