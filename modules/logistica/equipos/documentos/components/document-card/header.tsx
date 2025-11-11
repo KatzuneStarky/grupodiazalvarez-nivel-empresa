@@ -2,8 +2,8 @@
 
 import { getDocumentIcon } from "@/functions/get-document-icon";
 import { CardHeader } from "@/components/ui/card";
-import { FileVariant } from "../document-card"
 import HeaderToolTip from "./header-tooltip";
+import { FileVariant } from "./document-card-v2";
 
 const DocumentCardHeader = ({ file }: { file: FileVariant }) => {
     return (
