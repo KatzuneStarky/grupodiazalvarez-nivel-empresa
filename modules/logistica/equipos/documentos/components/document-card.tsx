@@ -28,7 +28,7 @@ const DocumentCard = ({
 
     if (esCertificado(file) || esArchivoVencimiento(file)) {
         const estado = calcularEstadoVencimiento(file);
-        borderClass = estadoColorMap[estado];
+        //borderClass = estadoColorMap[estado];
     }
 
     return (
