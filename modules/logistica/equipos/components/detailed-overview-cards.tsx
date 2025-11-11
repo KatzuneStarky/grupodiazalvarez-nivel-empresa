@@ -152,19 +152,19 @@ const DetailedOverviewCards = ({
                         <div className="flex justify-between items-center">
                             <span className="text-sm">Vencidos</span>
                             <Badge variant="destructive" className="text-xs">
-                                {expiredDocs.length}
+                                {expiredDocs}
                             </Badge>
                         </div>
                         <div className="flex justify-between items-center">
                             <span className="text-sm">Críticos (7 días)</span>
                             <Badge variant="secondary" className="text-xs bg-red-100 text-red-700">
-                                {criticalDocs.length}
+                                {criticalDocs}
                             </Badge>
                         </div>
                         <div className="flex justify-between items-center">
                             <span className="text-sm">Advertencia (30 días)</span>
                             <Badge variant="secondary" className="text-xs bg-yellow-100 text-yellow-700">
-                                {warningDocs.length}
+                                {warningDocs}
                             </Badge>
                         </div>
                     </div>
@@ -177,7 +177,7 @@ const DetailedOverviewCards = ({
                         </div>
                         <Progress value={compliancePercentage} className="h-2 mt-1" />
                     </div>
-                    <div className="text-xs text-muted-foreground">Total documentos: {allDocs.length}</div>
+                    <div className="text-xs text-muted-foreground">Total documentos: {allDocs}</div>
                 </CardContent>
             </Card>
 
