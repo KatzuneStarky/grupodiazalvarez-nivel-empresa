@@ -1,6 +1,6 @@
 import { calcularEstadoVencimiento, esArchivoVencimiento, esCertificado } from "@/functions/tipo-archivo-equipo";
 import { VencimientoEstado } from "../enum/estado-documento";
-import { FileVariant } from "../components/document-card";
+import { FileVariant } from "../components/document-card/delete-document-button";
 
 export const estadoMap: Record<VencimientoEstado, { icon: string; bg: string; texto: string }> = {
     [VencimientoEstado.VENCIDO]: { icon: 'text-red-600', bg: 'bg-red-600', texto: 'Vencido' },
@@ -13,9 +13,10 @@ export const getEstadoArchivo = (file: FileVariant) => {
     let iconName = "icon-park-outline:certificate";
 
     if (esCertificado(file) || esArchivoVencimiento(file)) {
-        estado = calcularEstadoVencimiento(file);
+        //estado = calcularEstadoVencimiento(file);
 
-        if (esCertificado(file)) {
+        {/**
+            if (esCertificado(file)) {
             iconName = estado === VencimientoEstado.VENCIDO
                 ? "tabler:certificate-off"
                 : "icon-park-outline:certificate";
@@ -23,7 +24,7 @@ export const getEstadoArchivo = (file: FileVariant) => {
             iconName = estado === VencimientoEstado.VENCIDO
                 ? "lucide:calendar-x-2"
                 : "mdi:calendar-warning";
-        }
+        } */}
     }
 
     return { estado, iconName };

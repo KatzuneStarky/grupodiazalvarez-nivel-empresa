@@ -5,7 +5,7 @@ import { esArchivoVencimiento, esCertificado } from "@/functions/tipo-archivo-eq
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { estadoMap, getEstadoArchivo } from "../../constants/estado-map";
 import { parseFirebaseDate } from "@/utils/parse-timestamp-date";
-import { FileVariant } from "../document-card";
+import { FileVariant } from "./document-card-v2";
 import Icon from "@/components/global/icon"
 import { format } from "date-fns";
 

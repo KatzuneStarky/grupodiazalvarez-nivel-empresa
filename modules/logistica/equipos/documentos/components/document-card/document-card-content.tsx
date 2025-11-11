@@ -4,7 +4,7 @@ import { calcularEstadoVencimiento, esArchivoVencimiento, esCertificado } from "
 import { convertirFecha } from "@/functions/document-date"
 import { Calendar, Clock, IdCard } from "lucide-react"
 import { CardContent } from "@/components/ui/card"
-import { FileVariant } from "../document-card"
+import { FileVariant } from "./document-card-v2"
 
 const DocumentCardContent = ({
     file
