@@ -1,21 +1,20 @@
 "use client"
 
+import DocumentCardV2 from "@/modules/logistica/equipos/documentos/components/document-card/document-card-v2"
 import { useDocumentsDashboard } from "@/modules/logistica/equipos/documentos/hooks/use-documents-dashboard"
+import { NewDocumentDialog } from "@/modules/logistica/equipos/documentos/components/new-document-dialog"
 import DocumentsChart from "@/modules/logistica/equipos/documentos/components/charts/documents-charts"
 import ArchivosChart from "@/modules/logistica/equipos/documentos/components/charts/archivos-chart"
 import MoreEquiposCard from "@/modules/logistica/equipos/documentos/components/more-equipos-card"
-import DocumentCard from "@/modules/logistica/equipos/documentos/components/document-card"
 import FolderCard from "@/modules/logistica/equipos/documentos/components/folder-card"
 import { useEquipos } from "@/modules/logistica/bdd/equipos/hooks/use-equipos"
+import PageTitle from "@/components/custom/page-title"
 import { Separator } from "@/components/ui/separator"
+import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import Icon from "@/components/global/icon"
 import { Card } from "@/components/ui/card"
 import { Search } from "lucide-react"
-import PageTitle from "@/components/custom/page-title"
-import Icon from "@/components/global/icon"
-import { NewDocumentDialog } from "@/modules/logistica/equipos/documentos/components/new-document-dialog"
-import { Button } from "@/components/ui/button"
-import DocumentCardV2 from "@/modules/logistica/equipos/documentos/components/document-card/document-card-v2"
 
 const DocumentosEquiposPage = () => {
     const {

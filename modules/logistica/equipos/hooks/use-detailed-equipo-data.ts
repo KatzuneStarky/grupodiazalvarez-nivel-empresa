@@ -1,6 +1,6 @@
+import { calcularCumplimientoDocumentalDetallado } from "../documentos/types/file-rules"
 import { getMaintenanceUrgency } from "../../utils/get-maintenance-urgency"
 import { EstadoEquipos } from "../../bdd/equipos/enum/estado-equipos"
-import { getDaysUntilExpiry } from "../../utils/documents-expiricy"
 import { parseFirebaseDate } from "@/utils/parse-timestamp-date"
 import { Equipo } from "../../bdd/equipos/types/equipos"
 
@@ -21,13 +21,12 @@ export const useDetailedEquipoData = ({
         return parseFirebaseDate(truck.mantenimiento?.[0]?.fecha) || null;
     };
 
-    const getSafeDocuments = (truck: Equipo) => {
-        return [
-            ...(truck.Certificado || []),
-            ...(truck.ArchivosVencimiento || []),
-            ...(truck.archivos || [])
-        ];
-    };
+    const allMaintenance = equipos.filter(truck => {
+        const lastMaintenance = getSafeMaintenanceDate(truck);
+        return lastMaintenance ?
+            getMaintenanceUrgency(lastMaintenance) !== "good" :
+            true;
+    }).length
 
     const overdueMaintenance = equipos.filter(truck => {
         const lastMaintenance = getSafeMaintenanceDate(truck);
@@ -50,19 +49,6 @@ export const useDetailedEquipoData = ({
             false;
     }).length;
 
-    const allDocs = equipos.flatMap(truck => getSafeDocuments(truck));
-    const expiredDocs = allDocs.filter(doc => doc?.createdAt && getDaysUntilExpiry(doc.updatedAt) < 0);
-    const criticalDocs = allDocs.filter(doc => {
-        if (!doc?.createdAt) return false;
-        const days = getDaysUntilExpiry(doc.createdAt);
-        return days >= 0 && days <= 7;
-    });
-    const warningDocs = allDocs.filter(doc => {
-        if (!doc?.createdAt) return false;
-        const days = getDaysUntilExpiry(doc.createdAt);
-        return days > 7 && days <= 30;
-    });
-
     const stats = equipos.reduce(
         (acc, truck) => {
             const age = currentYear - truck.year;
@@ -77,26 +63,27 @@ export const useDetailedEquipoData = ({
     const avgAge = equipos.length > 0 ? stats.totalAge / equipos.length : 0;
     const { newTrucks, oldTrucks } = stats;
 
-    const compliancePercentage = Math.round(((allDocs.length - expiredDocs.length) / allDocs.length) * 100)
     const maintenanceCompliance = Math.round(((equipos.length - overdueMaintenance) / equipos.length) * 100)
+    const resultados = calcularCumplimientoDocumentalDetallado(equipos)
 
     return {
-        activeTrucks,
-        inactiveTrucks,
-        operationalTrucks,
-        maintenanceTrucks,
+        maintenanceCompliance,
+        compliancePercentage: resultados.porcentajeCumplimiento,
+        upcomingMaintenance,
         outOfServiceTrucks,
         overdueMaintenance,
+        maintenanceTrucks,
+        operationalTrucks,
+        inactiveTrucks,
+        allMaintenance,
         dueMaintenance,
-        upcomingMaintenance,
-        expiredDocs,
-        criticalDocs,
-        warningDocs,
-        avgAge,
+        activeTrucks,
+        criticalDocs: resultados.porVencer,
+        expiredDocs: resultados.vencidos,
+        warningDocs: resultados.sinFecha,
         newTrucks,
         oldTrucks,
-        compliancePercentage,
-        maintenanceCompliance,
-        allDocs
-    }
+        allDocs: resultados.total,
+        avgAge,
+    };
 }

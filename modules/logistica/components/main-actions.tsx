@@ -1,7 +1,7 @@
 "use client"
 
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
-import { Plus, Truck, Users, UserPlus, MapPin, FileText, Zap } from "lucide-react"
+import { Plus, Truck, Users, UserPlus, MapPin, FileText, Zap, Pin, Route } from "lucide-react"
 import { useDirectLink } from "@/hooks/use-direct-link"
 import { Button } from "@/components/ui/button"
 import { useRouter } from "next/navigation"
@@ -27,8 +27,9 @@ export function MainActions() {
                     <Button
                         className="h-auto mx-4 justify-start gap-3 bg-blue-500/10 py-4 text-blue-400 hover:bg-blue-500/20 hover:text-blue-300"
                         variant="outline"
+                        onClick={() => window.location.href = `${directLink}/reportes/viajes`}
                     >
-                        <Plus className="h-5 w-5" />
+                        <MapPin className="h-5 w-5" />
                         <div className="flex flex-col items-start">
                             <span className="font-medium">Nuevo Viaje</span>
                             <span className="text-xs text-muted-foreground">Registrar un nuevo viaje</span>
@@ -38,7 +39,7 @@ export function MainActions() {
                     <Button
                         className="h-auto mx-4 justify-start gap-3 bg-emerald-500/10 py-4 text-emerald-400 hover:bg-emerald-500/20 hover:text-emerald-300"
                         variant="outline"
-                        onClick={() => router.push(`${directLink}/clientes/nuevo`)}
+                        onClick={() => window.location.href = `${directLink}/clientes/nuevo`}
                     >
                         <Users className="h-5 w-5" />
                         <div className="flex flex-col items-start">
@@ -50,7 +51,7 @@ export function MainActions() {
                     <Button
                         className="h-auto mx-4 justify-start gap-3 bg-purple-500/10 py-4 text-purple-400 hover:bg-purple-500/20 hover:text-purple-300"
                         variant="outline"
-                        onClick={() => router.push(`${directLink}/equipos/registros/nuevo`)}
+                        onClick={() => window.location.href = `${directLink}/equipos/registros/nuevo`}
                     >
                         <Truck className="h-5 w-5" />
                         <div className="flex flex-col items-start">
@@ -62,7 +63,7 @@ export function MainActions() {
                     <Button
                         className="h-auto mx-4 justify-start gap-3 bg-amber-500/10 py-4 text-amber-400 hover:bg-amber-500/20 hover:text-amber-300"
                         variant="outline"
-                        onClick={() => router.push(`${directLink}/operadores/nuevo`)}
+                        onClick={() => window.location.href = `${directLink}/operadores/nuevo`}
                     >
                         <UserPlus className="h-5 w-5" />
                         <div className="flex flex-col items-start">
@@ -74,7 +75,7 @@ export function MainActions() {
                     <Button
                         className="h-auto mx-4 justify-start gap-3 bg-red-500/10 py-4 text-red-400 hover:bg-red-500/20 hover:text-red-300"
                         variant="outline"
-                        onClick={() => router.push(`${directLink}/clientes/nuevo`)}
+                        onClick={() => window.location.href = `${directLink}/clientes/nuevo`}
                     >
                         <UserPlus className="h-5 w-5" />
                         <div className="flex flex-col items-start">
@@ -86,9 +87,9 @@ export function MainActions() {
                     <Button
                         className="h-auto mx-4 justify-start gap-3 bg-cyan-500/10 py-4 text-cyan-400 hover:bg-cyan-500/20 hover:text-cyan-300"
                         variant="outline"
-                        onClick={() => router.push(`${directLink}/equipos/rutas/nuevo`)}
+                        onClick={() => window.location.href = `${directLink}/equipos/rutas/nuevo`}
                     >
-                        <MapPin className="h-5 w-5" />
+                        <Route className="h-5 w-5" />
                         <div className="flex flex-col items-start">
                             <span className="font-medium">Nueva Ruta</span>
                             <span className="text-xs text-muted-foreground">Crear nueva ruta de entrega</span>
@@ -98,6 +99,7 @@ export function MainActions() {
                     <Button
                         className="h-auto mx-4 justify-start gap-3 bg-rose-500/10 py-4 text-rose-400 hover:bg-rose-500/20 hover:text-rose-300"
                         variant="outline"
+                        onClick={() => window.location.href = `${directLink}/reportes`}
                     >
                         <FileText className="h-5 w-5" />
                         <div className="flex flex-col items-start">
