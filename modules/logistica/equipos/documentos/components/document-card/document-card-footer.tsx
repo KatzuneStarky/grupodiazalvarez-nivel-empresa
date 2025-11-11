@@ -8,9 +8,9 @@ import { Download, Edit, Eye, MoreVertical, Trash2 } from "lucide-react"
 import { convertFileSize } from "@/functions/convert-file-size"
 import { CardFooter } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { FileVariant } from "../document-card"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
+import { FileVariant } from "./document-card-v2"
 
 const DocumentCardFooter = ({
     file
