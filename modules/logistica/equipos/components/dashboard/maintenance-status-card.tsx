@@ -10,17 +10,20 @@ interface MaintenanceStatusCardProps {
     proximos: number
     prontosAvencer: number
     vencidos: number
+    alDia: number
 }
 
 const MaintenanceStatusCard = ({
     total,
     proximos,
     prontosAvencer,
-    vencidos
+    vencidos,
+    alDia
 }: MaintenanceStatusCardProps) => {
     const overduePercent = (vencidos / total) * 100
     const dueSoonPercent = (prontosAvencer / total) * 100
     const scheduledPercent = (proximos / total) * 100
+    const okPercent = (alDia / total) * 100
 
     return (
         <Card className="border-border bg-card">
@@ -80,6 +83,23 @@ const MaintenanceStatusCard = ({
                         }
                     </div>
                     <Progress value={scheduledPercent} className="h-2 [&>div]:bg-chart-2" />
+                </div>
+
+                <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                            <span className="text-sm font-medium text-card-foreground">Al dia</span>
+                            <Badge variant="secondary" className="text-xs bg-chart-3/20 text-chart-3 border-chart-3/30">
+                                {alDia}
+                            </Badge>
+                        </div>
+                        {
+                            okPercent
+                                ? <span className="text-xs text-muted-foreground">{okPercent.toFixed(0)}%</span>
+                                : null
+                        }
+                    </div>
+                    <Progress value={okPercent} className="h-2 [&>div]:bg-chart-3" />
                 </div>
 
                 <div className="pt-4 border-t border-border">

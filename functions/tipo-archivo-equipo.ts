@@ -1,7 +1,7 @@
 import { ArchivosVencimiento } from "@/modules/logistica/bdd/equipos/types/archivos-vencimiento";
 import { EstadoDocumento, VencimientoEstado } from "@/modules/logistica/equipos/documentos/enum/estado-documento";
 import { DocumentoConFecha } from "@/modules/logistica/equipos/documentos/types/documento-fecha";
-import { reglas } from "@/modules/logistica/equipos/documentos/types/file-rules";
+import { reglas } from "@/modules/logistica/equipos/functions/detailed-equipo-data";
 import { Certificado } from "@/modules/logistica/bdd/equipos/types/certificados";
 import { Archivo } from "@/modules/logistica/bdd/equipos/types/archivos";
 import { parseFirebaseDate } from "@/utils/parse-timestamp-date";
@@ -19,7 +19,6 @@ export const obtenerFechaVencimiento = (archivo: DocumentoConFecha): Date | null
   if (regla.addMonths) vencimiento.setMonth(vencimiento.getMonth() + regla.addMonths);
   return vencimiento;
 };
-
 
 export const calcularEstadoVencimiento = (archivo: DocumentoConFecha): EstadoDocumento => {
   const fechaVencimiento = obtenerFechaVencimiento(archivo);

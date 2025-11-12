@@ -17,24 +17,40 @@ import { Truck } from "lucide-react"
 import { useState } from "react"
 import { toast } from "sonner"
 
+import { darkTheme } from '@uiw/react-json-view/dark';
+import JsonView from '@uiw/react-json-view';
+
 const EquiposPage = () => {
     const [open, setOpen] = useState<boolean>(false)
     const { equipos } = useEquipos()
     const { area } = useArea()
 
     const {
-        compliancePercentage,
-        upcomingMaintenance,
-        overdueMaintenance,
+        availableWithIssues,
+        maintenanceUpcoming,
+        outOfServiceTrucks,
+        maintenanceOverdue,
+        maintenanceDueSoon,
         operationalTrucks,
-        dueMaintenance,
-        allMaintenance,
-        criticalDocs,
-        expiredDocs,
-        warningDocs,
-        allDocs,
+        maintenanceTrucks,
+        totalMaintenance,
+        inactiveTrucks,
+        avgRendimiento,
+        enViajeTrucks,
+        maintenanceOk,
+        groupsSummary,
+        activeTrucks,
+        totalTrucks,
+        newTrucks,
+        oldTrucks,
         avgAge,
-    } = useDetailedEquipoData({ currentYear: new Date().getFullYear(), equipos: equipos })
+        documentosTotales
+    } = useDetailedEquipoData(equipos, new Date().getFullYear())
+
+    const convertedGroupSummary = Object.entries(groupsSummary).map(([key, value]) => ({
+        name: key,
+        value: value
+    }))    
 
     const exportEquiposData = async () => {
         try {
@@ -72,24 +88,34 @@ const EquiposPage = () => {
             />
             <Separator className="mt-4 mb-6" />
             <FleetKpiCard
+                availableWithIssues={availableWithIssues}
+                outOfServiceTrucks={outOfServiceTrucks}
                 operationalTrucks={operationalTrucks}
-                equipos={equipos}
+                maintenanceTrucks={maintenanceTrucks}
+                inactiveTrucks={inactiveTrucks}
+                totalTrucks={totalTrucks ?? 0}
+                enViajeTrucks={enViajeTrucks}
+                activeTrucks={activeTrucks}
+                newTrucks={newTrucks}
+                oldTrucks={oldTrucks}
                 avgAge={avgAge}
+                convertedGroupSummary={convertedGroupSummary}
             />
 
             <div className="grid gap-6 md:grid-cols-2 mb-8">
                 <MaintenanceStatusCard 
-                    prontosAvencer={dueMaintenance}
-                    proximos={upcomingMaintenance}
-                    vencidos={overdueMaintenance}
-                    total={allMaintenance}
+                    prontosAvencer={maintenanceDueSoon ?? 0}
+                    proximos={maintenanceUpcoming ?? 0}
+                    vencidos={maintenanceOverdue ?? 0}
+                    total={totalMaintenance ?? 0}
+                    alDia={maintenanceOk ?? 0}
                 />
                 <DocumentCompletationCard 
-                    porcentajeDeCumplimiento={compliancePercentage}
-                    expiraPronto={warningDocs ?? 0}
-                    critico={criticalDocs ?? 0}
-                    expirado={expiredDocs ?? 0}
-                    total={allDocs}
+                    porcentajeDeCumplimiento={0}
+                    expiraPronto={0}
+                    critico={0}
+                    expirado={0}
+                    total={0}
                 />
             </div>
 
