@@ -1,5 +1,6 @@
 "use client"
 
+import { EquipoConMantenimientos } from "@/modules/logistica/bdd/equipos/types/mantenimiento"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Equipo } from "@/modules/logistica/bdd/equipos/types/equipos"
 import { parseFirebaseDate } from "@/utils/parse-timestamp-date"
@@ -10,7 +11,7 @@ import { es } from "date-fns/locale"
 import { format } from "date-fns"
 
 interface TanksTabProps {
-    equipo: Equipo | null
+    equipo: EquipoConMantenimientos | null
     isExpired: (date: Date) => boolean
 }
 
@@ -31,10 +32,13 @@ const TanksTab = ({
         }
     }
 
+    console.log(equipo);
+    
+
     return (
         <TabsContent value="tanks" className="space-y-4 mt-6">
             <div>
-                {equipo?.tanque && equipo?.tanque.length === 0 ? (
+                {equipo?.tanques && equipo?.tanques.length === 0 ? (
                     <Card>
                         <CardContent className="flex flex-col items-center justify-center py-12">
                             <Fuel className="w-12 h-12 text-muted-foreground mb-4" />
@@ -43,7 +47,7 @@ const TanksTab = ({
                     </Card>
                 ) : (
                     <div className="grid md:grid-cols-2 gap-4">
-                        {equipo?.tanque && equipo?.tanque.map((tanque, index) => (
+                        {equipo?.tanques && equipo?.tanques.map((tanque, index) => (
                             <Card key={tanque.id}>
                                 <CardHeader>
                                     <CardTitle className="text-lg flex items-center justify-between">

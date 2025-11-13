@@ -1,9 +1,9 @@
 "use client"
 
-import { BarChart3, Calendar, Clock, DollarSign, Download, Eye, FileIcon, FileText, Gauge, ImageIcon, Package, Search, Wrench } from "lucide-react"
+import { BarChart3, Calendar, Clock, Download, Eye, FileIcon, FileText, Gauge, ImageIcon, Package, Search, Wrench } from "lucide-react"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Equipo } from "@/modules/logistica/bdd/equipos/types/equipos"
+import { EquipoConMantenimientos } from "@/modules/logistica/bdd/equipos/types/mantenimiento"
 import { parseFirebaseDate } from "@/utils/parse-timestamp-date"
 import { TabsContent } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
@@ -13,7 +13,7 @@ import { es } from "date-fns/locale"
 import { format } from "date-fns"
 
 interface MaintenanceTabProps {
-    equipo: Equipo | null
+    equipo: EquipoConMantenimientos | null
     searchTerm: string
     setSearchTerm: React.Dispatch<React.SetStateAction<string>>
     numMantenimientos: number
@@ -25,6 +25,14 @@ const MaintenanceTab = ({
     setSearchTerm,
     numMantenimientos
 }: MaintenanceTabProps) => {
+    const nextMaintenanceDate = equipo?.mantenimientos
+        .filter((m) => parseFirebaseDate(m.fechaProximo) && parseFirebaseDate(m.fechaProximo) > new Date())
+        .sort((a, b) => parseFirebaseDate(a.fechaProximo!).getTime() - parseFirebaseDate(b.fechaProximo!).getTime())[0]?.fechaProximo
+
+    const daysUntilNextMaintenance = nextMaintenanceDate
+        ? Math.floor((parseFirebaseDate(nextMaintenanceDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))
+        : null
+
     return (
         <TabsContent value="maintenance" className="space-y-4 mt-6">
             <div>
@@ -36,7 +44,7 @@ const MaintenanceTab = ({
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <div className="grid md:grid-cols-4 gap-4">
+                        <div className="grid md:grid-cols-3 gap-4">
                             <div className="p-4 rounded-lg bg-gradient-to-br from-blue-500/10 to-blue-500/5 border border-blue-500/20">
                                 <div className="flex items-center gap-2 mb-2">
                                     <Wrench className="w-5 h-5 text-blue-600 dark:text-blue-400" />
@@ -44,22 +52,13 @@ const MaintenanceTab = ({
                                 </div>
                                 <p className="text-3xl font-bold">{numMantenimientos}</p>
                             </div>
-                            {/**
-                             * <div className="p-4 rounded-lg bg-gradient-to-br from-green-500/10 to-green-500/5 border border-green-500/20">
-                                <div className="flex items-center gap-2 mb-2">
-                                    <DollarSign className="w-5 h-5 text-green-600 dark:text-green-400" />
-                                    <p className="text-sm text-muted-foreground">Costo Total</p>
-                                </div>
-                                <p className="text-3xl font-bold">${totalMaintenanceCost.toLocaleString()}</p>
-                            </div>
-                             */}
                             <div className="p-4 rounded-lg bg-gradient-to-br from-purple-500/10 to-purple-500/5 border border-purple-500/20">
                                 <div className="flex items-center gap-2 mb-2">
                                     <Clock className="w-5 h-5 text-purple-600 dark:text-purple-400" />
                                     <p className="text-sm text-muted-foreground">Próximo Servicio</p>
                                 </div>
                                 <p className="text-2xl font-bold">
-                                    {/** daysUntilNextMaintenance !== null ? `${daysUntilNextMaintenance} días` : "N/A" */}
+                                    {daysUntilNextMaintenance !== null ? `En ${daysUntilNextMaintenance} días` : "N/A"}
                                 </p>
                             </div>
                             <div className="p-4 rounded-lg bg-gradient-to-br from-orange-500/10 to-orange-500/5 border border-orange-500/20">
@@ -67,12 +66,12 @@ const MaintenanceTab = ({
                                     <Calendar className="w-5 h-5 text-orange-600 dark:text-orange-400" />
                                     <p className="text-sm text-muted-foreground">Último Servicio</p>
                                 </div>
-                                <p className="text-sm font-bold">
-                                    {equipo?.mantenimiento && equipo?.mantenimiento.length > 0
+                                <p className="text-2xl font-bold">
+                                    {equipo?.mantenimientos && equipo?.mantenimientos.length > 0
                                         ? format(
-                                            equipo?.mantenimiento.sort(
-                                                (a, b) => new Date(parseFirebaseDate(b.fecha)).getTime() - new Date(parseFirebaseDate(a.fecha)).getTime(),
-                                            )[0].fecha,
+                                            parseFirebaseDate(equipo?.mantenimientos.sort(
+                                                (a, b) => parseFirebaseDate(b.fecha).getTime() - parseFirebaseDate(a.fecha).getTime(),
+                                            )[0].fecha),
                                             "PPP", { locale: es })
                                         : "N/A"}
                                 </p>
@@ -93,7 +92,7 @@ const MaintenanceTab = ({
                     </div>
                 </div>
 
-                {equipo?.mantenimiento && equipo?.mantenimiento.length === 0 ? (
+                {equipo?.mantenimientos && equipo?.mantenimientos.length === 0 ? (
                     <Card>
                         <CardContent className="flex flex-col items-center justify-center py-16">
                             <Wrench className="w-16 h-16 text-muted-foreground mb-4" />
@@ -103,25 +102,22 @@ const MaintenanceTab = ({
                     </Card>
                 ) : (
                     <div className="space-y-4">
-                        {equipo?.mantenimiento && equipo?.mantenimiento.filter((m) =>
+                        {equipo?.mantenimientos && equipo?.mantenimientos.filter((m) =>
                             !searchTerm ||
                             m.tipoServicio?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                             m.mecanico?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                             m.notas?.toLowerCase().includes(searchTerm.toLowerCase()),
                         )
-                            .sort((a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime())
+                            .sort((a, b) => parseFirebaseDate(b.fecha).getTime() - parseFirebaseDate(a.fecha).getTime())
                             .map((mantenimiento, index) => {
-                                //const totalCost =
-                                //mantenimiento.mantenimientoData?.reduce((sum, item) => sum + (item. || 0), 0) || 0
-
                                 return (
                                     <Card key={mantenimiento.id} className="border-2 hover:shadow-lg transition-shadow">
-                                        <CardHeader className="bg-muted/30">
+                                        <CardHeader>
                                             <div className="flex items-start justify-between flex-wrap gap-3">
                                                 <div className="space-y-2">
                                                     <div className="flex items-center gap-2">
                                                         <Badge variant="outline" className="font-mono">
-                                                            #{equipo?.mantenimiento.length - index}
+                                                            #{equipo?.mantenimientos.length - index}
                                                         </Badge>
                                                         <CardTitle className="text-xl">
                                                             {mantenimiento.tipoServicio || "Mantenimiento General"}
@@ -137,16 +133,6 @@ const MaintenanceTab = ({
                                                             <Gauge className="w-4 h-4" />
                                                             {mantenimiento.kmMomento.toLocaleString()} km
                                                         </span>
-                                                        {/**
-                                                         * {totalCost > 0 && (
-                                                            <>
-                                                                <span className="text-muted-foreground">•</span>
-                                                                <span className="flex items-center gap-1.5 font-semibold text-green-600 dark:text-green-400">
-                                                                    <DollarSign className="w-4 h-4" />${totalCost.toLocaleString()}
-                                                                </span>
-                                                            </>
-                                                        )}
-                                                         */}
                                                     </CardDescription>
                                                 </div>
                                                 {mantenimiento.fechaProximo && (
@@ -195,44 +181,26 @@ const MaintenanceTab = ({
                                                         <Table>
                                                             <TableHeader>
                                                                 <TableRow className="bg-muted/50">
-                                                                    <TableHead className="font-semibold">Concepto</TableHead>
+                                                                    <TableHead className="font-semibold">Descripcion</TableHead>
                                                                     <TableHead className="text-center font-semibold">Cantidad</TableHead>
-                                                                    <TableHead className="text-right font-semibold">Costo Unitario</TableHead>
-                                                                    <TableHead className="text-right font-semibold">Total</TableHead>
                                                                 </TableRow>
                                                             </TableHeader>
                                                             <TableBody>
-                                                                {/**
-                                                                 * {mantenimiento.mantenimientoData.map((item) => (
+                                                                {mantenimiento.mantenimientoData.map((item) => (
                                                                     <TableRow key={item.id}>
-                                                                        <TableCell className="font-medium">{item.concepto}</TableCell>
+                                                                        <TableCell className="font-medium">{item.descripcion}</TableCell>
                                                                         <TableCell className="text-center">
                                                                             <Badge variant="outline">{item.cantidad}</Badge>
                                                                         </TableCell>
-                                                                        <TableCell className="text-right">
-                                                                            {item.costo ? `$${item.costo.toLocaleString()}` : "N/A"}
-                                                                        </TableCell>
-                                                                        <TableCell className="text-right font-semibold">
-                                                                            {item.costo ? `$${(item.costo * item.cantidad).toLocaleString()}` : "N/A"}
-                                                                        </TableCell>
                                                                     </TableRow>
                                                                 ))}
-                                                                <TableRow className="bg-muted/30 font-bold">
-                                                                    <TableCell colSpan={3} className="text-right">
-                                                                        Total del Servicio:
-                                                                    </TableCell>
-                                                                    <TableCell className="text-right text-lg text-primary">
-                                                                        ${totalCost.toLocaleString()}
-                                                                    </TableCell>
-                                                                </TableRow>
-                                                                 */}
                                                             </TableBody>
                                                         </Table>
                                                     </div>
                                                 </div>
                                             )}
 
-                                            {mantenimiento.Evidencia && mantenimiento.Evidencia.length > 0 && (
+                                            {mantenimiento.Evidencia && mantenimiento.Evidencia.length > 0 ? (
                                                 <div className="space-y-3">
                                                     <p className="text-sm font-semibold text-muted-foreground uppercase tracking-wide flex items-center gap-2">
                                                         <ImageIcon className="w-4 h-4" />
@@ -267,6 +235,13 @@ const MaintenanceTab = ({
                                                             </div>
                                                         ))}
                                                     </div>
+                                                </div>
+                                            ): (
+                                                <div>
+                                                    <p className="text-sm font-semibold text-muted-foreground uppercase tracking-wide flex items-center gap-2">
+                                                        <ImageIcon className="w-4 h-4" />
+                                                        Evidencia Fotográfica (0)
+                                                    </p>
                                                 </div>
                                             )}
                                         </CardContent>

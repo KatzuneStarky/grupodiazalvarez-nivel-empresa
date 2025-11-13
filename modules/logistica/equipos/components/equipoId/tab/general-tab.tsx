@@ -2,7 +2,8 @@
 
 import { Activity, AlertCircle, Calendar, CheckCircle2, FileText, Fuel, Gauge, Info, Package, Shield, TrendingUp, Truck, XCircle } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Equipo } from "@/modules/logistica/bdd/equipos/types/equipos"
+import { EquipoConMantenimientos } from "@/modules/logistica/bdd/equipos/types/mantenimiento"
+import { useConsumo } from "@/modules/logistica/consumo/hooks/use-consumo"
 import { parseFirebaseDate } from "@/utils/parse-timestamp-date"
 import { Separator } from "@/components/ui/separator"
 import { Progress } from "@/components/ui/progress"
@@ -10,9 +11,10 @@ import { TabsContent } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { es } from "date-fns/locale"
 import { format } from "date-fns"
+import { formatCurrency } from "@/utils/format-currency"
 
 interface GeneralTabProps {
-    equipo: Equipo | null
+    equipo: EquipoConMantenimientos | null
     isExpiringSoon: (date: Date) => boolean
     isExpired: (date: Date) => boolean
 }
@@ -22,10 +24,27 @@ const GeneralTab = ({
     isExpiringSoon,
     isExpired
 }: GeneralTabProps) => {
+    const { consumo } = useConsumo()
+    const consumoByEquipoId = consumo.find((consumo) => consumo.equipoId === equipo?.id)
+    const rendimiento = consumoByEquipoId?.rendimientoKmL ?? 0;
+    
+    const porcentajeRendimiento = (1 - rendimiento / 10) * 100
+    let progressColor = "bg-green-500";
+    if (porcentajeRendimiento < 40) progressColor = "bg-red-500";
+    else if (porcentajeRendimiento < 70) progressColor = "bg-yellow-500";
+    
+    const nextMaintenanceDate = equipo?.mantenimientos
+        .filter((m) => parseFirebaseDate(m.fechaProximo) && parseFirebaseDate(m.fechaProximo) > new Date())
+        .sort((a, b) => parseFirebaseDate(a.fechaProximo!).getTime() - parseFirebaseDate(b.fechaProximo!).getTime())[0]?.fechaProximo
+
+    const daysUntilNextMaintenance = nextMaintenanceDate
+        ? Math.floor((parseFirebaseDate(nextMaintenanceDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))
+        : null
+
     return (
         <TabsContent value="general" className="space-y-4 mt-6">
             <div className="space-y-4">
-                {equipo?.rendimientoPromedioKmPorLitro && (
+                {consumoByEquipoId && (
                     <Card className="border-2 border-primary/20 bg-gradient-to-br from-primary/5 to-background">
                         <CardHeader>
                             <CardTitle className="text-xl flex items-center gap-2">
@@ -43,15 +62,18 @@ const GeneralTab = ({
                                     </div>
                                     <div className="flex items-baseline gap-2">
                                         <p className="text-4xl font-bold text-primary">
-                                            {equipo?.rendimientoPromedioKmPorLitro.toFixed(2)}
+                                            {consumoByEquipoId.rendimientoKmL && consumoByEquipoId.rendimientoKmL.toFixed(2)}
                                         </p>
                                         <span className="text-lg text-muted-foreground">km/L</span>
                                     </div>
-                                    <Progress value={65} className="h-2" />
-                                    <p className="text-xs text-muted-foreground">65% de eficiencia óptima</p>
+                                    <Progress
+                                        value={Math.min(100, Math.max(0, rendimiento * 10))}
+                                        className={`h-2 ${progressColor}`}
+                                    />
+                                    <p className="text-xs text-muted-foreground">{porcentajeRendimiento.toFixed(2)}% de eficiencia óptima</p>
                                 </div>
 
-                                {equipo?.ultimoConsumo && (
+                                {consumoByEquipoId && (
                                     <>
                                         <div className="space-y-3">
                                             <div className="flex items-center gap-2">
@@ -61,17 +83,17 @@ const GeneralTab = ({
                                             <div className="space-y-2">
                                                 <div className="flex items-center justify-between">
                                                     <span className="text-sm text-muted-foreground">Fecha:</span>
-                                                    <span className="font-semibold">{format(parseFirebaseDate(equipo?.ultimoConsumo.fecha), "PPP", { locale: es })}</span>
+                                                    <span className="font-semibold">{format(parseFirebaseDate(consumoByEquipoId.fecha), "PPP", { locale: es })}</span>
                                                 </div>
                                                 <div className="flex items-center justify-between">
                                                     <span className="text-sm text-muted-foreground">Litros:</span>
                                                     <span className="font-semibold text-blue-600 dark:text-blue-400">
-                                                        {equipo?.ultimoConsumo.litros} L
+                                                        {consumoByEquipoId.litrosCargados} L
                                                     </span>
                                                 </div>
                                                 <div className="flex items-center justify-between">
-                                                    <span className="text-sm text-muted-foreground">Odómetro:</span>
-                                                    <span className="font-semibold">{equipo?.ultimoConsumo.odometro.toLocaleString()} km</span>
+                                                    <span className="text-sm text-muted-foreground">Km recorridos:</span>
+                                                    <span className="font-semibold">{consumoByEquipoId.kmRecorridos} km</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -79,23 +101,23 @@ const GeneralTab = ({
                                         <div className="space-y-3">
                                             <div className="flex items-center gap-2">
                                                 <TrendingUp className="w-5 h-5 text-green-600 dark:text-green-400" />
-                                                <p className="text-sm font-medium text-muted-foreground">Proyección</p>
+                                                <p className="text-sm font-medium text-muted-foreground">General</p>
                                             </div>
                                             <div className="space-y-2">
                                                 <div className="flex items-center justify-between">
-                                                    <span className="text-sm text-muted-foreground">Km recorridos:</span>
-                                                    <span className="font-semibold">{equipo?.ultimoConsumo.odometro.toLocaleString()}</span>
+                                                    <span className="text-sm text-muted-foreground">Costo por litro:</span>
+                                                    <span className="font-semibold">{formatCurrency(consumoByEquipoId.costoLitro ?? 0)} L</span>
                                                 </div>
                                                 <div className="flex items-center justify-between">
-                                                    <span className="text-sm text-muted-foreground">Consumo estimado:</span>
+                                                    <span className="text-sm text-muted-foreground">Costo total:</span>
                                                     <span className="font-semibold text-green-600 dark:text-green-400">
-                                                        {(equipo?.ultimoConsumo.odometro / equipo?.rendimientoPromedioKmPorLitro).toFixed(0)} L
+                                                        {formatCurrency(consumoByEquipoId.costoTotal ?? 0)}
                                                     </span>
                                                 </div>
                                                 <div className="flex items-center justify-between">
                                                     <span className="text-sm text-muted-foreground">Próximo servicio:</span>
                                                     <span className="font-semibold">
-                                                        {/** daysUntilNextMaintenance !== null ? `${daysUntilNextMaintenance} días` : "N/A" */}
+                                                        {daysUntilNextMaintenance !== null ? `${daysUntilNextMaintenance} días` : "N/A"}
                                                     </span>
                                                 </div>
                                             </div>

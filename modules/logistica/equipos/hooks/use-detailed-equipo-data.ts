@@ -14,6 +14,11 @@ interface MaintenanceResult {
     diasRestantes?: number | null;
 }
 
+interface GrupoPorYear {
+    rango: string;
+    equipos: Equipo[];
+}
+
 export const useDetailedEquipoData = (equipos: Equipo[], currentYear: number) => {
     if (!equipos.length) {
         return {
@@ -70,6 +75,53 @@ export const useDetailedEquipoData = (equipos: Equipo[], currentYear: number) =>
     const trucksWithRendimiento = equipos.filter((t) => typeof t.rendimientoPromedioKmPorLitro === "number").length;
     const avgRendimiento =
         trucksWithRendimiento > 0 ? stats.totalRendimiento / trucksWithRendimiento : 0;
+
+    const agruparEquiposPorAño = (equipos: Equipo[]): GrupoPorYear[] => {
+        const añoActual = new Date().getFullYear();
+
+        const grupos: GrupoPorYear[] = [];
+        const tamañoGrupo = 2;
+        const cantidadGrupos = 4;
+
+        for (let i = 0; i < cantidadGrupos; i++) {
+            const añoInicio = añoActual - i * tamañoGrupo;
+            const añoFin = añoInicio - (tamañoGrupo - 1);
+
+            grupos.push({
+                rango: `${añoFin} - ${añoInicio}`,
+                equipos: [],
+            });
+        }
+
+        grupos.push({
+            rango: `≤ ${añoActual - cantidadGrupos * tamañoGrupo}`,
+            equipos: [],
+        });
+
+        equipos.forEach((eq) => {
+            const year = eq.year;
+            if (!year) return;
+
+            let asignado = false;
+
+            for (const grupo of grupos.slice(0, cantidadGrupos)) {
+                const [añoFin, añoInicio] = grupo.rango.split(" - ").map(Number);
+                if (year >= añoFin && year <= añoInicio) {
+                    grupo.equipos.push(eq);
+                    asignado = true;
+                    break;
+                }
+            }
+
+            if (!asignado) {
+                grupos[grupos.length - 1].equipos.push(eq);
+            }
+        });
+
+        return grupos;
+    };
+
+    const edadEquiposChartData = agruparEquiposPorAño(equipos)
 
     //Mantenimiento
     const getSafeMaintenanceDate = (truck: Equipo): MaintenanceResult => {
@@ -159,5 +211,6 @@ export const useDetailedEquipoData = (equipos: Equipo[], currentYear: number) =>
         groupsSummary: stats.grupos,
         totalTrucks: equipos.length,
         avgAge: sanitize(avgAge),
+        edadEquiposChartData,
     }
 }

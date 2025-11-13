@@ -11,19 +11,30 @@ export const getEquipoById = async (id: string): Promise<EquipoConMantenimientos
     try {
         const equipoRef = doc(db, "equipos", id);
         const equipoSnap = await getDoc(equipoRef);
+        if (!equipoSnap.exists()) {
+            console.warn(`⚠️ No se encontró el equipo con ID: ${id}`);
+            return null;
+        }
 
         const equipo = { id: equipoSnap.id, ...equipoSnap.data() } as Equipo;
 
-        const mantenimientosSnapshot = await getDocs(collection(db, `mantenimientos`));
+        const mantenimientosRef = collection(db, "equipos", id, "mantenimientos");
+        const mantenimientosSnapshot = await getDocs(mantenimientosRef);
         const mantenimientosConDetalles: MantenimientoConDetalles[] = await Promise.all(
             mantenimientosSnapshot.docs.map(async (mantenimientoDoc) => {
                 const mantenimiento = mantenimientoDoc.data() as Mantenimiento;
                 const mantenimientoId = mantenimientoDoc.id;
 
-                const mantenimientoDataSnapshot = await getDocs(collection(db, `mantenimientos/${mantenimientoId}/mantenimientoData`));
+                // ✅ Subcolección correcta: equipos/{equipoId}/mantenimientos/{mantenimientoId}/mantenimientoData
+                const mantenimientoDataSnapshot = await getDocs(
+                    collection(db, "equipos", id, "mantenimientos", mantenimientoId, "mantenimientoData")
+                );
                 const mantenimientoData = mantenimientoDataSnapshot.docs.map((doc) => doc.data() as MantenimientoData);
 
-                const evidenciasSnapshot = await getDocs(collection(db, `mantenimientos/${mantenimientoId}/evidencia`));
+                // ✅ Subcolección correcta: equipos/{equipoId}/mantenimientos/{mantenimientoId}/evidencia
+                const evidenciasSnapshot = await getDocs(
+                    collection(db, "equipos", id, "mantenimientos", mantenimientoId, "evidencia")
+                );
                 const evidencias = evidenciasSnapshot.docs.map((doc) => doc.data() as Evidencia);
 
                 return {
@@ -35,9 +46,12 @@ export const getEquipoById = async (id: string): Promise<EquipoConMantenimientos
             })
         );
 
-        const tanqueRef = collection(db, "equipos", equipo.id, "tanques")
-        const tanquesSnapshot = await getDocs(tanqueRef);
-        const tanques: Tanque[] = tanquesSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as Tanque));
+        const tanquesRef = collection(db, "equipos", id, "tanques");
+        const tanquesSnapshot = await getDocs(tanquesRef);
+        const tanques: Tanque[] = tanquesSnapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+        })) as Tanque[];
 
         return { ...equipo, mantenimientos: mantenimientosConDetalles, tanques };
     } catch (error) {
@@ -82,7 +96,7 @@ export function listenArchivosVencimientoByEquipoId(equipoId: string, callback: 
 export function getUltimoMantenimiento({ equipoId }: { equipoId: string }, mantenimientos?: Mantenimiento[] | null): Mantenimiento | null {
     if (!mantenimientos || mantenimientos.length === 0) return null;
 
-    const mantenimientosOrdenados 
+    const mantenimientosOrdenados
         = [...mantenimientos].sort((a, b) => new Date(b.createAt).getTime() - new Date(a.createAt).getTime());
     const mantenimientoEquipo = mantenimientosOrdenados.find((m) => m.equipoId === equipoId)
     return mantenimientoEquipo || null;

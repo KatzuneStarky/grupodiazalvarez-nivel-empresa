@@ -34,22 +34,19 @@ const EquipoIdHeader = ({
             <CardHeader>
                 <div className="flex flex-col lg:flex-row gap-6">
                     <div className="flex-shrink-0">
-                        {equipo?.imagen ? (
-                            <div className="relative group">
-                                <img
-                                    src={equipo?.imagen || "/placeholder.svg"}
-                                    alt={`${equipo?.marca} ${equipo?.modelo}`}
-                                    className="w-full lg:w-64 h-64 object-cover rounded-xl shadow-lg ring-2 ring-primary/10"
+                        <div className="relative group">
+                            <img
+                                src={equipo?.imagen || "https://images.unsplash.com/photo-1601584115197-04ecc0da31d7"}
+                                alt={`${equipo?.marca} ${equipo?.modelo}`}
+                                className="w-full lg:w-64 h-64 object-cover rounded-xl shadow-lg ring-2 ring-primary/10"
+                            />
+                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity rounded-xl flex items-center justify-center">
+                                <EquipoImageDialog
+                                    src={equipo?.imagen || "https://images.unsplash.com/photo-1601584115197-04ecc0da31d7"}
+                                    numEconomico={equipo?.numEconomico || ""}
                                 />
-                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity rounded-xl flex items-center justify-center">
-                                    <EquipoImageDialog src={equipo.imagen || ""} numEconomico={equipo.numEconomico} />
-                                </div>
                             </div>
-                        ) : (
-                            <div className="w-full lg:w-64 h-64 bg-gradient-to-br from-muted to-muted/50 rounded-xl flex items-center justify-center ring-2 ring-border">
-                                <Truck className="w-20 h-20 text-muted-foreground/50" />
-                            </div>
-                        )}
+                        </div>
                     </div>
                     <div className="flex-1 space-y-4">
                         <div className="flex items-start justify-between flex-wrap gap-3">

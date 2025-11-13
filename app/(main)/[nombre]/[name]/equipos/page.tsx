@@ -1,10 +1,13 @@
 "use client"
 
 import DocumentCompletationCard from "@/modules/logistica/equipos/components/dashboard/document-completation-card"
+import StatusDistributionChart from "@/modules/logistica/equipos/components/dashboard/status-distribution-chart"
 import { CommandDialogEquipos } from "@/modules/logistica/equipos/documentos/components/command-dialog-equipos"
 import MaintenanceStatusCard from "@/modules/logistica/equipos/components/dashboard/maintenance-status-card"
 import { FleetActionsSheet } from "@/modules/logistica/equipos/components/dashboard/fleet-action-sheet"
 import { useDetailedEquipoData } from "@/modules/logistica/equipos/hooks/use-detailed-equipo-data"
+import FleetAgeChart from "@/modules/logistica/equipos/components/dashboard/fleet-age-chart"
+import AlertsSection from "@/modules/logistica/equipos/components/dashboard/alerts-section"
 import FleetKpiCard from "@/modules/logistica/equipos/components/dashboard/fleet-kpi-cards"
 import { exportEquipos } from "@/functions/excel-export/equipos/export/export-equipos"
 import { useEquipos } from "@/modules/logistica/bdd/equipos/hooks/use-equipos"
@@ -26,6 +29,7 @@ const EquiposPage = () => {
     const { area } = useArea()
 
     const {
+        edadEquiposChartData,
         availableWithIssues,
         maintenanceUpcoming,
         outOfServiceTrucks,
@@ -44,13 +48,12 @@ const EquiposPage = () => {
         newTrucks,
         oldTrucks,
         avgAge,
-        documentosTotales
     } = useDetailedEquipoData(equipos, new Date().getFullYear())
 
     const convertedGroupSummary = Object.entries(groupsSummary).map(([key, value]) => ({
         name: key,
         value: value
-    }))    
+    }))
 
     const exportEquiposData = async () => {
         try {
@@ -103,14 +106,14 @@ const EquiposPage = () => {
             />
 
             <div className="grid gap-6 md:grid-cols-2 mb-8">
-                <MaintenanceStatusCard 
+                <MaintenanceStatusCard
                     prontosAvencer={maintenanceDueSoon ?? 0}
                     proximos={maintenanceUpcoming ?? 0}
                     vencidos={maintenanceOverdue ?? 0}
                     total={totalMaintenance ?? 0}
                     alDia={maintenanceOk ?? 0}
                 />
-                <DocumentCompletationCard 
+                <DocumentCompletationCard
                     porcentajeDeCumplimiento={0}
                     expiraPronto={0}
                     critico={0}
@@ -118,6 +121,19 @@ const EquiposPage = () => {
                     total={0}
                 />
             </div>
+
+            <div className="grid gap-6 md:grid-cols-2 mb-8">
+                <StatusDistributionChart
+                    disponibleConDetallesNum={availableWithIssues ?? 0}
+                    fueraDeServicioNum={outOfServiceTrucks ?? 0}
+                    disponibleNum={operationalTrucks ?? 0}
+                    enTallerNum={maintenanceTrucks ?? 0}
+                    enViajeNum={enViajeTrucks ?? 0}
+                />
+                <FleetAgeChart data={edadEquiposChartData || []} />
+            </div>
+
+            <AlertsSection />
 
             <CommandDialogEquipos
                 equipos={equipos}
