@@ -7,6 +7,7 @@ import { getEquipmentUtilization } from "@/functions/get-equipment-utilization"
 import { TopClientsTable } from "./components/tables/mejores-clientes-table"
 import { useDashboardDataLogistica } from "./hooks/use-dashboard-logistica"
 import { RecentTripsTable } from "./components/tables/reporte-viajes-table"
+import MainChartPerformance from "./components/main-chat-performance"
 import { EquipmentTable } from "./components/tables/equipos-tablet"
 import { MainActions } from "./components/main-actions"
 import PageTitle from "@/components/custom/page-title"
@@ -15,7 +16,8 @@ import MetricCard from "./components/metric-card"
 import MainCharts from "./components/main-charts"
 import { useYear } from "@/context/year-context"
 import dynamic from "next/dynamic";
-import MainChartPerformance from "./components/main-chat-performance"
+import { parseFirebaseDate } from "@/utils/parse-timestamp-date"
+import { ReporteViajes } from "./reportes-viajes/types/reporte-viajes"
 
 const Map = dynamic(() => import('../root/components/coverage/map'), { ssr: false });
 
@@ -28,22 +30,27 @@ const MainDashboardLogistica = () => {
         estacionesCount,
         totalFlete,
         totalM3,
-        percentage,
-        percentageChange,
         totalViajes,
         mesActual,
         totalM3Week,
         totalFleteSemana,
         rutasCount,
-        totalM3CurrentMonth,
-        semanaActual,
         primerDiaSemana,
         ultimoDiaSemana,
         reporteViajes,
     } = useDashboardDataLogistica()
 
-    const equipmentUtilization = getEquipmentUtilization(reporteViajes)
-
+    
+    const sortedViajes = reporteViajes.sort((a, b) => {
+        const dateA = parseFirebaseDate(a.Fecha);
+        const dateB = parseFirebaseDate(b.Fecha);
+        return dateB.getTime() - dateA.getTime();
+    });
+    
+    const sortedDataByMonth 
+    = sortedViajes.filter((viaje) => viaje.Mes === "Octubre" && viaje.Year === selectedYear)    
+    const equipmentUtilization = getEquipmentUtilization(sortedDataByMonth)
+    
     return (
         <div className="flex-1 space-y-6 p-6">
             <PageTitle
@@ -65,7 +72,6 @@ const MainDashboardLogistica = () => {
                         title="Total M³ transportado"
                         value={totalM3}
                         icon={Fuel}
-                        trend={{ value: 12, isPositive: true }}
                         colorVariant="amber"
                         textValue="M³"
                     />
@@ -73,7 +79,6 @@ const MainDashboardLogistica = () => {
                         title={`Viajes Este Mes (${mesActual})`}
                         value={totalViajes}
                         icon={MapPinHouse}
-                        trend={{ value: 12, isPositive: true }}
                         colorVariant="cyan"
                         textValue="Viajes"
                     />
@@ -81,7 +86,6 @@ const MainDashboardLogistica = () => {
                         title={`Flete total (${mesActual})`}
                         value={totalFlete}
                         icon={HandCoins}
-                        trend={{ value: 12, isPositive: true }}
                         colorVariant="lime"
                         initialTextVaule="$"
                     />
@@ -89,7 +93,6 @@ const MainDashboardLogistica = () => {
                         title={`Total M³ transportado semana actual (${primerDiaSemana} - ${ultimoDiaSemana})`}
                         value={totalM3Week}
                         icon={Fuel}
-                        trend={{ value: 12, isPositive: true }}
                         colorVariant="emerald"
                         textValue="M³"
                     />
@@ -97,7 +100,6 @@ const MainDashboardLogistica = () => {
                         title={`Flete total senaba actual (${primerDiaSemana} - ${ultimoDiaSemana})`}
                         value={totalFleteSemana}
                         icon={Banknote}
-                        trend={{ value: 12, isPositive: true }}
                         colorVariant="orange"
                         initialTextVaule="$"
                     />
@@ -154,11 +156,11 @@ const MainDashboardLogistica = () => {
                 </Card>
 
                 <div className="mb-6">
-                    <RecentTripsTable trips={reporteViajes} />
+                    <RecentTripsTable trips={sortedViajes} />
                 </div>
 
                 <div className="mb-6 grid gap-6 lg:grid-cols-2">
-                    <TopClientsTable trips={reporteViajes} />
+                    <TopClientsTable trips={sortedDataByMonth} />
                     <EquipmentUtilizationTable data={equipmentUtilization} />
                 </div>
 

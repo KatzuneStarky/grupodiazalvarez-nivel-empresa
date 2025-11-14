@@ -8,9 +8,9 @@ import { useEstaciones } from "../estaciones/hooks/use-estaciones";
 import { useClientes } from "../bdd/clientes/hooks/use-clientes";
 import { useEquipos } from "../bdd/equipos/hooks/use-equipos";
 import { endOfWeek, getWeek, startOfWeek } from "date-fns";
+import { useRutas } from "../rutas/hooks/use-rutas";
 import { useYear } from "@/context/year-context";
 import { useEffect, useState } from "react";
-import { useRutas } from "../rutas/hooks/use-rutas";
 
 export const useDashboardDataLogistica = () => {
     const { selectedYear } = useYear();
@@ -45,7 +45,7 @@ export const useDashboardDataLogistica = () => {
 
     useEffect(() => {
         const viajesAnio = reporteViajes.filter(viaje => viaje.Year === selectedYear)
-        const totalViajesMesActual = viajesAnio.filter(viaje => viaje.Mes === "Julio").length
+        const totalViajesMesActual = viajesAnio.filter(viaje => viaje.Mes === "Octubre").length
         setTotalViajes(totalViajesMesActual)
     }, [reporteViajes])
 
@@ -86,7 +86,7 @@ export const useDashboardDataLogistica = () => {
         //if (!selectedYear || !mesActual) return;
 
         const fetchTotalM3 = async () => {
-            const total = await getTotalM3ForCurrentMonth("Julio", selectedYear || 0);
+            const total = await getTotalM3ForCurrentMonth("Octubre", selectedYear || 0);
             setTotalM3(total);
         };
 

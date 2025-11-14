@@ -60,7 +60,7 @@ export function EquipmentTable({ trips, mes, year }: EquipmentTableProps) {
     return (
         <Card>
             <CardHeader>
-                <CardTitle className="text-card-foreground">Equipos y Operadores</CardTitle>
+                <CardTitle className="text-card-foreground">Uso de Equipos y Operadores</CardTitle>
             </CardHeader>
             <CardContent>
                 <Table>
