@@ -9,6 +9,7 @@ import { useDashboardDataLogistica } from "./hooks/use-dashboard-logistica"
 import { RecentTripsTable } from "./components/tables/reporte-viajes-table"
 import MainChartPerformance from "./components/main-chat-performance"
 import { EquipmentTable } from "./components/tables/equipos-tablet"
+import { parseFirebaseDate } from "@/utils/parse-timestamp-date"
 import { MainActions } from "./components/main-actions"
 import PageTitle from "@/components/custom/page-title"
 import { Separator } from "@/components/ui/separator"
@@ -16,8 +17,6 @@ import MetricCard from "./components/metric-card"
 import MainCharts from "./components/main-charts"
 import { useYear } from "@/context/year-context"
 import dynamic from "next/dynamic";
-import { parseFirebaseDate } from "@/utils/parse-timestamp-date"
-import { ReporteViajes } from "./reportes-viajes/types/reporte-viajes"
 
 const Map = dynamic(() => import('../root/components/coverage/map'), { ssr: false });
 
@@ -39,7 +38,6 @@ const MainDashboardLogistica = () => {
         ultimoDiaSemana,
         reporteViajes,
     } = useDashboardDataLogistica()
-
     
     const sortedViajes = reporteViajes.sort((a, b) => {
         const dateA = parseFirebaseDate(a.Fecha);
