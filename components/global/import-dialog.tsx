@@ -1,8 +1,13 @@
 "use client"
 
-import { useRef, useState } from "react"
-import * as XLSX from "xlsx"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Loader2Icon, UploadIcon, FileIcon, AlertCircleIcon, CheckCircleIcon } from "lucide-react"
+import { Label } from "@/components/ui/label"
+import { Input } from "@/components/ui/input"
+import { Alert } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
+import React, { useRef, useState } from "react"
+import * as XLSX from "xlsx"
 import {
     Dialog,
     DialogContent,
@@ -12,16 +17,13 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Label } from "@/components/ui/label"
-import { Input } from "@/components/ui/input"
-import { Alert } from "@/components/ui/alert"
-import { Loader2Icon, UploadIcon, FileIcon, AlertCircleIcon, CheckCircleIcon } from "lucide-react"
 
 interface ImportDialogProps<T> {
     onImport: (data: T[]) => void
     title?: string
     triggerLabel?: string
+    child?: boolean
+    children?: React.ReactNode
 }
 
 type ImportState = "idle" | "loading" | "preview" | "error" | "success"
@@ -30,6 +32,8 @@ const ImportDialog = <T extends Record<string, any>>({
     onImport,
     title = "Import Data",
     triggerLabel = "Import",
+    child = false,
+    children
 }: ImportDialogProps<T>) => {
     const [state, setState] = useState<ImportState>("idle")
     const [parsedData, setParsedData] = useState<T[]>([])
@@ -171,10 +175,14 @@ const ImportDialog = <T extends Record<string, any>>({
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button className="sm:w-auto">
-                    <UploadIcon className="w-4 h-4 mr-2" />
-                    {triggerLabel}
-                </Button>
+                {child ? (
+                    children
+                ) : (
+                    <Button variant="outline" className="flex items-center gap-2">
+                        <UploadIcon className="size-4" />
+                        {triggerLabel}
+                    </Button>
+                )}
             </DialogTrigger>
             <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>

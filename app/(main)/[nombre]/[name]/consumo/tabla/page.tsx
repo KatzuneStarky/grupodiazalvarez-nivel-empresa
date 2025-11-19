@@ -2,6 +2,8 @@
 
 import ConsumoAlertsDialog from "@/modules/logistica/consumo/components/consumo-alerts-dialog"
 import ConsumosTable from "@/modules/logistica/consumo/components/table/consumos-table"
+import ConsumoTable from "@/modules/logistica/consumo/components/table/consumo-table"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useConsumo } from "@/modules/logistica/consumo/hooks/use-consumo"
 import { parseFirebaseDate } from "@/utils/parse-timestamp-date"
 import { ArrowDownIcon, ArrowUpIcon } from "lucide-react"
@@ -10,7 +12,6 @@ import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
 import Icon from "@/components/global/icon"
 import { useState } from "react"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 type SortField = "fecha" | "litrosCargados" | "rendimientoKmL" | "costoTotal"
 type SortDirection = "asc" | "desc"
@@ -120,11 +121,7 @@ const ConsumoTablaPage = () => {
                     )}
                 </TabsContent>
                 <TabsContent value="Tabla consumos">
-                    <div className="flex items-center justify-center h-full">
-                        <h1 className="text-2xl font-bold text-gray-500">
-                            Próximamente...
-                        </h1>
-                    </div>
+                    <ConsumoTable />
                 </TabsContent>
             </Tabs>
         </div>

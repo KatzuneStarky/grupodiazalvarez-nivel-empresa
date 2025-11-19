@@ -2,9 +2,11 @@
 
 import ReporteViajesActionsSheet from "@/modules/logistica/reportes-viajes/components/reporte-viajes-actions-sheet"
 import { useReporteViajesFilters } from "@/modules/logistica/reportes-viajes/hooks/use-reporte-viajes-filters"
+import ReporteViajesPagination from "@/modules/logistica/reportes-viajes/components/reporte-viajes-pagination"
 import { exportReporteViajes } from "@/functions/excel-export/reportes-viajes/export/export-reporte-viajes"
 import ReporteViajesFilters from "@/modules/logistica/reportes-viajes/components/reporte-viajes-filters"
 import ReporteViajesTable from "@/modules/logistica/reportes-viajes/components/reporte-viajes-table"
+import ReporteViajesCard from "@/modules/logistica/reportes-viajes/components/reporte-viajes-card"
 import { exportCollectionToJson } from "@/functions/json-export/export-collection-to-json"
 import { ReporteViajes } from "@/modules/logistica/reportes-viajes/types/reporte-viajes"
 import { importJsonToCollection } from "@/functions/json-import/import-json-to-data"
@@ -13,11 +15,9 @@ import { downloadJson } from "@/functions/json-export/download-json"
 import PageTitle from "@/components/custom/page-title"
 import { Separator } from "@/components/ui/separator"
 import { Badge } from "@/components/ui/badge"
+import { Card } from "@/components/ui/card"
 import Icon from "@/components/global/icon"
 import { toast } from "sonner"
-import ReporteViajesPagination from "@/modules/logistica/reportes-viajes/components/reporte-viajes-pagination"
-import { Card } from "@/components/ui/card"
-import ReporteViajesCard from "@/modules/logistica/reportes-viajes/components/reporte-viajes-card"
 
 const ReporteViajesPage = () => {
     const {
@@ -35,6 +35,7 @@ const ReporteViajesPage = () => {
         uniqueClients,
         paginatedData,
         setSearchTerm,
+        reporteViajes,
         selectedYear,
         clearFilters,
         uniqueYears,
@@ -64,7 +65,8 @@ const ReporteViajesPage = () => {
                 error: "Error al importar datos"
             })
         } catch (error) {
-
+            console.log(error);
+            toast.error("Error al importar datos")
         }
     }
 
@@ -106,7 +108,12 @@ const ReporteViajesPage = () => {
                 hasActions={true}
                 actions={
                     <>
-                        <ReporteViajesActionsSheet />
+                        <ReporteViajesActionsSheet 
+                            exportReporteViajesDataJson={exportReporteViajesDataJson}
+                            exportReportesViajesAction={exportReportesViajesAction}
+                            importViajesDataJson={importViajesDataJson}
+                            reporteViajes={reporteViajes}
+                        />
                     </>
                 }
             />
