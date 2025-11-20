@@ -92,3 +92,20 @@ export const writeOrdenConsumo = async (data: Omit<OrdenDeConsumo, "id" | "creat
         };
     }
 }
+
+export const deleteOrdenConsumo = async (ordenId: string):
+    Promise<{ message: string, data?: OrdenDeConsumo, success: boolean, error?: Error }> => {
+    try {
+        return {
+            message: "Orden de consumo eliminada",
+            success: true,
+        };
+    } catch (error) {
+        console.log(error);
+        return {
+            message: "Error al eliminar la orden",
+            success: false,
+            error: error as Error
+        };
+    }
+}

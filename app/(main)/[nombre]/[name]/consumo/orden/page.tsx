@@ -1,13 +1,25 @@
 "use client"
 
-import { useOrdenesConsumos } from "@/modules/logistica/consumo/hooks/use-ordenes-consumos";
-import OrdenConsumoTable from "@/modules/logistica/consumo/components/main/table";
+import { useOrdenConsumoFilters } from "@/modules/logistica/consumo/hooks/use-orden-consumo-filters"
+import { useOrdenesConsumos } from "@/modules/logistica/consumo/hooks/use-ordenes-consumos"
+import OrdenFilters from "@/modules/logistica/consumo/components/orden/orden-filters"
+import OrdenConsumoTable from "@/modules/logistica/consumo/components/main/table"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { LayoutGrid, Table2 } from "lucide-react";
-import OrdenConsumoCard from "@/modules/logistica/consumo/components/main/card";
+import OrdenConsumoCard from "@/modules/logistica/consumo/components/main/card"
+import { LayoutGrid, Table2 } from "lucide-react"
+import { parseFirebaseDate } from "@/utils/parse-timestamp-date"
 
 const OrdenConsumoPage = () => {
     const { ordenesConsumos } = useOrdenesConsumos()
+    const {
+        filteredOrdenes,
+        setFilterEstado,
+        setSearchTerm,
+        setDateRange,
+        filterEstado,
+        searchTerm,
+        dateRange,
+    } = useOrdenConsumoFilters()
 
     function getEstadoColor(estado: string): string {
         const colors: Record<string, string> = {
@@ -26,8 +38,17 @@ const OrdenConsumoPage = () => {
 
     return (
         <div className="container mx-auto py-8 px-6">
+            <OrdenFilters 
+                setFilterEstado={setFilterEstado}
+                setSearchTerm={setSearchTerm}
+                setDateRange={setDateRange}
+                filterEstado={filterEstado}
+                searchTerm={searchTerm}
+                dateRange={dateRange}
+            />
+
             <div className="w-full space-y-4">
-                <Tabs defaultValue="table" className="flex justify-end">
+                <Tabs defaultValue="table" className="flex justify-end mt-4 w-full">
                     <TabsList className="inline-flex rounded-lg border p-1">
                         <TabsTrigger value="table" className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md transition-all">
                             <Table2 className="w-4 h-4" />
@@ -42,12 +63,12 @@ const OrdenConsumoPage = () => {
                         <OrdenConsumoTable
                             getEstadoColor={getEstadoColor}
                             formatFolio={formatFolio}
-                            data={ordenesConsumos}
+                            data={filteredOrdenes}
                         />
                     </TabsContent>
                     <TabsContent value="card">
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                            {ordenesConsumos.map((orden) => (
+                            {filteredOrdenes.map((orden) => (
                                 <OrdenConsumoCard
                                     getEstadoColor={getEstadoColor}
                                     formatFolio={formatFolio}
@@ -57,7 +78,7 @@ const OrdenConsumoPage = () => {
                             ))}
                         </div>
 
-                        {ordenesConsumos.length === 0 && (
+                        {filteredOrdenes.length === 0 && (
                             <div className="col-span-full py-12 text-center text-sm text-gray-500">
                                 No hay órdenes de consumo para mostrar
                             </div>

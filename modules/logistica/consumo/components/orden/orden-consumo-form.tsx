@@ -7,15 +7,16 @@ import { Operador } from "@/modules/logistica/bdd/operadores/types/operadores"
 import { Equipo } from "@/modules/logistica/bdd/equipos/types/equipos"
 import { OrdenDeConsumoType } from "../../schema/orden-consumo.schema"
 import { DatePickerForm } from "@/components/custom/date-picker-form"
+import SeleccionarDestinoDialog from "./seleccionar-destino-dialog"
 import { parseFirebaseDate } from "@/utils/parse-timestamp-date"
 import { Check, ChevronsUpDown, Table2Icon } from "lucide-react"
+import PlantillaOrdenConsumo from "./plantilla-orden-consumo"
 import { Separator } from "@/components/ui/separator"
 import { Textarea } from "@/components/ui/textarea"
-import { CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { UseFormReturn } from "react-hook-form"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import { useEffect, useState } from "react"
 import { cn } from "@/lib/utils"
 
 import {
@@ -27,9 +28,6 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table"
-import { useEffect } from "react"
-import { IconPdf } from "@tabler/icons-react"
-import PlantillaOrdenConsumo from "./plantilla-orden-consumo"
 
 interface OrdenConsumoFormProps {
     onSubmit: (data: OrdenDeConsumoType) => void
@@ -59,6 +57,7 @@ const OrdenConsumoForm = ({
     equipos,
     form,
 }: OrdenConsumoFormProps) => {
+    const [showTablaDestinos, setShowTablaDestinos] = useState<boolean>(false);
     const observaciones = form.watch("observaciones")
     const kilometraje = form.watch("kilometraje")
     const mediciones = form.watch("mediciones")
@@ -393,7 +392,11 @@ const OrdenConsumoForm = ({
                             )}
                         />
 
-                        <Button className="h-10 w-full" type="button">
+                        <Button
+                            onClick={() => setShowTablaDestinos(!showTablaDestinos)}
+                            className="h-10 w-full"
+                            type="button"
+                        >
                             <Table2Icon className="size-6" />
                         </Button>
                     </div>
@@ -419,10 +422,15 @@ const OrdenConsumoForm = ({
 
                     <Separator className="my-4" />
                     {submitButton}
+
+                    <SeleccionarDestinoDialog
+                        setShowTablaDestinos={setShowTablaDestinos}
+                        showTablaDestinos={showTablaDestinos}
+                    />
                 </form>
             </Form>
-            
-            <PlantillaOrdenConsumo 
+
+            <PlantillaOrdenConsumo
                 observaciones={observaciones || ""}
                 operadorNombre={operadorNombre}
                 numEconomico={numEconomico}
@@ -431,6 +439,7 @@ const OrdenConsumoForm = ({
                 mediciones={mediciones}
                 lastFolio={lastFolio}
                 destino={destino}
+                viewMode={false}
             />
         </div>
     )

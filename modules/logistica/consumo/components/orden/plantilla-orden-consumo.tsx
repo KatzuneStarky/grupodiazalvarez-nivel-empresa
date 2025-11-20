@@ -24,6 +24,7 @@ interface PlantillaOrdenConsumoProps {
     kilometraje: number
     destino: string
     observaciones: string
+    viewMode: boolean
 }
 
 const PlantillaOrdenConsumo = ({
@@ -34,6 +35,7 @@ const PlantillaOrdenConsumo = ({
     kilometraje,
     mediciones,
     lastFolio,
+    viewMode,
     destino,
 }: PlantillaOrdenConsumoProps) => {
     const plantillaRef = useRef<HTMLDivElement>(null);
@@ -54,7 +56,7 @@ const PlantillaOrdenConsumo = ({
     if (!plantillaRef) return null;
     const reactToPrintFn = useReactToPrint({
         contentRef: plantillaRef,
-        documentTitle: `Orden de Consumo - ${formatFolio(lastFolio + 1)} - ${new Date().toLocaleDateString()}`,
+        documentTitle: `Orden de Consumo - ${formatFolio(viewMode === true ? lastFolio : lastFolio + 1)} - ${new Date().toLocaleDateString()}`,
         onAfterPrint: () => window.close(),
         onBeforePrint: handleOnBeforePrint,
         onPrintError: () => toast.error("Error al generar la orden de consumo"),
@@ -77,8 +79,9 @@ const PlantillaOrdenConsumo = ({
                                 <span className="text-2xl font-bold text-[#c85a54]">N°.</span>
                                 <Input
                                     className="w-32 border-0 border-b-2 border-[#4a6fa5] bg-transparent px-0 text-2xl font-bold text-[#c85a54] focus-visible:ring-0 print:border-b-[1px]"
-                                    value={formatFolio(lastFolio + 1)}
+                                    value={formatFolio(viewMode ? lastFolio : lastFolio + 1)}
                                     type="number"
+                                    readOnly
                                 />
                             </div>
                         </div>
@@ -95,6 +98,7 @@ const PlantillaOrdenConsumo = ({
                                 className="flex-1 border-0 bg-transparent px-2 text-black font-bold focus-visible:ring-0"
                                 placeholder="DD/MM/YYYY"
                                 value={fechaString.toLocaleDateString()}
+                                readOnly
                             />
                         </div>
                     </div>
@@ -120,10 +124,10 @@ const PlantillaOrdenConsumo = ({
                                         DIESEL
                                     </td>
                                     <td className="border-[2px] border-[#4a6fa5] bg-[#faf8f3] p-3">
-                                        <Input className="border-0 bg-transparent text-black font-bold focus-visible:ring-0" value={mediciones.antes.diesel} />
+                                        <Input className="border-0 bg-transparent text-black font-bold focus-visible:ring-0" value={mediciones.antes.diesel} readOnly />
                                     </td>
                                     <td className="border-[2px] border-[#4a6fa5] bg-[#faf8f3] p-3">
-                                        <Input className="border-0 bg-transparent text-black font-bold focus-visible:ring-0" value={""} />
+                                        <Input className="border-0 bg-transparent text-black font-bold focus-visible:ring-0" value={""} readOnly />
                                     </td>
                                 </tr>
                                 <tr>
@@ -131,10 +135,10 @@ const PlantillaOrdenConsumo = ({
                                         MEDIDA TANQUE
                                     </td>
                                     <td className="border-[2px] border-[#4a6fa5] bg-[#faf8f3] p-3">
-                                        <Input className="border-0 bg-transparent text-black font-bold focus-visible:ring-0" value={mediciones.antes.medidaTanque} />
+                                        <Input className="border-0 bg-transparent text-black font-bold focus-visible:ring-0" value={mediciones.antes.medidaTanque} readOnly />
                                     </td>
                                     <td className="border-[2px] border-[#4a6fa5] bg-[#faf8f3] p-3">
-                                        <Input className="border-0 bg-transparent text-black font-bold focus-visible:ring-0" value={""} />
+                                        <Input className="border-0 bg-transparent text-black font-bold focus-visible:ring-0" value={""} readOnly />
                                     </td>
                                 </tr>
                                 <tr>
@@ -142,10 +146,10 @@ const PlantillaOrdenConsumo = ({
                                         MEDIDA TABLERO
                                     </td>
                                     <td className="border-[2px] border-[#4a6fa5] bg-[#faf8f3] p-3">
-                                        <Input className="border-0 bg-transparent text-black font-bold focus-visible:ring-0" value={mediciones.antes.medidaTablero} />
+                                        <Input className="border-0 bg-transparent text-black font-bold focus-visible:ring-0" value={mediciones.antes.medidaTablero} readOnly />
                                     </td>
                                     <td className="border-[2px] border-[#4a6fa5] bg-[#faf8f3] p-3">
-                                        <Input className="border-0 bg-transparent text-black font-bold focus-visible:ring-0" value={""} />
+                                        <Input className="border-0 bg-transparent text-black font-bold focus-visible:ring-0" value={""} readOnly />
                                     </td>
                                 </tr>
                             </tbody>
@@ -162,6 +166,7 @@ const PlantillaOrdenConsumo = ({
                                 type="text"
                                 className="flex-1 border-0 bg-transparent px-2 text-black font-bold focus-visible:ring-0"
                                 value={numEconomico}
+                                readOnly
                             />
                         </div>
 
@@ -174,6 +179,7 @@ const PlantillaOrdenConsumo = ({
                                 type="text"
                                 className="flex-1 border-0 bg-transparent px-2 text-black font-bold focus-visible:ring-0"
                                 value={operadorNombre}
+                                readOnly
                             />
                         </div>
 
@@ -186,6 +192,7 @@ const PlantillaOrdenConsumo = ({
                                 type="text"
                                 className="flex-1 border-0 bg-transparent px-2 text-black font-bold focus-visible:ring-0"
                                 value={kilometraje}
+                                readOnly
                             />
                         </div>
 
@@ -198,6 +205,7 @@ const PlantillaOrdenConsumo = ({
                                 type="text"
                                 className="flex-1 border-0 bg-transparent px-2 text-black font-bold focus-visible:ring-0"
                                 value={destino}
+                                readOnly
                             />
                         </div>
 
@@ -210,6 +218,7 @@ const PlantillaOrdenConsumo = ({
                                 type="text"
                                 className="flex-1 border-0 bg-transparent px-2 text-black font-bold focus-visible:ring-0"
                                 value={observaciones}
+                                readOnly
                             />
                         </div>
                     </div>

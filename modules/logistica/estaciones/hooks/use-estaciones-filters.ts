@@ -12,7 +12,7 @@ export const useEstacionesFilters = () => {
     const [tanquesRange, setTanquesRange] = useState<[number, number]>([0, 0])
     const [filterCombustible, setFilterCombustible] = useState<string>("all")
     const [searchTerm, setSearchTerm] = useState<string>("")
-    const { estaciones } = useEstaciones()
+    const { estaciones } = useEstaciones()    
 
     const estacionesOrdered = useMemo(() => {
         return estaciones.flatMap((estacion) => {

@@ -24,7 +24,9 @@ const NuevaOrdenConsumoPage = () => {
     const { equipos } = useEquipos()
     const { userBdd } = useAuth()
 
-    const lastOrdenConsumo = ordenesConsumos.sort((a, b) => b.folio - a.folio)[0]
+    const ordenesOrdenadas = [...ordenesConsumos].sort((a, b) => a.folio - b.folio);
+    const lastOrden = ordenesOrdenadas[ordenesOrdenadas.length - 1];
+    const lastFolio = lastOrden ? lastOrden.folio : 0;
 
     const form = useForm<OrdenDeConsumoType>({
         resolver: zodResolver(OrdenDeConsumoSchema),
@@ -70,7 +72,7 @@ const NuevaOrdenConsumoPage = () => {
             setIsSubmiting(true)
 
             toast.promise(writeOrdenConsumo({
-                folio: lastOrdenConsumo?.folio || 1,
+                folio: lastFolio,
                 estado: "GENERADA",
                 destino: data.destino,
                 fecha: parseFirebaseDate(data.fecha),
@@ -125,7 +127,7 @@ const NuevaOrdenConsumoPage = () => {
             />
             <Separator className="mt-4" />
             <OrdenConsumoForm
-                lastFolio={lastOrdenConsumo?.folio || 1}
+                lastFolio={lastFolio}
                 operadorNombre={operadorNombreCompleto}
                 numEconomico={numEconomico}
                 isSubmiting={isSubmitting}
