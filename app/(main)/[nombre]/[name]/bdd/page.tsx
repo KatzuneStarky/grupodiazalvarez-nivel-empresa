@@ -1,6 +1,6 @@
 "use client"
 
-import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { useOperadores } from "@/modules/logistica/bdd/operadores/hooks/use-estaciones"
 import { Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts"
 import { useEstaciones } from "@/modules/logistica/estaciones/hooks/use-estaciones"
@@ -137,87 +137,97 @@ const BddPage = () => {
                 />
             </div>
 
-            <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-                <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 col-span-2">
-                    {filteredEntities.map((entity) => (
-                        <BddCard
-                            key={entity.id}
-                            id={entity.id}
-                            title={entity.title}
-                            description={entity.description}
-                            category={entity.category}
-                            icon={entity.icon}
-                            itemCount={entity.itemCount}
-                        />
-                    ))}
+            {/* Main Grid: 2/3 for cards, 1/3 for chart on desktop */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                {/* Entity Cards Grid - 2/3 width on desktop (8 columns) */}
+                <div className="lg:col-span-8">
+                    <div className="grid gap-6 grid-cols-1 sm:grid-cols-2">
+                        {filteredEntities.map((entity) => (
+                            <BddCard
+                                key={entity.id}
+                                id={entity.id}
+                                title={entity.title}
+                                description={entity.description}
+                                category={entity.category}
+                                icon={entity.icon}
+                                itemCount={entity.itemCount}
+                            />
+                        ))}
+                    </div>
                 </div>
 
-                <Card className="border-border/40 bg-card/50 backdrop-blur-sm">
-                    <CardHeader className="mt-2">
-                        <CardTitle className="flex items-center">
-                            <DatabaseIcon className="h-4 w-4 mr-2" />
-                            Registros de base de datos
-                        </CardTitle>
-                        <CardDescription>
-                            Grafica de uso de la base de datos y sus registros por tabla
-                        </CardDescription>
-                    </CardHeader>
-                    <ChartContainer
-                        config={{
-                            records: {
-                                label: "Registros",
-                            },
-                        }}
-                        className="w-full h-[400px]"
-                    >
-                        <ResponsiveContainer width="100%" height="100%">
-                            <PieChart>
-                                <Pie
-                                    data={chartData}
-                                    cx="50%"
-                                    cy="50%"
-                                    labelLine={false}
-                                    label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                                    outerRadius={120}
-                                    fill="#8884d8"
-                                    dataKey="value"
-                                >
-                                    {chartData.map((entry, index) => (
-                                        <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
-                                    ))}
-                                </Pie>
-                                <Tooltip
-                                    content={({ active, payload }) => {
-                                        if (active && payload && payload.length) {
-                                            const data = payload[0].payload
-                                            return (
-                                                <div className="bg-background border border-border rounded-lg p-2 shadow-lg">
-                                                    <p className="text-sm font-medium text-foreground">{data.name}</p>
-                                                    <p className="text-sm text-primary font-bold">{data.value.toLocaleString()} Registros</p>
-                                                </div>
-                                            )
-                                        }
-                                        return null
-                                    }}
-                                />
-                                <Legend
-                                    wrapperStyle={{ paddingTop: "20px" }}
-                                    style={{
-                                        color: "hsl(var(--foreground))",
-                                        backgroundColor: "hsl(var(--background))",
-                                        border: "1px solid hsl(var(--border))",
-                                        borderRadius: "8px",
-                                        padding: "12px",
-                                    }}
-                                />
-                            </PieChart>
-                        </ResponsiveContainer>
-                    </ChartContainer>
-                    <Separator className="w-[95%] mx-auto" />
-                    <CardFooter className="-mt-2">
-                        Todos los registros presentados son representados por sus respectivas tablas
-                    </CardFooter>
-                </Card>
+                {/* Chart Card - 1/3 width on desktop (4 columns), full width on mobile */}
+                <div className="lg:col-span-4">
+                    <Card className="border-border/40 bg-card/50 backdrop-blur-sm w-full h-full">
+                        <CardHeader className="mt-2">
+                            <CardTitle className="flex items-center text-base sm:text-lg">
+                                <DatabaseIcon className="h-4 w-4 mr-2" />
+                                Registros de base de datos
+                            </CardTitle>
+                            <CardDescription className="text-xs sm:text-sm">
+                                Grafica de uso de la base de datos y sus registros por tabla
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent className="pb-2">
+                            <ChartContainer
+                                config={{
+                                    records: {
+                                        label: "Registros",
+                                    },
+                                }}
+                                className="w-full h-[300px] sm:h-[400px]"
+                            >
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <PieChart>
+                                        <Pie
+                                            data={chartData}
+                                            cx="50%"
+                                            cy="50%"
+                                            labelLine={false}
+                                            label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                                            outerRadius={80}
+                                            fill="#8884d8"
+                                            dataKey="value"
+                                        >
+                                            {chartData.map((entry, index) => (
+                                                <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
+                                            ))}
+                                        </Pie>
+                                        <Tooltip
+                                            content={({ active, payload }) => {
+                                                if (active && payload && payload.length) {
+                                                    const data = payload[0].payload
+                                                    return (
+                                                        <div className="bg-background border border-border rounded-lg p-2 shadow-lg">
+                                                            <p className="text-sm font-medium text-foreground">{data.name}</p>
+                                                            <p className="text-sm text-primary font-bold">{data.value.toLocaleString()} Registros</p>
+                                                        </div>
+                                                    )
+                                                }
+                                                return null
+                                            }}
+                                        />
+                                        <Legend
+                                            wrapperStyle={{ paddingTop: "10px" }}
+                                            iconSize={10}
+                                            style={{
+                                                fontSize: "12px",
+                                                color: "hsl(var(--foreground))",
+                                                backgroundColor: "hsl(var(--background))",
+                                                border: "1px solid hsl(var(--border))",
+                                                borderRadius: "8px",
+                                                padding: "8px",
+                                            }}
+                                        />
+                                    </PieChart>
+                                </ResponsiveContainer>
+                            </ChartContainer>
+                        </CardContent>
+                        <CardFooter className="text-xs sm:text-sm pt-2">
+                            Todos los registros presentados son representados por sus respectivas tablas
+                        </CardFooter>
+                    </Card>
+                </div>
             </div>
         </div>
     )

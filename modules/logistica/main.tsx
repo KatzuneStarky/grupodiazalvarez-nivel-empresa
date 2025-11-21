@@ -64,7 +64,7 @@ const MainDashboardLogistica = () => {
     }
 
     return (
-        <div className="flex-1 space-y-6 p-6">
+        <div className="flex-1 space-y-4 sm:space-y-6 p-4 sm:p-6">
             <PageTitle
                 title="Dashboard Logística"
                 description="Resumen de la información del area de logistica"
@@ -78,8 +78,9 @@ const MainDashboardLogistica = () => {
             />
             <Separator className="my-4" />
 
-            <div className="space-y-6" >
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+            <div className="space-y-4 sm:space-y-6" >
+                {/* Metric Cards Grid - Responsive */}
+                <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
                     <MetricCard
                         title="Total M³ transportado"
                         value={totalM3}
@@ -148,17 +149,19 @@ const MainDashboardLogistica = () => {
                     />
                 </div>
 
-                <div className="grid gap-6 lg:grid-cols-2">
+                {/* Charts Grid - Responsive */}
+                <div className="grid gap-4 sm:gap-6 grid-cols-1 lg:grid-cols-2">
                     <MainCharts year={selectedYear || new Date().getFullYear()} />
                     <MainChartPerformance />
                 </div>
 
+                {/* Coverage Map */}
                 <Card>
                     <CardHeader>
-                        <CardTitle className="flex items-center justify-between">
+                        <CardTitle className="flex items-center justify-between text-lg sm:text-xl">
                             Mapa de cobertura
                         </CardTitle>
-                        <CardDescription>
+                        <CardDescription className="text-sm">
                             Mapa de cobertura de las estaciones de servicio
                         </CardDescription>
                     </CardHeader>
@@ -167,15 +170,18 @@ const MainDashboardLogistica = () => {
                     </CardContent>
                 </Card>
 
+                {/* Recent Trips Table */}
                 <div>
                     <RecentTripsTable trips={sortedViajes} />
                 </div>
 
-                <div className="grid gap-6 lg:grid-cols-2">
+                {/* Clients and Equipment Grid - Responsive */}
+                <div className="grid gap-4 sm:gap-6 grid-cols-1 lg:grid-cols-2">
                     <TopClientsTable trips={sortedDataByMonth} />
                     <EquipmentUtilizationTable data={equipmentUtilization} />
                 </div>
 
+                {/* Equipment Table */}
                 <div>
                     <EquipmentTable
                         trips={reporteViajes}

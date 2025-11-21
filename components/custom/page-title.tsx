@@ -17,21 +17,26 @@ const PageTitle = ({
 }: PageTitleProps) => {
 
     return (
-        <div className={cn("flex items-center gap-3", hasActions ? "justify-between" : "")}>
+        <div className={cn(
+            "flex flex-col gap-4",
+            hasActions ? "sm:flex-row sm:items-center sm:justify-between" : "sm:flex-row sm:items-center"
+        )}>
             <div className="flex items-center gap-3">
-                <div className="p-2 bg-primary/10 rounded-lg">
-                    {icon}
+                <div className="p-2 bg-primary/10 rounded-lg shrink-0">
+                    <div className="[&>svg]:size-5 sm:[&>svg]:size-6">
+                        {icon}
+                    </div>
                 </div>
-                <div>
-                    <h1 className="text-3xl font-bold">{title}</h1>
-                    <p className="text-muted-foreground">
+                <div className="min-w-0">
+                    <h1 className="text-2xl sm:text-3xl font-bold truncate">{title}</h1>
+                    <p className="text-sm sm:text-base text-muted-foreground line-clamp-2">
                         {description}
                     </p>
                 </div>
             </div>
 
             {hasActions && (
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2 sm:shrink-0">
                     {actions}
                 </div>
             )}

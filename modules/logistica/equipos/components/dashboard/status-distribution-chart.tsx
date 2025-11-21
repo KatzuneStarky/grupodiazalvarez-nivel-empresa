@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { EstadoEquipos } from "@/modules/logistica/bdd/equipos/enum/estado-equipos"
 import { Pie, PieChart, Cell, ResponsiveContainer } from "recharts"
+import { useEffect, useState } from "react"
 
 interface StatusDistributionChartProps {
     disponibleNum: number
@@ -20,6 +21,15 @@ const StatusDistributionChart = ({
     enViajeNum,
     fueraDeServicioNum,
 }: StatusDistributionChartProps) => {
+    const [isMobile, setIsMobile] = useState(false)
+
+    useEffect(() => {
+        const checkMobile = () => setIsMobile(window.innerWidth < 640)
+        checkMobile()
+        window.addEventListener('resize', checkMobile)
+        return () => window.removeEventListener('resize', checkMobile)
+    }, [])
+
     const data = [
         { name: EstadoEquipos.DISPONIBLE, value: disponibleNum, color: "var(--color-chart-2)" },
         { name: EstadoEquipos.DISPONIBLE_CON_DETALLES, value: disponibleConDetallesNum, color: "var(--color-chart-1)" },
@@ -28,18 +38,23 @@ const StatusDistributionChart = ({
         { name: EstadoEquipos.FUERA_DE_SERVICIO, value: fueraDeServicioNum, color: "var(--color-destructive)" },
     ]
 
+    const renderLabel = ({ percent }: any) => {
+        if (isMobile) return null
+        return `${(percent * 100).toFixed(0)}%`
+    }
+
     return (
         <Card className="border-border bg-card">
             <CardHeader>
-                <CardTitle className="text-card-foreground">Grafica de distribucion de flota por estado</CardTitle>
-                <CardDescription>Se divide la cantidad de equipos por estado actual</CardDescription>
+                <CardTitle className="text-card-foreground text-base sm:text-lg">Grafica de distribucion de flota por estado</CardTitle>
+                <CardDescription className="text-xs sm:text-sm">Se divide la cantidad de equipos por estado actual</CardDescription>
             </CardHeader>
             <CardContent>
                 <ChartContainer
                     config={{
                         disponible: { label: EstadoEquipos.DISPONIBLE, color: "var(--color-chart-2)" },
                     }}
-                    className="h-[300px]"
+                    className="h-[250px] sm:h-[300px]"
                 >
                     <ResponsiveContainer width="100%" height="100%">
                         <PieChart>
@@ -48,10 +63,11 @@ const StatusDistributionChart = ({
                                 cx="50%"
                                 cy="50%"
                                 labelLine={false}
-                                label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                                outerRadius={80}
+                                label={renderLabel}
+                                outerRadius="60%"
                                 fill="#8884d8"
                                 dataKey="value"
+                                style={{ fontSize: '11px' }}
                             >
                                 {data.map((entry, index) => (
                                     <Cell key={`cell-${index}`} fill={entry.color} />

@@ -147,58 +147,60 @@ const FleetKpiCard = ({
                 </CardContent>
             </Card>
 
-            <Card className="border-border bg-card">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium text-card-foreground">Edad de la flota</CardTitle>
-                    <Timer className="h-4 w-4" />
-                </CardHeader>
-                <CardContent>
-                    <div className="grid grid-cols-2 gap-4">
-                        <div className="col-span-2 mx-auto">
-                            <div className="text-4xl font-bold text-card-foreground">{avgAge.toFixed(2)} Años</div>
-                            <p className="text-sm text-muted-foreground">
-                                <span>Edad promedio</span>
-                            </p>
-                        </div>
-                        <div>
-                            <div className="text-2xl font-bold text-card-foreground">{newTrucks} Años</div>
-                            <p className="text-xs text-muted-foreground">
-                                <span className="text-muted-foreground">Comiones mas nuevos</span>
-                            </p>
-                        </div>
-
-                        <div>
-                            <div className="text-2xl font-bold text-card-foreground">{oldTrucks} Años</div>
-                            <p className="text-xs text-muted-foreground">
-                                <span className="text-muted-foreground">Camiones mas antiguos</span>
-                            </p>
-                        </div>
-                    </div>
-                </CardContent>
-            </Card>
-
-            <Card className="border-border bg-card">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium text-card-foreground">Flota por grupo</CardTitle>
-                    <Building className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                    <div>
-                        {convertedGroupSummary.map((group, index) => (
-                            <div key={group.name}>
-                                {index === 1 && <Separator className="mt-2" />}
-                                <div className="grid grid-cols-2 gap-2">
-                                    <div className="text-2xl font-bold text-card-foreground">{group.value.total} Equipos</div>
-                                    <div className="text-2xl font-bold text-card-foreground">{group.value.activos} Activos</div>
-                                    <p className="text-xs text-muted-foreground">
-                                        <span className="text-muted-foreground">{group.name}</span>
-                                    </p>
-                                </div>
+            <div className="grid gap-4 sm:gap-6 grid-cols-1 md:grid-cols-2 mb-6 sm:mb-8 col-span-2 h-full">
+                <Card className="border-border bg-card">
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium text-card-foreground">Edad de la flota</CardTitle>
+                        <Timer className="h-4 w-4" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="col-span-2 mx-auto">
+                                <div className="text-4xl font-bold text-card-foreground">{avgAge.toFixed(2)} Años</div>
+                                <p className="text-sm text-muted-foreground">
+                                    <span>Edad promedio</span>
+                                </p>
                             </div>
-                        ))}
-                    </div>
-                </CardContent>
-            </Card>
+                            <div>
+                                <div className="text-2xl font-bold text-card-foreground">{newTrucks} Años</div>
+                                <p className="text-xs text-muted-foreground">
+                                    <span className="text-muted-foreground">Comiones mas nuevos</span>
+                                </p>
+                            </div>
+
+                            <div>
+                                <div className="text-2xl font-bold text-card-foreground">{oldTrucks} Años</div>
+                                <p className="text-xs text-muted-foreground">
+                                    <span className="text-muted-foreground">Camiones mas antiguos</span>
+                                </p>
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+
+                <Card className="border-border bg-card">
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium text-card-foreground">Flota por grupo</CardTitle>
+                        <Building className="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                        <div>
+                            {convertedGroupSummary.map((group, index) => (
+                                <div key={group.name} className="mt-4">
+                                    {index === 1 && <Separator className="mt-2" />}
+                                    <div className="grid grid-cols-2 gap-2">
+                                        <div className="text-2xl font-bold text-card-foreground">{group.value.total} Equipos</div>
+                                        <div className="text-2xl font-bold text-card-foreground">{group.value.activos} Activos</div>
+                                        <p className="text-xs text-muted-foreground">
+                                            <span className="text-muted-foreground">{group.name}</span>
+                                        </p>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </CardContent>
+                </Card>
+            </div>
         </div>
     )
 }

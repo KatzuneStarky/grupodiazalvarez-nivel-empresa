@@ -77,7 +77,7 @@ const EquiposPage = () => {
     }
 
     return (
-        <div className="container mx-auto px-6 py-8">
+        <div className="container mx-auto px-4 sm:px-6 py-6 sm:py-8">
             <PageTitle
                 icon={<Truck className="h-12 w-12 text-primary" />}
                 title="Datos de la Flota"
@@ -97,7 +97,9 @@ const EquiposPage = () => {
                     </>
                 }
             />
-            <Separator className="mt-4 mb-6" />
+            <Separator className="my-4 sm:my-6" />
+
+            {/* KPI Cards Section */}
             <FleetKpiCard
                 availableWithIssues={availableWithIssues}
                 outOfServiceTrucks={outOfServiceTrucks}
@@ -113,7 +115,8 @@ const EquiposPage = () => {
                 convertedGroupSummary={convertedGroupSummary}
             />
 
-            <div className="grid gap-6 md:grid-cols-2 mb-8">
+            {/* Maintenance and Documents Grid */}
+            <div className="grid gap-4 sm:gap-6 grid-cols-1 md:grid-cols-2 mb-6 sm:mb-8">
                 <MaintenanceStatusCard
                     prontosAvencer={maintenanceDueSoon ?? 0}
                     proximos={maintenanceUpcoming ?? 0}
@@ -130,7 +133,8 @@ const EquiposPage = () => {
                 />
             </div>
 
-            <div className="grid gap-6 md:grid-cols-2 mb-8">
+            {/* Charts Grid */}
+            <div className="grid gap-4 sm:gap-6 grid-cols-1 md:grid-cols-2 mb-6 sm:mb-8">
                 <StatusDistributionChart
                     disponibleConDetallesNum={availableWithIssues ?? 0}
                     fueraDeServicioNum={outOfServiceTrucks ?? 0}
@@ -141,8 +145,10 @@ const EquiposPage = () => {
                 <FleetAgeChart data={edadEquiposChartData || []} />
             </div>
 
+            {/* Alerts Section */}
             <AlertsSection />
 
+            {/* Command Dialog */}
             <CommandDialogEquipos
                 equipos={equipos}
                 setOpen={setOpen}

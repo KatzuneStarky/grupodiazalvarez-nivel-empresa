@@ -35,7 +35,7 @@ const DocumentosEquiposPage = () => {
     } = useDocumentsDashboard()
 
     return (
-        <div className="space-y-4 m-6">
+        <div className="space-y-4 sm:space-y-6 m-4 sm:m-6">
             <PageTitle
                 title="Documentacion de equipos"
                 description="Administre y maneje la documentacion del parque vehicular"
@@ -55,52 +55,59 @@ const DocumentosEquiposPage = () => {
                 }
             />
 
-            <Separator className="my-4" />
-            <div className="flex flex-col lg:flex-row gap-6">
-                <div className="space-y-6">
-                    <section className="mb-12 grid grid-cols-4 gap-6">
-                        <div className="grid grid-cols-1 sm:grid-cols-2 2xl:grid-cols-3 gap-4 col-span-3">
-                            {first6Folders.map((folder, index) => (
-                                <FolderCard key={`${folder.id} - ${index}`} folder={folder} />
-                            ))}
+            <Separator className="my-4 sm:my-6" />
 
-                            <MoreEquiposCard equipos={equipos} />
-                        </div>
-
-                        <div className="grid grid-rows-2 gap-6">
-                            <div className="relative space-y-4">
-                                <Card className="p-4 mb-4">
-                                    <div className="relative">
-                                        <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                                        <Input placeholder="Buscar archivos" className="pl-8" />
-                                    </div>
-                                </Card>
-
-                                <DocumentsChart />
-                            </div>
-                            <ArchivosChart />
-                        </div>
-                    </section>
-
-                    <Separator />
-
-                    <section className="space-y-6">
-                        <PageTitle 
-                            title="Archivos recientes"
-                            description="Listado de los archivos mas recientes subidos al sistema"
-                            icon={
-                                <Icon iconName="fontisto:file-1" className="h-12 w-12" />
-                            }
-                        />
-                        <div className="space-y-2">
-                            <div className="grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-5 gap-6">
-                                {first18Archivos.map((a, index) => (
-                                    <DocumentCardV2 file={a} key={`${a.id} - ${index}`} />
+            <div className="flex flex-col gap-4 sm:gap-6">
+                {/* Main Section */}
+                <section className="space-y-4 sm:space-y-6">
+                    <div className="grid grid-cols-1 xl:grid-cols-4 gap-4 sm:gap-6">
+                        {/* Folders Grid - 3 columns on XL, full width on smaller screens */}
+                        <div className="xl:col-span-3">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                                {first6Folders.map((folder, index) => (
+                                    <FolderCard key={`${folder.id} - ${index}`} folder={folder} />
                                 ))}
+
+                                <MoreEquiposCard equipos={equipos} />
                             </div>
                         </div>
-                    </section>
-                </div>
+
+                        {/* Charts Column - 1 column on XL, full width on smaller screens */}
+                        <div className="xl:col-span-1">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-1 gap-4 sm:gap-6">
+                                <div className="space-y-4">
+                                    <Card className="p-4">
+                                        <div className="relative">
+                                            <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                                            <Input placeholder="Buscar archivos" className="pl-8" />
+                                        </div>
+                                    </Card>
+
+                                    <DocumentsChart />
+                                </div>
+                                <ArchivosChart />
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <Separator />
+
+                {/* Recent Files Section */}
+                <section className="space-y-4 sm:space-y-6">
+                    <PageTitle
+                        title="Archivos recientes"
+                        description="Listado de los archivos mas recientes subidos al sistema"
+                        icon={
+                            <Icon iconName="fontisto:file-1" className="h-12 w-12" />
+                        }
+                    />
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 sm:gap-6">
+                        {first18Archivos.map((a, index) => (
+                            <DocumentCardV2 file={a} key={`${a.id} - ${index}`} />
+                        ))}
+                    </div>
+                </section>
             </div>
         </div>
     )
