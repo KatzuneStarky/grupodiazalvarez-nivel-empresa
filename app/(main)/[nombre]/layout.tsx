@@ -1,16 +1,21 @@
-"use client"
-
 import { EmpresaProvider } from '@/context/empresa-context';
-import React, { use } from 'react'
+import React from 'react'
 
-const EmpresaLayout = ({
+export async function generateMetadata({ params }: { params: Promise<{ nombre: string }> }) {
+    const { nombre } = await params;
+    return {
+        title: decodeURIComponent(nombre),
+    }
+}
+
+const EmpresaLayout = async ({
     children,
     params,
 }: {
     children: React.ReactNode;
     params: Promise<{ nombre: string }>;
 }) => {
-    const { nombre } = use(params);
+    const { nombre } = await params;
     const decodedName = nombre ? decodeURIComponent(nombre) : '';
 
     return (

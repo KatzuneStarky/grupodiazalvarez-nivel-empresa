@@ -16,20 +16,40 @@ import Link from 'next/link';
 const MainPage = () => {
     const [contactoAdminstrador, setContactoAdministrador] = useState<ContactInfoInput | null>(null)
     const [isValidUser, setIsValidUser] = useState<boolean>(false)
-    const [isAdmin, setIsAdmin] = useState<boolean>(false)
     const [elapsedTime, setElapsedTime] = useState(0)
 
     const { empresa, loading } = useEmpresa()
     const { userBdd } = useAuth()
     const router = useRouter()
 
-    const isPublic = empresa?.configuraciones.accesoPublico
     useEffect(() => {
-        if (!loading) {
-            setIsValidUser(userBdd?.rol as RolUsuario === RolUsuario.Super_Admin);
-            setIsAdmin(userBdd?.rol as RolUsuario === RolUsuario.Super_Admin)
+        if (!loading && userBdd && empresa) {
+            const isSuperAdmin = userBdd.rol === RolUsuario.Super_Admin
+            const isAdmin = userBdd.rol === RolUsuario.Admin
+
+            if (isSuperAdmin || isAdmin) {
+                setIsValidUser(true)
+                if (empresa.areas && empresa.areas.length > 0) {
+                    router.push(`/${empresa.nombre}/${empresa.areas[0].nombre}`)
+                }
+                return
+            }
+
+            // Verificar si el usuario pertenece a la empresa
+            const userInCompany = empresa.usuarios?.some((u: any) =>
+                (typeof u === 'string' ? u === userBdd.id : u.id === userBdd.id)
+            )
+
+            if (userInCompany) {
+                setIsValidUser(true)
+                if (empresa.areas && empresa.areas.length > 0) {
+                    router.push(`/${empresa.nombre}/${empresa.areas[0].nombre}`)
+                }
+            } else {
+                setIsValidUser(false)
+            }
         }
-    }, [userBdd, loading]);
+    }, [userBdd, loading, empresa, router])
 
     useEffect(() => {
         const contactos = empresa?.contactos
@@ -66,7 +86,6 @@ const MainPage = () => {
     const { hours, minutes, seconds } = formatTime(elapsedTime)
 
     if (loading) return <LoadingState message='Verificando permisos' />
-    if(isAdmin) return router.push(`/${empresa?.nombre}/${empresa?.areas?.[0].nombre}`)
 
     return (
         <div>

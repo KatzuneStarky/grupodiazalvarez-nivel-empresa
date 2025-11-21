@@ -40,7 +40,7 @@ const CreateNewConsumoDialog = ({
         defaultValues: {
             costoLitro: 0,
             costoTotal: 0,
-            fecha: consumoDate || new Date(),
+            fecha: consumoDate ?? undefined,
             kmFinal: 0,
             kmInicial: 0,
             kmRecorridos: 0,
@@ -117,7 +117,7 @@ const CreateNewConsumoDialog = ({
                         />
                     }
                     isInDialog={true}
-                    calendarDateConsumo={consumoDate || new Date()}
+                    calendarDateConsumo={consumoDate}
                     openDialog={open}
                 />
             </DialogContent>

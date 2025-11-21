@@ -1,23 +1,27 @@
-"use client"
-
 import AreaSidebar from "@/modules/areas/components/layout/area-sidebar";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+import { AutoLockWrapper } from "@/components/global/auto-lock-wrapper";
 import AreaNavbar from "@/modules/areas/components/layout/area-navbar";
+import { NotificationsProvider } from "@/context/notification-context";
 import { TimeProvider } from "@/context/time-context";
 import { DateProvider } from "@/context/date-context";
 import { AreaProvider } from "@/context/area-context"
-import { use } from "react";
-import { AutoLockWrapper } from "@/components/global/auto-lock-wrapper";
-import { NotificationsProvider } from "@/context/notification-context";
 
-const AreaLayout = ({
+export async function generateMetadata({ params }: { params: Promise<{ nombre: string, name: string }> }) {
+    const { nombre, name } = await params;
+    return {
+        title: `${decodeURIComponent(name)} - ${decodeURIComponent(nombre)}`,
+    }
+}
+
+const AreaLayout = async ({
     children,
     params,
 }: {
     children: React.ReactNode,
     params: Promise<{ nombre: string, name: string }>;
 }) => {
-    const { nombre, name } = use(params);
+    const { nombre, name } = await params;
     const empresaDecodedName = nombre ? decodeURIComponent(nombre) : '';
     const areaDecodedName = name ? decodeURIComponent(name) : '';
 

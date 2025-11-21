@@ -1,30 +1,30 @@
 "use client"
 
+import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { useOperadores } from "@/modules/logistica/bdd/operadores/hooks/use-estaciones"
+import { Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts"
 import { useEstaciones } from "@/modules/logistica/estaciones/hooks/use-estaciones"
 import { useClientes } from "@/modules/logistica/bdd/clientes/hooks/use-clientes"
 import { useEquipos } from "@/modules/logistica/bdd/equipos/hooks/use-equipos"
-import { Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts"
 import { useRutas } from "@/modules/logistica/rutas/hooks/use-rutas"
 import BddCard from "@/modules/logistica/bdd/components/bdd-card"
+import { Database, DatabaseIcon, Search } from "lucide-react"
 import { ChartContainer } from "@/components/ui/chart"
 import PageTitle from "@/components/custom/page-title"
 import { Separator } from "@/components/ui/separator"
-import { Database, DatabaseIcon, Search } from "lucide-react"
 import { Input } from "@/components/ui/input"
-import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { useMemo, useState } from "react"
 
-const CATEGORIES = ["All", "Logistica", "System Config", "Analytics Data"]
 const CHART_COLORS = [
-    "hsl(220, 90%, 60%)",
-    "hsl(200, 85%, 55%)",
-    "hsl(260, 70%, 50%)",
-    "hsl(40, 90%, 55%)",
+    "hsl(10, 90%, 60%)",
+    "hsl(130, 80%, 50%)",
+    "hsl(330, 85%, 60%)",
+    "hsl(160, 85%, 45%)",
+    "hsl(290, 75%, 55%)",
+    "hsl(70, 90%, 45%)",
 ]
 
 const BddPage = () => {
-    const [selectedCategory, setSelectedCategory] = useState("All")
     const [searchQuery, setSearchQuery] = useState("")
 
     const { estaciones } = useEstaciones()
@@ -32,8 +32,6 @@ const BddPage = () => {
     const { clientes } = useClientes()
     const { equipos } = useEquipos()
     const { rutas } = useRutas()
-
-
 
     const allTanks = useMemo(() => {
         return equipos.flatMap((equipo) =>
@@ -49,39 +47,73 @@ const BddPage = () => {
         )
     }, [equipos])
 
-    const bddDataValues = [
+    const entities = useMemo(() => [
         {
-            title: "Estaciones",
-            itemCount: estaciones.length
-        },
-        {
+            id: "1",
             title: "Operadores",
-            itemCount: operadores.length
+            description: "Tabla con los registros de los operadores",
+            category: "Logistica",
+            icon: "healthicons:truck-driver",
+            itemCount: operadores?.length || 0
         },
         {
-            title: "Clientes",
-            itemCount: clientes?.length
-        },
-        {
+            id: "2",
             title: "Equipos",
-            itemCount: equipos.length
+            description: "Tabla con los registros del parque vehicular",
+            category: "Parque vehicular",
+            icon: "mdi:tanker-truck",
+            itemCount: equipos?.length || 0
         },
         {
+            id: "3",
             title: "Tanques",
+            description: "Tabla con los registros de los tanques de cada equipo en el parque vehicular",
+            category: "Parque vehicular",
+            icon: "mdi:train-car-tank",
             itemCount: allTanks.length
         },
         {
-            title: "Rutas",
-            itemCount: rutas?.length
+            id: "4",
+            title: "Clientes",
+            description: "Tabla con el catálogo de clientes registrados",
+            category: "Clientes",
+            icon: "vaadin:users",
+            itemCount: clientes?.length || 0
         },
-    ]
+        {
+            id: "5",
+            title: "Estaciones",
+            description: "Tabla con el catálogo de estaciones de servicio",
+            category: "Estaciones",
+            icon: "ic:round-local-gas-station",
+            itemCount: estaciones?.length || 0
+        },
+        {
+            id: "6",
+            title: "Rutas",
+            description: "Tabla con las rutas logísticas definidas",
+            category: "Logistica",
+            icon: "fa7-solid:route",
+            itemCount: rutas?.length || 0
+        },
+    ], [operadores, equipos, allTanks, clientes, estaciones, rutas])
+
+    const filteredEntities = useMemo(() => {
+        if (!searchQuery) return entities
+        const lowerQuery = searchQuery.toLowerCase()
+        return entities.filter((item) =>
+            item.title.toLowerCase().includes(lowerQuery) ||
+            item.description.toLowerCase().includes(lowerQuery) ||
+            item.category.toLowerCase().includes(lowerQuery)
+        )
+    }, [entities, searchQuery])
 
     const chartData = useMemo(() => {
-        return bddDataValues.map((entity) => ({
+        return entities.map((entity) => ({
             name: entity.title,
             value: entity.itemCount,
         }))
-    }, [])
+    }, [entities])
 
     return (
         <div className="container mx-auto px-4 py-12 sm:px-6 lg:px-8">
@@ -107,59 +139,17 @@ const BddPage = () => {
 
             <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
                 <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 col-span-2">
-                    <BddCard
-                        id="1"
-                        title="Operadores"
-                        description="Tabla con los registros de los operadores"
-                        category="Logistica"
-                        icon="healthicons:truck-driver"
-                        itemCount={operadores.length}
-                    />
-
-                    <BddCard
-                        id="2"
-                        title="Equipos"
-                        description="Tabla con los registros del parque vehicular"
-                        category="Parque vehicular"
-                        icon="mdi:tanker-truck"
-                        itemCount={equipos.length}
-                    />
-
-                    <BddCard
-                        id="3"
-                        title="Tanques"
-                        description="Tabla con los registros de los tanques de cada equipo en el parque vehicular"
-                        category="Parque vehicular"
-                        icon="mdi:train-car-tank"
-                        itemCount={allTanks.length}
-                    />
-
-                    <BddCard
-                        id="4"
-                        title="Clientes"
-                        description="Tabla con los registros de los tanques de cada equipo en el parque vehicular"
-                        category="Clientes"
-                        icon="vaadin:users"
-                        itemCount={clientes?.length || 0}
-                    />
-
-                    <BddCard
-                        id="5"
-                        title="Estaciones"
-                        description="Tabla con los registros de los tanques de cada equipo en el parque vehicular"
-                        category="Estaciones"
-                        icon="ic:round-local-gas-station"
-                        itemCount={estaciones.length}
-                    />
-
-                    <BddCard
-                        id="6"
-                        title="Rutas"
-                        description="Tabla con los registros de los tanques de cada equipo en el parque vehicular"
-                        category="Logistica"
-                        icon="fa7-solid:route"
-                        itemCount={rutas?.length || 0}
-                    />
+                    {filteredEntities.map((entity) => (
+                        <BddCard
+                            key={entity.id}
+                            id={entity.id}
+                            title={entity.title}
+                            description={entity.description}
+                            category={entity.category}
+                            icon={entity.icon}
+                            itemCount={entity.itemCount}
+                        />
+                    ))}
                 </div>
 
                 <Card className="border-border/40 bg-card/50 backdrop-blur-sm">

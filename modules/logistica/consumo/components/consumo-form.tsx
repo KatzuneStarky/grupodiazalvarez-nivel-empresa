@@ -10,12 +10,12 @@ import { parseFirebaseDate } from "@/utils/parse-timestamp-date"
 import { ConsumoSchemaType } from "../schema/consumo.schema"
 import { Equipo } from "../../bdd/equipos/types/equipos"
 import { Check, ChevronsUpDown } from "lucide-react"
+import { useEffect, useMemo, useState } from "react"
 import { Textarea } from "@/components/ui/textarea"
 import { UseFormReturn } from "react-hook-form"
 import { Button } from "@/components/ui/button"
 import { Timestamp } from "firebase/firestore"
 import { Input } from "@/components/ui/input"
-import { useEffect, useState } from "react"
 import { cn } from "@/lib/utils"
 
 interface ConsumoFormProps {
@@ -47,44 +47,55 @@ const ConsumoForm = ({
 }: ConsumoFormProps) => {
     const [viajesFiltrados, setViajesFiltrados] = useState<ReporteViajes[]>([]);
     const litrosCargados = form.watch("litrosCargados") ?? 0;
-    const fechaConsumo = form.watch("fecha")
+    const fechaConsumo = calendarDateConsumo ?? undefined
     const costoLitro = form.watch("costoLitro") ?? 0;
     const kmInicial = form.watch("kmInicial") ?? 0;
     const kmFinal = form.watch("kmFinal") ?? 0;
 
     const kmRecorridos = kmFinal - kmInicial;
-    const rendimiento = kmRecorridos / litrosCargados;
-    const costoTotal = litrosCargados * costoLitro;
 
     useEffect(() => {
-        if (openDialog && isInDialog && calendarDateConsumo) {
-            form.setValue("fecha", calendarDateConsumo)
-        } else if (openDialog && isInDialog && !calendarDateConsumo) {
-            form.setValue("fecha", new Date())
+        if (!isInDialog || !openDialog) return;
+
+        if (calendarDateConsumo) {
+            form.setValue("fecha", calendarDateConsumo, { shouldValidate: true });
+        } else {
+            form.setValue("fecha", new Date());
         }
-    }, [calendarDateConsumo, isInDialog, openDialog])
+    }, [calendarDateConsumo, isInDialog, openDialog]);
 
     useEffect(() => {
         if (kmInicial > 0 && kmFinal > 0) {
-            form.setValue("kmRecorridos", kmRecorridos);
+            const kmRecorridosCalc = kmFinal - kmInicial;
+            form.setValue("kmRecorridos", kmRecorridosCalc);
         }
-    }, [kmInicial, kmFinal, kmRecorridos])
+    }, [kmInicial, kmFinal]);
 
     useEffect(() => {
-        if (kmRecorridos > 0 && litrosCargados > 0) {
-            form.setValue("rendimientoKmL", rendimiento)
+        if (kmInicial > 0 && kmFinal > 0 && litrosCargados > 0) {
+            const kmRecorridosCalc = kmFinal - kmInicial;
+            const rendimientoCalc = kmRecorridosCalc / litrosCargados;
+
+            form.setValue("rendimientoKmL", rendimientoCalc);
         }
-    }, [rendimiento, kmRecorridos, litrosCargados])
+    }, [kmInicial, kmFinal, litrosCargados]);
 
     useEffect(() => {
         if (litrosCargados > 0 && costoLitro > 0) {
-            form.setValue("costoTotal", costoTotal)
+            const costoTotalCalc = litrosCargados * costoLitro;
+            form.setValue("costoTotal", costoTotalCalc);
         }
-    }, [litrosCargados, costoLitro, costoTotal])
+    }, [litrosCargados, costoLitro]);
+
+    const fechaFiltro = useMemo(() => {
+        if (!fechaConsumo) return null;
+        return fechaConsumo instanceof Timestamp
+            ? fechaConsumo.toDate()
+            : new Date(fechaConsumo);
+    }, [fechaConsumo]);
 
     useEffect(() => {
-        const fechaFiltro =
-            fechaConsumo instanceof Timestamp ? fechaConsumo.toDate() : new Date(fechaConsumo);
+        if (!fechaFiltro) return;
 
         const filtrados = viajes.filter((viaje) => {
             const fechaViaje =
@@ -98,7 +109,8 @@ const ConsumoForm = ({
         });
 
         setViajesFiltrados(filtrados);
-    }, [viajes, fechaConsumo]);
+
+    }, [viajes, fechaFiltro]);
 
     return (
         <Form {...form}>

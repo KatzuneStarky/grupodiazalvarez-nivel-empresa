@@ -40,12 +40,18 @@ export const useConsumoCalendarData = () => {
     }, [])
 
 
-    const handleDateSelect = useCallback((selectInfo: DateSelectArg) => {        
-        const calendarApi = selectInfo.view.calendar
-        setConsumoDate(selectInfo.start || new Date())
-        calendarApi.unselect()
+    const handleDateSelect = useCallback((selectInfo: DateSelectArg) => {
         setOpenNewOrderDialog(true)
-    }, [])
+        const calendarApi = selectInfo.view.calendar
+        const selectedDay = new Date(
+            selectInfo.start.getUTCFullYear(),
+            selectInfo.start.getUTCMonth(),
+            selectInfo.start.getUTCDate()
+        );
+
+        setConsumoDate(selectedDay);
+        calendarApi.unselect()
+    }, [consumoDate])
 
     const mapConsumosToEvents = (consumos: ConsumoCombustible[]): EventInput[] => {
         return consumos.map((item) => ({

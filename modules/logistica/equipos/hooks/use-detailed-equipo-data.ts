@@ -33,7 +33,20 @@ export const useDetailedEquipoData = (equipos: Equipo[], currentYear: number) =>
             avgRendimiento: 0,
             enViajeTrucks: 0,
             availableWithIssues: 0,
-            groupsSummary: {}
+            groupsSummary: {},
+            documentosTotales: 0,
+            documentosEnTiempo: 0,
+            documentosPorVencer: 0,
+            documentosVencidos: 0,
+            documentosSinFecha: 0,
+            porcentajeCumplimientoDocumental: 0,
+            maintenanceUpcoming: 0,
+            maintenanceDueSoon: 0,
+            maintenanceOverdue: 0,
+            totalMaintenance: 0,
+            maintenanceOk: 0,
+            totalTrucks: 0,
+            edadEquiposChartData: [],
         };
     }
 
@@ -208,6 +221,11 @@ export const useDetailedEquipoData = (equipos: Equipo[], currentYear: number) =>
         newTrucks: sanitize(stats.newTrucks),
         oldTrucks: sanitize(stats.oldTrucks),
         documentosTotales: sanitize(total),
+        documentosEnTiempo: sanitize(enTiempo),
+        documentosPorVencer: sanitize(porVencer),
+        documentosVencidos: sanitize(vencidos),
+        documentosSinFecha: sanitize(sinFecha),
+        porcentajeCumplimientoDocumental: sanitize(porcentajeCumplimiento),
         groupsSummary: stats.grupos,
         totalTrucks: equipos.length,
         avgAge: sanitize(avgAge),

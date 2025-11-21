@@ -6,6 +6,7 @@ import { CommandDialogEquipos } from "@/modules/logistica/equipos/documentos/com
 import MaintenanceStatusCard from "@/modules/logistica/equipos/components/dashboard/maintenance-status-card"
 import { FleetActionsSheet } from "@/modules/logistica/equipos/components/dashboard/fleet-action-sheet"
 import { useDetailedEquipoData } from "@/modules/logistica/equipos/hooks/use-detailed-equipo-data"
+import { EquiposSkeleton } from "@/modules/logistica/equipos/components/dashboard/equipos-skeleton"
 import FleetAgeChart from "@/modules/logistica/equipos/components/dashboard/fleet-age-chart"
 import AlertsSection from "@/modules/logistica/equipos/components/dashboard/alerts-section"
 import FleetKpiCard from "@/modules/logistica/equipos/components/dashboard/fleet-kpi-cards"
@@ -20,12 +21,9 @@ import { Truck } from "lucide-react"
 import { useState } from "react"
 import { toast } from "sonner"
 
-import { darkTheme } from '@uiw/react-json-view/dark';
-import JsonView from '@uiw/react-json-view';
-
 const EquiposPage = () => {
     const [open, setOpen] = useState<boolean>(false)
-    const { equipos } = useEquipos()
+    const { equipos, isLoading } = useEquipos()
     const { area } = useArea()
 
     const {
@@ -48,6 +46,12 @@ const EquiposPage = () => {
         newTrucks,
         oldTrucks,
         avgAge,
+        documentosTotales,
+        documentosEnTiempo,
+        documentosPorVencer,
+        documentosVencidos,
+        documentosSinFecha,
+        porcentajeCumplimientoDocumental,
     } = useDetailedEquipoData(equipos, new Date().getFullYear())
 
     const convertedGroupSummary = Object.entries(groupsSummary).map(([key, value]) => ({
@@ -66,6 +70,10 @@ const EquiposPage = () => {
             console.log(error);
             toast.error("Error al exportar datos")
         }
+    }
+
+    if (isLoading) {
+        return <EquiposSkeleton />
     }
 
     return (
@@ -114,11 +122,11 @@ const EquiposPage = () => {
                     alDia={maintenanceOk ?? 0}
                 />
                 <DocumentCompletationCard
-                    porcentajeDeCumplimiento={0}
-                    expiraPronto={0}
-                    critico={0}
-                    expirado={0}
-                    total={0}
+                    porcentajeDeCumplimiento={porcentajeCumplimientoDocumental}
+                    expiraPronto={documentosPorVencer}
+                    critico={documentosSinFecha}
+                    expirado={documentosVencidos}
+                    total={documentosTotales}
                 />
             </div>
 

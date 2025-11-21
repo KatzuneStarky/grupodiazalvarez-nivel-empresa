@@ -11,12 +11,10 @@ const BddCard = ({
     category,
     title,
     icon,
-    id,
 }: BddCardType) => {
     return (
         <Card
-            key={id}
-            className="cursor-pointer overflow-hidden border-border/40 bg-card/50 backdrop-blur-sm transition-all duration-300 hover:border-primary/50 hover:shadow-lg hover:shadow-primary/10 hover:bg-card/80"
+            className="group cursor-pointer overflow-hidden border-border/40 bg-card/50 backdrop-blur-sm transition-all duration-300 hover:border-primary/50 hover:shadow-lg hover:shadow-primary/10 hover:bg-card/80"
         >
             <div className="p-6 h-full flex flex-col">
                 <div className="flex items-start justify-between">

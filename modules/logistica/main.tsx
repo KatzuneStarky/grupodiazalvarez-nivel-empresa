@@ -7,6 +7,7 @@ import { getEquipmentUtilization } from "@/functions/get-equipment-utilization"
 import { TopClientsTable } from "./components/tables/mejores-clientes-table"
 import { useDashboardDataLogistica } from "./hooks/use-dashboard-logistica"
 import { RecentTripsTable } from "./components/tables/reporte-viajes-table"
+import { DashboardSkeleton } from "./components/dashboard-skeleton"
 import MainChartPerformance from "./components/main-chat-performance"
 import { EquipmentTable } from "./components/tables/equipos-tablet"
 import { parseFirebaseDate } from "@/utils/parse-timestamp-date"
@@ -17,6 +18,7 @@ import MetricCard from "./components/metric-card"
 import MainCharts from "./components/main-charts"
 import { useYear } from "@/context/year-context"
 import dynamic from "next/dynamic";
+import { useMemo } from "react"
 
 const Map = dynamic(() => import('../root/components/coverage/map'), { ssr: false });
 
@@ -37,22 +39,34 @@ const MainDashboardLogistica = () => {
         primerDiaSemana,
         ultimoDiaSemana,
         reporteViajes,
+        loading
     } = useDashboardDataLogistica()
-    
-    const sortedViajes = reporteViajes.sort((a, b) => {
-        const dateA = parseFirebaseDate(a.Fecha);
-        const dateB = parseFirebaseDate(b.Fecha);
-        return dateB.getTime() - dateA.getTime();
-    });
-    
-    const sortedDataByMonth 
-    = sortedViajes.filter((viaje) => viaje.Mes === "Octubre" && viaje.Year === selectedYear)    
-    const equipmentUtilization = getEquipmentUtilization(sortedDataByMonth)
-    
+
+    const sortedViajes = useMemo(() => {
+        return [...reporteViajes].sort((a, b) => {
+            const dateA = parseFirebaseDate(a.Fecha);
+            const dateB = parseFirebaseDate(b.Fecha);
+            return dateB.getTime() - dateA.getTime();
+        });
+    }, [reporteViajes]);
+
+    const sortedDataByMonth = useMemo(() => {
+        if (!selectedYear || !mesActual) return [];
+        return sortedViajes.filter(viaje => viaje.Mes === "Octubre" && viaje.Year === selectedYear);
+    }, [sortedViajes, mesActual, selectedYear]);
+
+    const equipmentUtilization = useMemo(() => {
+        return getEquipmentUtilization(sortedDataByMonth);
+    }, [sortedDataByMonth]);
+
+    if (loading) {
+        return <DashboardSkeleton />
+    }
+
     return (
         <div className="flex-1 space-y-6 p-6">
             <PageTitle
-                title="Dashboard logistica"
+                title="Dashboard Logística"
                 description="Resumen de la información del area de logistica"
                 icon={
                     <Truck className="h-12 w-12 text-primary" />
@@ -64,8 +78,8 @@ const MainDashboardLogistica = () => {
             />
             <Separator className="my-4" />
 
-            <div className="container mx-auto px-4 py-6" >
-                <div className="mb-6 grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+            <div className="space-y-6" >
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
                     <MetricCard
                         title="Total M³ transportado"
                         value={totalM3}
@@ -74,28 +88,28 @@ const MainDashboardLogistica = () => {
                         textValue="M³"
                     />
                     <MetricCard
-                        title={`Viajes Este Mes (${mesActual})`}
+                        title={`Viajes Este Mes(${mesActual})`}
                         value={totalViajes}
                         icon={MapPinHouse}
                         colorVariant="cyan"
                         textValue="Viajes"
                     />
                     <MetricCard
-                        title={`Flete total (${mesActual})`}
+                        title={`Flete total(${mesActual})`}
                         value={totalFlete}
                         icon={HandCoins}
                         colorVariant="lime"
                         initialTextVaule="$"
                     />
                     <MetricCard
-                        title={`Total M³ transportado semana actual (${primerDiaSemana} - ${ultimoDiaSemana})`}
+                        title={`Total M³ sem.actual(${primerDiaSemana} - ${ultimoDiaSemana})`}
                         value={totalM3Week}
                         icon={Fuel}
                         colorVariant="emerald"
                         textValue="M³"
                     />
                     <MetricCard
-                        title={`Flete total senaba actual (${primerDiaSemana} - ${ultimoDiaSemana})`}
+                        title={`Flete total sem.actual(${primerDiaSemana} - ${ultimoDiaSemana})`}
                         value={totalFleteSemana}
                         icon={Banknote}
                         colorVariant="orange"
@@ -134,35 +148,35 @@ const MainDashboardLogistica = () => {
                     />
                 </div>
 
-                <div className="mb-6 grid gap-6 lg:grid-cols-2">
+                <div className="grid gap-6 lg:grid-cols-2">
                     <MainCharts year={selectedYear || new Date().getFullYear()} />
                     <MainChartPerformance />
                 </div>
 
-                <Card className="mb-6">
-                    <CardContent>
-                        <CardHeader>
-                            <CardTitle className="flex items-center justify-between">
-                                Mapa de cobertura
-                            </CardTitle>
-                            <CardDescription>
-                                Mapa de cobertura de las estaciones de servicio
-                            </CardDescription>
-                        </CardHeader>
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="flex items-center justify-between">
+                            Mapa de cobertura
+                        </CardTitle>
+                        <CardDescription>
+                            Mapa de cobertura de las estaciones de servicio
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent className="p-0 sm:p-6">
                         <Map />
                     </CardContent>
                 </Card>
 
-                <div className="mb-6">
+                <div>
                     <RecentTripsTable trips={sortedViajes} />
                 </div>
 
-                <div className="mb-6 grid gap-6 lg:grid-cols-2">
+                <div className="grid gap-6 lg:grid-cols-2">
                     <TopClientsTable trips={sortedDataByMonth} />
                     <EquipmentUtilizationTable data={equipmentUtilization} />
                 </div>
 
-                <div className="mb-6">
+                <div>
                     <EquipmentTable
                         trips={reporteViajes}
                         year={selectedYear || new Date().getFullYear()}

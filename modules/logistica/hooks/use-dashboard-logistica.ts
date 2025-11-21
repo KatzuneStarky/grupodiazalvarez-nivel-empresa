@@ -26,12 +26,14 @@ export const useDashboardDataLogistica = () => {
     const [totalM3, setTotalM3] = useState<number>(0);
 
     const mesActual = getCurrentMonthCapitalized();
-    const { reporteViajes } = useReporteViajes()
-    const { operadores } = useOperadores();
-    const { estaciones } = useEstaciones();
-    const { clientes } = useClientes()
-    const { equipos } = useEquipos();
-    const { rutas } = useRutas()
+    const { reporteViajes, isLoading: loadingViajes } = useReporteViajes()
+    const { operadores, isLoading: loadingOperadores } = useOperadores();
+    const { estaciones, isLoading: loadingEstaciones } = useEstaciones();
+    const { clientes, loading: loadingClientes } = useClientes()
+    const { equipos, isLoading: loadingEquipos } = useEquipos();
+    const { rutas, loading: loadingRutas } = useRutas()
+
+    const loading = loadingViajes || loadingOperadores || loadingEstaciones || loadingClientes || loadingEquipos || loadingRutas;
 
     const semanaActual = getWeek(new Date());
     const primerDiaSemana = startOfWeek(new Date()).toLocaleDateString();
@@ -47,7 +49,7 @@ export const useDashboardDataLogistica = () => {
         const viajesAnio = reporteViajes.filter(viaje => viaje.Year === selectedYear)
         const totalViajesMesActual = viajesAnio.filter(viaje => viaje.Mes === "Octubre").length
         setTotalViajes(totalViajesMesActual)
-    }, [reporteViajes])
+    }, [reporteViajes, selectedYear])
 
     useEffect(() => {
         if (!selectedYear) return;
@@ -168,5 +170,6 @@ export const useDashboardDataLogistica = () => {
         rutas,
         reporteViajes,
         selectedYear,
+        loading,
     };
 };
