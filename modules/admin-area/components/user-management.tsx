@@ -188,7 +188,7 @@ const UserManagement = ({
                                         : new Date(user.ultimoAcceso || new Date());
 
                                     return (
-                                        <TableRow key={user.id} className="hover:bg-muted/50">
+                                        <TableRow key={user.uid} className="hover:bg-muted/50">
                                             <TableCell>
                                                 <div className="flex items-center space-x-3">
                                                     <Avatar className="h-10 w-10">
@@ -197,7 +197,7 @@ const UserManagement = ({
                                                     </Avatar>
                                                     <div>
                                                         <p className="font-medium">{user.nombre}</p>
-                                                        <p className="text-sm text-muted-foreground">ID: {user.id}</p>
+                                                        <p className="text-sm text-muted-foreground">ID: {user.uid}</p>
                                                     </div>
                                                 </div>
                                             </TableCell>

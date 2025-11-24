@@ -13,6 +13,7 @@ export interface SystemUser {
     creadoEn: Timestamp
     actualizadoEn: Timestamp
     ultimoAcceso?: Timestamp
+    avatarUrl?: string
 
     // NUEVO: Información Profesional
     informacionProfesional?: {

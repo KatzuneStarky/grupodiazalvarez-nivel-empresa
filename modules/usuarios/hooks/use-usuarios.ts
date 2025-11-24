@@ -15,7 +15,7 @@ export const useUsuarios = () => {
         const unsubscribe = onSnapshot(usuariosRef, (querySnapshot) => {
             const usuariosData: SystemUser[] = [];
             querySnapshot.forEach((doc) => {
-                usuariosData.push({ id: doc.id, ...doc.data() } as SystemUser);
+                usuariosData.push({ uid: doc.id, ...doc.data() } as SystemUser);
             });
             setUsuarios(usuariosData);
             setLoading(false);

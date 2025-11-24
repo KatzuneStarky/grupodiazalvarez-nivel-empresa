@@ -40,14 +40,18 @@ export const useUsuariosDashboard = (usuarios: SystemUser[]) => {
             const matchesTipoRegistro = !filters.tipoRegistro || user.tipoRegistro === filters.tipoRegistro
             const matchesRol = !filters.rol || user.rol === filters.rol
             const matchesEmpresa = !filters.empresaId || user.empresaId === filters.empresaId
+            const matchesDepartamento = !filters.departamento || user.informacionProfesional?.departamento === filters.departamento
+            const matchesCargo = !filters.cargo || user.informacionProfesional?.cargo === filters.cargo
 
+            const creadoEnDate = user.creadoEn.toDate()
             const matchesFechaCreacion =
-                (!filters.fechaCreacionDesde || user.creadoEn >= filters.fechaCreacionDesde) &&
-                (!filters.fechaCreacionHasta || user.creadoEn <= filters.fechaCreacionHasta)
+                (!filters.fechaCreacionDesde || creadoEnDate >= filters.fechaCreacionDesde) &&
+                (!filters.fechaCreacionHasta || creadoEnDate <= filters.fechaCreacionHasta)
 
+            const ultimoAccesoDate = user.ultimoAcceso?.toDate()
             const matchesUltimoAcceso =
-                (!filters.ultimoAccesoDesde || (user.ultimoAcceso && user.ultimoAcceso >= filters.ultimoAccesoDesde)) &&
-                (!filters.ultimoAccesoHasta || (user.ultimoAcceso && user.ultimoAcceso <= filters.ultimoAccesoHasta))
+                (!filters.ultimoAccesoDesde || (ultimoAccesoDate && ultimoAccesoDate >= filters.ultimoAccesoDesde)) &&
+                (!filters.ultimoAccesoHasta || (ultimoAccesoDate && ultimoAccesoDate <= filters.ultimoAccesoHasta))
 
             return (
                 matchesSearch &&
@@ -55,15 +59,22 @@ export const useUsuariosDashboard = (usuarios: SystemUser[]) => {
                 matchesTipoRegistro &&
                 matchesRol &&
                 matchesEmpresa &&
+                matchesDepartamento &&
+                matchesCargo &&
                 matchesFechaCreacion &&
                 matchesUltimoAcceso
             )
         })
 
-        // Sort users
         filtered.sort((a, b) => {
-            let aValue = a[sortField]
-            let bValue = b[sortField]
+            let aValue: any = a[sortField]
+            let bValue: any = b[sortField]
+
+            // Convert Timestamp fields to Date for comparison
+            if (sortField === "creadoEn" || sortField === "ultimoAcceso") {
+                aValue = (aValue as any)?.toDate?.() ?? aValue
+                bValue = (bValue as any)?.toDate?.() ?? bValue
+            }
 
             if (sortField === "rol") {
                 aValue = a.rol || ""
@@ -77,14 +88,13 @@ export const useUsuariosDashboard = (usuarios: SystemUser[]) => {
             if (aValue > bValue) return sortDirection === "asc" ? 1 : -1
             return 0
         })
-
         return filtered
     }, [usuarios, filters, sortField, sortDirection])
 
     const totalPages = Math.ceil(filteredAndSortedUsers.length / itemsPerPage)
     const startIndex = (currentPage - 1) * itemsPerPage
     const paginatedUsers = filteredAndSortedUsers.slice(startIndex, startIndex + itemsPerPage)
-    const selectedUsers = usuarios.filter((user) => selectedUserIds.has(user.id))
+    const selectedUsers = usuarios.filter((user) => selectedUserIds.has(user.uid))
 
     const handleFiltersChange = (newFilters: UserFilters) => {
         setFilters(newFilters)
@@ -129,7 +139,7 @@ export const useUsuariosDashboard = (usuarios: SystemUser[]) => {
 
     const handleSelectAll = (selected: boolean) => {
         if (selected) {
-            setSelectedUserIds(new Set(paginatedUsers.map((user) => user.id)))
+            setSelectedUserIds(new Set(paginatedUsers.map((user) => user.uid)))
         } else {
             setSelectedUserIds(new Set())
         }
@@ -144,20 +154,23 @@ export const useUsuariosDashboard = (usuarios: SystemUser[]) => {
         }
     }
 
-    const allSelected = paginatedUsers.length > 0 && paginatedUsers.every((user) => selectedUserIds.has(user.id))
-    const someSelected = paginatedUsers.some((user) => selectedUserIds.has(user.id))
-
     return {
-        ITEMS_PER_PAGE_OPTIONS,
         viewMode,
+        setViewMode,
         currentPage,
+        setCurrentPage,
         itemsPerPage,
+        setItemsPerPage,
         selectedUserIds,
+        setSelectedUserIds,
         selectedUser,
+        setSelectedUser,
         detailModalOpen,
+        setDetailModalOpen,
         sortField,
         sortDirection,
         filters,
+        setFilters,
         filteredAndSortedUsers,
         totalPages,
         startIndex,
@@ -170,10 +183,5 @@ export const useUsuariosDashboard = (usuarios: SystemUser[]) => {
         handleSelectUser,
         handleSelectAll,
         handleSort,
-        allSelected,
-        someSelected,
-        setViewMode,
-        setItemsPerPage,
-        setCurrentPage
     }
 }
