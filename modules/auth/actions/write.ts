@@ -30,7 +30,7 @@ export async function writeUser(
 
         await setDoc(userRef, {
             ...userData,
-            uidFirebase: uid,
+            uid: uid,
             estado: "activo",
             rol: rol as RolUsuario ? rol : RolUsuario.usuario,
             creadoEn: new Date().toISOString(),

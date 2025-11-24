@@ -4,7 +4,7 @@ import { RolUsuario } from "@/enum/user-roles";
 import { z } from "zod";
 
 export const UserSchema = z.object({
-    uidFirebase: z.string(),
+    uid: z.string(),
     email: z.string().email(),
     nombre: z.string().optional(),
     avatarUrl: z.string().optional(),

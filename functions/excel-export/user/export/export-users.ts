@@ -8,10 +8,8 @@ export const exportUsers = async (users: SystemUser[], areaName: string) => {
   const worksheet = workbook.addWorksheet("Usuarios_Totales");
 
   worksheet.columns = [
-    { header: "ID", key: "id", width: 40 },
-    { header: "ID Firebase", key: "uidFirebase", width: 40 },
+    { header: "ID Firebase", key: "uid", width: 40 },
     { header: "Nombre completo", key: "nombre", width: 40 },
-    { header: "Fecha Nacimiento", key: "fechaNacimiento", width: 20 },
     { header: "Email", key: "email", width: 30 },
     { header: "Tipo Registro", key: "tipoRegistro", width: 15 },
     { header: "Estado de cuenta", key: "estado", width: 10 },
@@ -21,7 +19,6 @@ export const exportUsers = async (users: SystemUser[], areaName: string) => {
     { header: "Último Acceso", key: "ultimoAcceso", width: 20 },
   ];
 
-  worksheet.getColumn("fechaNacimiento").numFmt = "dd/mm/yyyy";
   worksheet.getColumn("creadoEn").numFmt = "dd/mm/yyyy hh:mm";
   worksheet.getColumn("ultimoAcceso").numFmt = "dd/mm/yyyy hh:mm";
 
@@ -35,24 +32,20 @@ export const exportUsers = async (users: SystemUser[], areaName: string) => {
     },
     columns: worksheet.columns.map((col) => ({ name: col.header as string })),
     rows: users.map((user) => [
-      user.id,
-      user.uidFirebase,
+      user.uid,
       user.nombre ?? "N/A",
-      user.fechaNacimiento
-        ? new Date(parseFirebaseDate(user.fechaNacimiento)).toLocaleDateString()
-        : "N/A",
       user.email,
       user.tipoRegistro,
       user.estado,
       user.rol ?? "N/A",
       user.creadoEn
-        ? new Date(user.creadoEn).toLocaleString()
+        ? parseFirebaseDate(user.creadoEn).toLocaleString()
         : "N/A",
       user.actualizadoEn
-        ? new Date(user.actualizadoEn).toLocaleString()
+        ? parseFirebaseDate(user.actualizadoEn).toLocaleString()
         : "N/A",
       user.ultimoAcceso
-        ? new Date(user.ultimoAcceso).toLocaleString()
+        ? parseFirebaseDate(user.ultimoAcceso).toLocaleString()
         : "N/A",
     ])
   })

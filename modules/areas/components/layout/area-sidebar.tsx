@@ -36,7 +36,7 @@ const AreaSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
                     empresa={empresa}
                     areas={areas || []}
                     currentArea={area}
-                    userId={userBdd?.uidFirebase}
+                    userId={userBdd?.uid}
                 />
             </SidebarHeader>
 

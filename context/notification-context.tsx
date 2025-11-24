@@ -17,7 +17,7 @@ export const NotificationsProvider
         const { notifications: fetchedNotifications, hasMore, loadMore } = useAllNotifications({})
 
         const { userBdd } = useAuth()
-        
+
         const { area } = useArea()
 
         const fetchNotifications = async () => {
@@ -30,24 +30,24 @@ export const NotificationsProvider
         }, [area?.id]);
 
         const markAsRead = async (id: string) => {
-            if (!userBdd?.uidFirebase) return;
-            await markNotificationAsRead(id, userBdd?.uidFirebase || "");
+            if (!userBdd?.uid) return;
+            await markNotificationAsRead(id, userBdd?.uid || "");
             setNotifications((prev) =>
                 prev.map((notif) =>
-                    notif.id === id ? { ...notif, readBy: Array.from(new Set([...notif.readBy, userBdd?.uidFirebase || ""])) } : notif
+                    notif.id === id ? { ...notif, readBy: Array.from(new Set([...notif.readBy, userBdd?.uid || ""])) } : notif
                 )
             );
         };
 
         const markAllAsRead = async () => {
-            if (!userBdd?.uidFirebase) return;
-            await markAllNotificationsAsRead(userBdd?.uidFirebase || "");
+            if (!userBdd?.uid) return;
+            await markAllNotificationsAsRead(userBdd?.uid || "");
             setNotifications((prev) =>
-                prev.map((notif) => ({ ...notif, readBy: Array.from(new Set([...notif.readBy, userBdd?.uidFirebase || ""])) }))
+                prev.map((notif) => ({ ...notif, readBy: Array.from(new Set([...notif.readBy, userBdd?.uid || ""])) }))
             );
         };
 
-        const unreadCount = notifications.filter((notif) => !notif.readBy.includes(userBdd?.uidFirebase || "")).length;
+        const unreadCount = notifications.filter((notif) => !notif.readBy.includes(userBdd?.uid || "")).length;
         const sortedNotifications = [...notifications].sort((a, b) => parseFirebaseDate(b.createdAt).getTime() - parseFirebaseDate(a.createdAt).getTime());
 
         return (

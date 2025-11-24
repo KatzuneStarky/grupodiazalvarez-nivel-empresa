@@ -17,11 +17,11 @@ export const useRedirectUserByCompanyArea = () => {
         const empresa = empresas.find(e => e.id === userBdd.empresaId);
         if (!empresa || !areasHook.areas) return;
 
-        const lastAreaId = localStorage.getItem(`last_area_${userBdd.uidFirebase}`);
+        const lastAreaId = localStorage.getItem(`last_area_${userBdd.uid}`);
         const area = areasHook.areas.find(a => a.id === lastAreaId) || areasHook.areas[0];
         if (!area) return;
 
-        localStorage.setItem(`last_area_${userBdd.uidFirebase}`, area.id);
+        localStorage.setItem(`last_area_${userBdd.uid}`, area.id);
 
         const empresaSlug = empresa.nombre
         const areaSlug = area.nombre

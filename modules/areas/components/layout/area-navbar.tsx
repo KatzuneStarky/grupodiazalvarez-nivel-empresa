@@ -68,7 +68,7 @@ const AreaNavbar = ({ companyName }: AppNavbarProps) => {
                 <YearCombobox />
                 <div className="h-4 w-px bg-border hidden sm:block" aria-hidden="true" />
                 <NotificationsNavbar
-                    currentUserId={currentUser?.uidFirebase || ""}
+                    currentUserId={currentUser?.uid || ""}
                     notifications={notifications}
                     unreadCount={unreadCount}
                     onMarkAsRead={markAsRead}

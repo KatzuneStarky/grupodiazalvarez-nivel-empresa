@@ -52,7 +52,7 @@ const UsuarioPage = () => {
         resolver: zodResolver(UserSchema),
         defaultValues: {
             nombre: auth?.currentUser?.displayName || "",
-            uidFirebase: auth?.currentUser?.uid || "",
+            uid: auth?.currentUser?.uid || "",
             tipoRegistro: registerProvider === "google.com" ? isRegisterByGoogle : isRegisterByEmail,
             email: defaultEmail || "",
             estado: estadoUsuario.activo,
@@ -77,13 +77,13 @@ const UsuarioPage = () => {
                 writeUser(auth?.currentUser?.uid || "", {
                     email: defaultEmail || "",
                     estado: estadoUsuario.activo,
-                    fechaNacimiento: new Date(data.fechaNacimiento),
                     tipoRegistro: registerProvider === "google.com" ? isRegisterByGoogle : isRegisterByEmail,
-                    uidFirebase: auth?.currentUser?.uid || "",
-                    avatarUrl: imageUrl,
+                    uid: auth?.currentUser?.uid || "",
                     empleadoId: "",
                     empresaId: "",
-                    nombre: data.nombre,
+                    nombre: data.nombre || "",
+                    rol: data.rol || RolUsuario.usuario,
+                    contacto: {}
                 }, defaultEmail || "", invitacionId || ""), {
                 loading: "Registrando usuario...",
                 success: async (result) => {
