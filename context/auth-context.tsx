@@ -1,6 +1,6 @@
 "use client"
 
-import { getAuth, getIdTokenResult, GoogleAuthProvider, onAuthStateChanged, ParsedToken, signInWithEmailAndPassword, signInWithEmailLink, signInWithPopup, updatePassword, User } from "firebase/auth"
+import { getAuth, getIdTokenResult, GoogleAuthProvider, onAuthStateChanged, ParsedToken, sendPasswordResetEmail, signInWithEmailAndPassword, signInWithEmailLink, signInWithPopup, updatePassword, User } from "firebase/auth"
 import { createContext, useContext, useEffect, useState } from "react"
 import { updateUsedInvitation } from "@/actions/invitaciones/write"
 import { doc, getDoc } from "firebase/firestore"
@@ -17,6 +17,7 @@ type AuthContextType = {
     loginWithGoogle: () => Promise<void>,
     registerWithEmail: (email: string, password: string, invitacionId: string) => Promise<void>;
     loginWithEmail: (email: string, password: string) => Promise<void>;
+    resetPassword: (email: string) => Promise<void>;
     customClaims: ParsedToken | null
     lastSignInTime: string | null
     emailVerified: boolean
@@ -204,6 +205,32 @@ export const AuthProvider = ({
         setUserRol(claims?.rol as RolUsuario ?? null);
     };
 
+    const resetPassword = async (email: string) => {
+        try {
+            await sendPasswordResetEmail(auth, email);
+            toast.success("Correo enviado", {
+                description: "Revisa tu bandeja de entrada para restablecer tu contraseña.",
+            });
+        } catch (error) {
+            let message = "No se pudo enviar el correo";
+            if (error instanceof FirebaseError) {
+                switch (error.code) {
+                    case "auth/user-not-found":
+                        message = "No existe una cuenta con ese correo.";
+                        break;
+                    case "auth/invalid-email":
+                        message = "Correo electrónico inválido.";
+                        break;
+                    default:
+                        message = error.message;
+                }
+            }
+            toast.error("Error", {
+                description: message,
+            });
+        }
+    };
+
     return (
         <AuthContext.Provider value={{
             currentUser,
@@ -211,6 +238,7 @@ export const AuthProvider = ({
             loginWithGoogle,
             registerWithEmail,
             loginWithEmail,
+            resetPassword,
             customClaims,
             lastSignInTime,
             emailVerified,
