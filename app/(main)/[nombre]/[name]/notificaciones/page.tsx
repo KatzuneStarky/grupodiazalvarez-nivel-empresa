@@ -31,8 +31,8 @@ const NotificacionesPage = () => {
 
             const matchesTab =
                 activeTab === "todas" ||
-                (activeTab === "no leidas" && !n.readBy.includes(currentUser?.uidFirebase || "")) ||
-                (activeTab === "leidas" && n.readBy.includes(currentUser?.uidFirebase || ""))
+                (activeTab === "no leidas" && !n.readBy.includes(currentUser?.uid || "")) ||
+                (activeTab === "leidas" && n.readBy.includes(currentUser?.uid || ""))
 
             return matchesSearch && matchesTab
         })
@@ -115,7 +115,7 @@ const NotificacionesPage = () => {
                                         <div key={notification.id} className="relative group">
                                             <NotificationItem
                                                 notification={notification}
-                                                currentUserId={currentUser?.uidFirebase || ""}
+                                                currentUserId={currentUser?.uid || ""}
                                                 onClick={() => markAsRead(notification.id)}
                                                 showFullMessage
                                             />
