@@ -233,3 +233,64 @@ export const createAreaSubMenu = async (
         }
     }
 }
+
+export const updateSubMenuOrder = async (
+    empresaId: string,
+    areaId: string,
+    menuId: string,
+    subMenuId: string,
+    newOrder: number
+): Promise<{ success: boolean, message: string, error?: Error }> => {
+    try {
+        if (!empresaId || !areaId || !menuId || !subMenuId || !newOrder)
+            throw new Error("Todos los campos son requeridos");
+
+        const subMenuRef = doc(
+            db,
+            "empresas",
+            empresaId,
+            "areas",
+            areaId,
+            "menus",
+            menuId,
+            "subMenus",
+            subMenuId
+        );
+
+        const subMenuSnap = await getDoc(subMenuRef);
+        if (!subMenuSnap.exists()) throw new Error("Submenú no encontrado");
+
+        await updateDoc(subMenuRef, { order: newOrder });
+
+        // Update parent menu's subMenus array for consistency
+        const menuRef = doc(db, "empresas", empresaId, "areas", areaId, "menus", menuId);
+        const menuSnap = await getDoc(menuRef);
+
+        if (menuSnap.exists()) {
+            const menuData = menuSnap.data();
+            const subMenus: SubMenu[] = menuData.subMenus || [];
+
+            const updatedSubMenus = subMenus.map(sub => {
+                if (sub.id === subMenuId) {
+                    return { ...sub, order: newOrder };
+                }
+                return sub;
+            });
+
+            await updateDoc(menuRef, { subMenus: updatedSubMenus });
+        }
+
+        return {
+            success: true,
+            message: "Orden del submenú actualizado con éxito",
+            error: undefined
+        };
+    } catch (error) {
+        console.error("Error actualizando orden del submenú:", error);
+        return {
+            success: false,
+            message: "Error al actualizar el orden del submenú",
+            error: error as Error
+        };
+    }
+};

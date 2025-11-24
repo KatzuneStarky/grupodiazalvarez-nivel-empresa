@@ -14,13 +14,8 @@ import { useArea } from "@/context/area-context"
 import { useTime } from "@/context/time-context"
 import { useDate } from "@/context/date-context"
 import { Badge } from "@/components/ui/badge"
-import { useEffect, useState } from "react"
 
 const AdministracionPage = () => {
-    const [activeUsers, setActiveUsers] = useState(0)
-    const [menuCount, setMenuCount] = useState(0)
-    const [userCount, setUserCount] = useState(0)
-
     const { usuarios, loading: userLoading } = useUsuarios()
     const { empresa } = useEmpresa()
     const { area } = useArea()
@@ -30,11 +25,10 @@ const AdministracionPage = () => {
 
     const usuariosEmpresActual = usuarios.filter((u) => u.empresaId === empresa?.id)
 
-    useEffect(() => {
-        setMenuCount(menus.length)
-        setUserCount(usuariosEmpresActual.length)
-        setActiveUsers(usuariosEmpresActual.filter((u) => u.estado === "activo").length)
-    }, [menus])
+    // Derived state (calculated directly)
+    const menuCount = menus?.length || 0
+    const userCount = usuariosEmpresActual.length
+    const activeUsers = usuariosEmpresActual.filter((u) => u.estado === "activo").length
 
     return (
         <div className="min-h-screen">
@@ -47,9 +41,9 @@ const AdministracionPage = () => {
                             <div className="flex flex-col lg:flex-row lg:items-center justify-between space-y-4 lg:space-y-0">
                                 <div className="space-y-2">
                                     <CardTitle className="text-3xl font-bold">
-                                        Panel de administracion
+                                        Panel de administración
                                     </CardTitle>
-                                    <p className="text-muted-foreground text-lg">Administre sus menus y usuarios</p>
+                                    <p className="text-muted-foreground text-lg">Administre sus menús y usuarios</p>
                                     <div className="flex items-center space-x-2 text-sm text-muted-foreground">
                                         <Clock className="h-4 w-4" />
                                         <span>{formattedDate} {formattedTime}</span>
@@ -83,7 +77,7 @@ const AdministracionPage = () => {
                                     {area?.nombre}
                                 </Badge>
                                 <Badge variant="secondary" className="px-3 py-1">
-                                    {menuCount} Menus
+                                    {menuCount} Menús
                                 </Badge>
                                 <Badge variant="secondary" className="px-3 py-1">
                                     {userCount} Usuarios
@@ -103,7 +97,6 @@ const AdministracionPage = () => {
                         areaId={area?.id || ""}
                         empresaId={empresa?.id || ""}
                         empresaName={empresa?.nombre || ""}
-                        onMenuCountChange={setMenuCount}
                     />
 
                     <UserManagement

@@ -5,15 +5,15 @@ import { closestCenter, DndContext, DragEndEvent, KeyboardSensor, PointerSensor,
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { ChevronDown, ChevronRight, Edit, Plus, Trash2 } from "lucide-react";
 import { Menu, SubMenu } from "@/modules/menus/types/menu-sistema";
-import { TableCell, TableRow } from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import SortableSubmenuRow from "./sorteable-item-sub-menu";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import CreateAreaMenuForm from "../menu-form";
 import Icon from "@/components/global/icon";
-import { useEffect, useState } from "react";
 import SubMenuForm from "../sub-menu-form";
 import { CSS } from "@dnd-kit/utilities";
+import { useState } from "react";
 
 interface SortableItemProps {
     id: string;
@@ -21,12 +21,10 @@ interface SortableItemProps {
     areaId: string
     empresaId: string
     empresaName: string
+    onSubMenuReorder?: (menuId: string, newSubMenus: SubMenu[]) => void
 }
 
-const SorteableItem: React.FC<SortableItemProps> = ({ id, menu, areaId, empresaId, empresaName }) => {
-    
-
-    const [orderedSubMenus, setOrderedSubMenus] = useState<SubMenu[]>([]);
+const SorteableItem: React.FC<SortableItemProps> = ({ id, menu, areaId, empresaId, empresaName, onSubMenuReorder }) => {
     const [expanded, setExpanded] = useState(false);
 
     const {
@@ -50,31 +48,21 @@ const SorteableItem: React.FC<SortableItemProps> = ({ id, menu, areaId, empresaI
         background: isDragging ? "rgba(0,0,0,0.02)" : "transparent",
     };
 
-    useEffect(() => {
-        if (menu?.subMenus?.length) {
-            setOrderedSubMenus([...menu.subMenus].sort((a, b) => a.order - b.order));
-        } else {
-            setOrderedSubMenus([]);
-        }
-    }, [menu]);
-
-    const hasChildren = orderedSubMenus.length > 0;
+    const hasChildren = menu.subMenus && menu.subMenus.length > 0;
 
     const handleSubDragEnd = (event: DragEndEvent) => {
         const { active, over } = event;
-        if (!over || active.id === over.id) return;
+        if (!over || active.id === over.id || !menu.subMenus) return;
 
-        setOrderedSubMenus((prev) => {
-            const oldIndex = prev.findIndex((s) => s.id === String(active.id));
-            const newIndex = prev.findIndex((s) => s.id === String(over.id));
-            if (oldIndex === -1 || newIndex === -1) return prev;
+        const oldIndex = menu.subMenus.findIndex((s) => s.id === String(active.id));
+        const newIndex = menu.subMenus.findIndex((s) => s.id === String(over.id));
 
-            const next = arrayMove(prev, oldIndex, newIndex).map((s, i) => ({
-                ...s,
-                order: i + 1,
-            }));
-            return next;
-        });
+        if (oldIndex === -1 || newIndex === -1) return;
+
+        const newSubMenus = arrayMove(menu.subMenus, oldIndex, newIndex);
+        if (onSubMenuReorder) {
+            onSubMenuReorder(menu.id, newSubMenus);
+        }
     };
 
     return (
@@ -83,7 +71,7 @@ const SorteableItem: React.FC<SortableItemProps> = ({ id, menu, areaId, empresaI
                 ref={setNodeRef} style={style} {...attributes}
             >
                 <TableCell
-                    className="cursor-move place-items-center" {...listeners}
+                    className="cursor-move place-items-center w-10" {...listeners}
                 >
                     <Icon iconName="mingcute:move-line" />
                 </TableCell>
@@ -192,27 +180,37 @@ const SorteableItem: React.FC<SortableItemProps> = ({ id, menu, areaId, empresaI
             </TableRow>
 
             {hasChildren && expanded && (
-                <DndContext
-                    sensors={subSensors}
-                    collisionDetection={closestCenter}
-                    onDragEnd={handleSubDragEnd}
-                >
-                    <SortableContext
-                        items={orderedSubMenus.map((s) => s.id)}
-                        strategy={verticalListSortingStrategy}
-                    >
-                        {orderedSubMenus.map((submenu) => (
-                            <SortableSubmenuRow
-                                key={submenu.id}
-                                submenu={submenu}
-                                parentOrder={menu.order}
-                                areaId={areaId}
-                                empresaId={empresaId}
-                                empresaName={empresaName}
-                            />
-                        ))}
-                    </SortableContext>
-                </DndContext>
+                <TableRow>
+                    <TableCell colSpan={6} className="p-0 border-b-0">
+                        <div className="pl-12 pr-4 py-2 bg-muted/10">
+                            <Table>
+                                <TableBody>
+                                    <DndContext
+                                        sensors={subSensors}
+                                        collisionDetection={closestCenter}
+                                        onDragEnd={handleSubDragEnd}
+                                    >
+                                        <SortableContext
+                                            items={menu.subMenus!.map((s) => s.id)}
+                                            strategy={verticalListSortingStrategy}
+                                        >
+                                            {menu.subMenus!.map((submenu) => (
+                                                <SortableSubmenuRow
+                                                    key={submenu.id}
+                                                    submenu={submenu}
+                                                    parentOrder={menu.order}
+                                                    areaId={areaId}
+                                                    empresaId={empresaId}
+                                                    empresaName={empresaName}
+                                                />
+                                            ))}
+                                        </SortableContext>
+                                    </DndContext>
+                                </TableBody>
+                            </Table>
+                        </div>
+                    </TableCell>
+                </TableRow>
             )}
         </>
     )

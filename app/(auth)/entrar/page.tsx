@@ -3,6 +3,7 @@
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { AnimatedToggleMode } from "@/components/global/animated-toggle-mode";
 import { SocialLoginButtons } from "@/components/global/social-login-buttons";
+import { LoadingState } from "@/components/skeleton/loading-state";
 import { LogoutButton } from "@/components/global/logout-button";
 import { SocialProvider } from "@/types/social-provider";
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -18,7 +19,6 @@ import { Eye, EyeOff } from "lucide-react";
 import { useForm } from "react-hook-form";
 import Image from "next/image";
 import z from "zod"
-import { LoadingState } from "@/components/skeleton/loading-state";
 
 const LoginSchema = z.object({
     email: z.string().email(),
@@ -26,10 +26,11 @@ const LoginSchema = z.object({
 })
 
 const LoginPage = () => {
-    const { currentUser, loginWithGoogle, loginWithEmail, isLoading } = useAuth();
+    const { currentUser, loginWithGoogle, loginWithEmail, resetPassword, isLoading } = useAuth();
     const [forgotPasswordOpen, setForgotPasswordOpen] = useState(false)
     const [showPassword, setShowPassword] = useState(false)
     const [rememberMe, setRememberMe] = useState(false)
+    const [resetEmail, setResetEmail] = useState("")
     const router = useRouter()
 
     const form = useForm<z.infer<typeof LoginSchema>>({
@@ -54,12 +55,13 @@ const LoginPage = () => {
         return <LoadingState message='Verificando permisos' />
     }
 
-    const handleForgotPasswordSubmit = (e: React.FormEvent) => {
+    const handleForgotPasswordSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
+        if (!resetEmail) return
 
-        setTimeout(() => {
-            setForgotPasswordOpen(false)
-        }, 1000)
+        await resetPassword(resetEmail)
+        setForgotPasswordOpen(false)
+        setResetEmail("")
     }
 
     const handleSocialLogin = (provider: SocialProvider) => {
@@ -200,7 +202,14 @@ const LoginPage = () => {
                     <form onSubmit={handleForgotPasswordSubmit} className="space-y-4">
                         <div className="space-y-2">
                             <Label htmlFor="reset-email">Email</Label>
-                            <Input id="reset-email" type="email" placeholder="you@example.com" />
+                            <Input
+                                id="reset-email"
+                                type="email"
+                                placeholder="you@example.com"
+                                value={resetEmail}
+                                onChange={(e) => setResetEmail(e.target.value)}
+                                required
+                            />
                         </div>
                         <DialogFooter>
                             <Button type="button" variant="outline" onClick={() => setForgotPasswordOpen(false)}>

@@ -1,8 +1,8 @@
 "use client"
 
 import { Table, TableBody, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { updateMenuOrder } from "@/modules/menus/actions/write";
-import { Menu } from "@/modules/menus/types/menu-sistema";
+import { updateMenuOrder, updateSubMenuOrder } from "@/modules/menus/actions/write";
+import { Menu, SubMenu } from "@/modules/menus/types/menu-sistema";
 import { Card, CardContent } from "@/components/ui/card";
 import SorteableItem from "./menu/sorteable-item";
 import { Button } from "@/components/ui/button";
@@ -37,9 +37,49 @@ const MenuOrder: React.FC<MenuOrderProps> = ({ areaId, empresaId, empresaName, m
     const [orderedMenus, setOrderedMenus] = useState<Menu[]>([]);
     const [isSaving, setIsSaving] = useState(false);
 
+    const initializeMenus = (menuList: Menu[]) => {
+        return [...menuList].sort((a, b) => a.order - b.order).map(menu => ({
+            ...menu,
+            subMenus: menu.subMenus ? [...menu.subMenus].sort((a, b) => a.order - b.order) : []
+        }));
+    };
+
+    const areMenusContentEqual = (current: Menu[], incoming: Menu[]) => {
+        if (current.length !== incoming.length) return false;
+
+        const currentMap = new Map(current.map(m => [m.id, m]));
+
+        for (const incomingMenu of incoming) {
+            const currentMenu = currentMap.get(incomingMenu.id);
+            if (!currentMenu) return false;
+
+            const currentSubMenus = currentMenu.subMenus || [];
+            const incomingSubMenus = incomingMenu.subMenus || [];
+
+            if (currentSubMenus.length !== incomingSubMenus.length) return false;
+
+            const currentSubMap = new Set(currentSubMenus.map(s => s.id));
+            for (const sub of incomingSubMenus) {
+                if (!currentSubMap.has(sub.id)) return false;
+            }
+        }
+
+        return true;
+    };
+
     useEffect(() => {
         if (menus && menus.length > 0) {
-            setOrderedMenus((prev) => prev.length === 0 ? [...menus].sort((a, b) => a.order - b.order) : prev);
+            setOrderedMenus((prev) => {
+                if (prev.length === 0) {
+                    return initializeMenus(menus);
+                }
+
+                if (areMenusContentEqual(prev, menus)) {
+                    return prev;
+                }
+
+                return initializeMenus(menus);
+            });
         }
     }, [menus]);
 
@@ -53,12 +93,20 @@ const MenuOrder: React.FC<MenuOrderProps> = ({ areaId, empresaId, empresaName, m
         setIsSaving(true);
 
         try {
+            const promises: Promise<any>[] = [];
+
+            orderedMenus.forEach((menu, index) => {
+                promises.push(updateMenuOrder(empresaId, areaId, menu.id, index + 1));
+
+                if (menu.subMenus && menu.subMenus.length > 0) {
+                    menu.subMenus.forEach((subMenu, subIndex) => {
+                        promises.push(updateSubMenuOrder(empresaId, areaId, menu.id, subMenu.id, subIndex + 1));
+                    });
+                }
+            });
+
             toast.promise(
-                Promise.all(
-                    orderedMenus.map((menu, index) =>
-                        updateMenuOrder(empresaId, areaId, menu.id, index + 1)
-                    )
-                ),
+                Promise.all(promises),
                 {
                     loading: "Guardando orden...",
                     success: "Orden guardado con éxito",
@@ -66,7 +114,12 @@ const MenuOrder: React.FC<MenuOrderProps> = ({ areaId, empresaId, empresaName, m
                 }
             );
 
-            setOrderedMenus((prev) => prev.map((menu, index) => ({ ...menu, order: index + 1 })));
+            setOrderedMenus((prev) => prev.map((menu, index) => ({
+                ...menu,
+                order: index + 1,
+                subMenus: menu.subMenus?.map((sub, subIndex) => ({ ...sub, order: subIndex + 1 }))
+            })));
+
         } catch (error) {
             console.error("Error updating order:", error);
         } finally {
@@ -97,8 +150,17 @@ const MenuOrder: React.FC<MenuOrderProps> = ({ areaId, empresaId, empresaName, m
             const newIndex = prev.findIndex((m) => m.id === String(over.id));
             if (oldIndex === -1 || newIndex === -1) return prev;
 
-            return arrayMove(prev, oldIndex, newIndex).map((m, i) => ({ ...m, order: i + 1 }));
+            return arrayMove(prev, oldIndex, newIndex);
         });
+    };
+
+    const handleSubMenuReorder = (menuId: string, newSubMenus: SubMenu[]) => {
+        setOrderedMenus(prev => prev.map(menu => {
+            if (menu.id === menuId) {
+                return { ...menu, subMenus: newSubMenus };
+            }
+            return menu;
+        }));
     };
 
     return (
@@ -106,7 +168,7 @@ const MenuOrder: React.FC<MenuOrderProps> = ({ areaId, empresaId, empresaName, m
             <Table className="border rounded-lg">
                 <TableHeader>
                     <TableRow className="bg-muted/50">
-                        <TableHead className="font-semibold"></TableHead>
+                        <TableHead className="font-semibold w-10"></TableHead>
                         <TableHead className="font-semibold">Nombre</TableHead>
                         <TableHead className="font-semibold">Link</TableHead>
                         <TableHead className="font-semibold">Roles permitidos</TableHead>
@@ -132,6 +194,7 @@ const MenuOrder: React.FC<MenuOrderProps> = ({ areaId, empresaId, empresaName, m
                                     areaId={areaId}
                                     empresaId={empresaId}
                                     empresaName={empresaName}
+                                    onSubMenuReorder={handleSubMenuReorder}
                                 />
                             ))}
                         </SortableContext>

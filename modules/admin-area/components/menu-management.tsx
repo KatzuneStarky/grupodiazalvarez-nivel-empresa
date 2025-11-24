@@ -11,17 +11,16 @@ import { Button } from "@/components/ui/button"
 import { RolUsuario } from "@/enum/user-roles"
 import { Input } from "@/components/ui/input"
 import CreateAreaMenuForm from "./menu-form"
-import MenuOrder from "./menu-order"
 import { useEffect, useState } from "react"
+import MenuOrder from "./menu-order"
 
 interface MenuManagementProps {
     areaId: string
     empresaId: string
     empresaName: string
-    onMenuCountChange: (count: number) => void
 }
 
-const MenuManagement = ({ areaId, empresaId, empresaName, onMenuCountChange }: MenuManagementProps) => {
+const MenuManagement = ({ areaId, empresaId, empresaName }: MenuManagementProps) => {
     const [orderedMenus, setOrderedMenus] = useState<Menu[]>([]);
     const [roleFilter, setRoleFilter] = useState<RolUsuario | string>("all")
     const [searchTerm, setSearchTerm] = useState<string>("")

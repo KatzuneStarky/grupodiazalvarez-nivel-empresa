@@ -1,8 +1,9 @@
 import { useAuth } from "@/context/auth-context"
 import { AlertCircle, CheckCircle, XCircle } from "lucide-react"
+import { useMemo } from "react"
 
 export const usePerfilUsuario = () => {
-    const { currentUser, userBdd } = useAuth()
+    const { currentUser, userBdd, isLoading } = useAuth()
 
     const getStatusConfig = (status: string) => {
         switch (status) {
@@ -46,7 +47,7 @@ export const usePerfilUsuario = () => {
     }
     const profilePicture = userBdd?.avatarUrl || currentUser?.photoURL
     const email = userBdd?.email || currentUser?.email || "Desconocido"
-    
+
     const getInitials = (name: string) => {
         if (name === "Not provided") return "U"
         return name
@@ -70,13 +71,14 @@ export const usePerfilUsuario = () => {
         return Math.round((completedFields / fields.length) * 100)
     }
 
-    const statusConfig = getStatusConfig(userBdd?.estado || "")
+    const statusConfig = useMemo(() => getStatusConfig(userBdd?.estado || ""), [userBdd?.estado])
     const StatusIcon = statusConfig.icon
-    const profileCompletion = calculateProfileCompletion()
+    const profileCompletion = useMemo(() => calculateProfileCompletion(), [userBdd])
 
     return {
         currentUser,
         userBdd,
+        isLoading,
         getStatusConfig,
         getRegistrationType,
         profilePicture,
