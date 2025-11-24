@@ -16,8 +16,6 @@ import { Button } from "@/components/ui/button"
 const UsuariosPage = () => {
     const { usuarios } = useUsuarios()
     const {
-        ITEMS_PER_PAGE_OPTIONS,
-        allSelected,
         currentPage,
         filteredAndSortedUsers,
         filters,
@@ -34,12 +32,14 @@ const UsuariosPage = () => {
         setItemsPerPage,
         setViewMode,
         setCurrentPage,
-        someSelected,
         sortDirection,
         sortField,
         startIndex,
         totalPages,
-        viewMode
+        viewMode,
+        ITEMS_PER_PAGE_OPTIONS,
+        allSelected,
+        someSelected
     } = useUsuariosDashboard(usuarios)
 
     return (
@@ -51,7 +51,7 @@ const UsuariosPage = () => {
                     onClearFilters={handleClearFilters}
                     onExportUsers={() => { }}
                     onImportUsers={() => { }}
-                    onCreateUser={() => {}}
+                    onCreateUser={() => { }}
                     totalUsers={usuarios.length}
                     filteredUsers={filteredAndSortedUsers.length}
                 />

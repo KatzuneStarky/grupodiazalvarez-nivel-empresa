@@ -14,6 +14,8 @@ export const useUsuariosDashboard = (usuarios: SystemUser[]) => {
     const [detailModalOpen, setDetailModalOpen] = useState(false)
     const [sortField, setSortField] = useState<SortField>("creadoEn")
     const [sortDirection, setSortDirection] = useState<SortDirection>("desc")
+    const [allSelected, setAllSelected] = useState(false)
+    const [someSelected, setSomeSelected] = useState(false)
     const [filters, setFilters] = useState<UserFilters>({
         search: "",
         estado: "",
@@ -183,5 +185,8 @@ export const useUsuariosDashboard = (usuarios: SystemUser[]) => {
         handleSelectUser,
         handleSelectAll,
         handleSort,
+        ITEMS_PER_PAGE_OPTIONS,
+        allSelected,
+        someSelected
     }
 }
