@@ -37,7 +37,7 @@ const MainPage = () => {
 
             // Verificar si el usuario pertenece a la empresa
             const userInCompany = empresa.usuarios?.some((u: any) =>
-                (typeof u === 'string' ? u === userBdd.id : u.id === userBdd.id)
+                (typeof u === 'string' ? u === userBdd.uid : u.uid === userBdd.uid)
             )
 
             if (userInCompany) {
