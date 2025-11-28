@@ -2,18 +2,18 @@
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { relacionContactoMap } from "../../bdd/operadores/types/operadores"
 import { OperadoresSchemaType } from "../schemas/operadores.schema"
 import UploadImage from "@/components/custom/upload-image-firebase"
+import { UseFormReturn, useFieldArray } from "react-hook-form"
+import { Contact, Contact2, Plus, Trash2 } from "lucide-react"
 import { TipoLicencia } from "../constants/tipo-licencia"
 import { TipoSangre } from "../constants/tipo-sangre"
 import { Separator } from "@/components/ui/separator"
-import { UseFormReturn, useFieldArray } from "react-hook-form"
+import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Emisor } from "../constants/emisor"
-import { Button } from "@/components/ui/button"
-import { Contact, Contact2, Plus, Trash2 } from "lucide-react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { relacionContactoMap } from "../../bdd/operadores/types/operadores"
 
 interface OperadorFormProps {
     onSubmit: (data: OperadoresSchemaType) => void
@@ -458,7 +458,7 @@ const OperadorForm = ({
                                                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                                                         <FormControl>
                                                             <SelectTrigger className="w-full">
-                                                                <SelectValue placeholder={field.value ? field.value: "Seleccione el parentesco"} />
+                                                                <SelectValue placeholder={field.value ? field.value : "Seleccione el parentesco"} />
                                                             </SelectTrigger>
                                                         </FormControl>
                                                         <SelectContent>
