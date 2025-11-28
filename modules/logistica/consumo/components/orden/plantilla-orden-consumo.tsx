@@ -51,20 +51,25 @@ const PlantillaOrdenConsumo = ({
             toast.error("Error al generar la orden de consumo")
         }
         return Promise.resolve();
+    }, [lastFolio])
+
+    const handleOnAfterPrint = useCallback(() => {
+        window.close();
+        toast.success("Orden de consumo generada con exito")
     }, [])
 
     if (!plantillaRef) return null;
     const reactToPrintFn = useReactToPrint({
         contentRef: plantillaRef,
         documentTitle: `Orden de Consumo - ${formatFolio(viewMode === true ? lastFolio : lastFolio + 1)} - ${new Date().toLocaleDateString()}`,
-        onAfterPrint: () => window.close(),
+        onAfterPrint: handleOnAfterPrint,
         onBeforePrint: handleOnBeforePrint,
         onPrintError: () => toast.error("Error al generar la orden de consumo"),
     });
 
     return (
         <div>
-            <div ref={plantillaRef} className="border-[3px] border-[#4a6fa5] bg-[#faf8f3] shadow-lg">
+            <div ref={plantillaRef} className="border-[3px] border-[#4a6fa5] bg-[#faf8f3] shadow-lg print:w-full print:origin-top-left print:scale-[0.75]">
                 <CardContent className="p-8">
                     <div className="mb-6 text-center">
                         <h1 className="mb-1 font-sans text-3xl font-bold uppercase tracking-wide text-[#4a6fa5]">

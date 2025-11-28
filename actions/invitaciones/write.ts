@@ -1,4 +1,4 @@
-import { collection, doc, getDoc, getDocs, query, setDoc, where } from "firebase/firestore";
+import { collection, deleteDoc, doc, getDoc, getDocs, query, setDoc, where } from "firebase/firestore";
 import { Invitacion } from "@/types/invitacion";
 import { db } from "@/firebase/client";
 import { v7 } from "uuid"
@@ -74,6 +74,24 @@ export const updateUsedInvitation = async (invitationId: string): Promise<{ succ
         return {
             success: false,
             message: "Error al actualizar la invitación.",
+        };
+    }
+};
+
+export const deleteInvitation = async (invitationId: string): Promise<{ success: boolean, message: string }> => {
+    try {
+        const invitationRef = doc(db, "invitaciones", invitationId);
+        await deleteDoc(invitationRef);
+
+        return {
+            success: true,
+            message: "Invitación eliminada correctamente.",
+        };
+    } catch (error) {
+        console.error("Error al eliminar la invitación:", error);
+        return {
+            success: false,
+            message: "Error al eliminar la invitación.",
         };
     }
 };

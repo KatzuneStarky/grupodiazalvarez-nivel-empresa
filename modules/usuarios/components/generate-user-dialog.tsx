@@ -1,10 +1,10 @@
 "use client"
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { inviteNewUser, deleteInvitation } from "@/actions/invitaciones/write";
 import { useAllEmpreas } from "@/modules/empresas/hooks/use-all-empresas";
 import { Link, UserPlus, Check, ChevronsUpDown } from "lucide-react";
 import { getAuth, sendSignInLinkToEmail } from "firebase/auth";
-import { inviteNewUser } from "@/actions/invitaciones/write";
 import { ArrayRoles, RolUsuario } from "@/enum/user-roles";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -59,46 +59,46 @@ const GenerateUserDialog = () => {
         }
 
         setLoading(true)
-        try {
-            toast.promise(
-                (async () => {
-                    const invitation = await inviteNewUser({
-                        email,
-                        empresaId,
-                        empresaName,
-                        rol: role
-                    });
 
-                    if (!invitation.success || !invitation.resultId) {
-                        throw new Error(invitation.message);
-                    }
+        toast.promise(
+            (async () => {
+                const invitation = await inviteNewUser({
+                    email,
+                    empresaId,
+                    empresaName,
+                    rol: role
+                });
 
+                if (!invitation.success || !invitation.resultId) {
+                    throw new Error(invitation.message);
+                }
+
+                try {
+                    const origin = window.location.origin;
                     const actionCodeSettings = {
-                        url: `https://grupodiazalvarez.com/registro?email=${encodeURIComponent(email)}&invitationId=${invitation.resultId}`,
+                        url: `${origin}/registro?email=${encodeURIComponent(email)}&invitationId=${invitation.resultId}`,
                         handleCodeInApp: true,
                     };
 
                     await sendSignInLinkToEmail(auth, email, actionCodeSettings);
+                } catch (error) {
+                    await deleteInvitation(invitation.resultId);
+                    throw new Error("Error al enviar el correo. Intente nuevamente.");
+                }
 
-                    return `Invitación enviada a ${email}.`;
-                })(),
-                {
-                    loading: "Enviando invitación, favor de esperar...",
-                    success: (message) => message,
-                    error: (error) => error.message || "Error al enviar la invitación.",
-                }                               
-            );         
-        } catch (error: any) {
-            toast.error("Error al enviar invitación", {
-                description: error?.message || String(error),
-            });
-        } finally {
-            setRole(RolUsuario.usuario);
-            setEmpresaName("");
-            setLoading(false);
-            setUserEmail("");
-            setEmpresaId("");
-        }
+                setRole(RolUsuario.usuario);
+                setEmpresaName("");
+                setUserEmail("");
+                setEmpresaId("");
+
+                return `Invitación enviada a ${email}.`;
+            })(),
+            {
+                loading: "Enviando invitación, favor de esperar...",
+                success: (message) => message,
+                error: (error) => error.message || "Error al enviar la invitación.",
+            }
+        )
     }
 
     return (

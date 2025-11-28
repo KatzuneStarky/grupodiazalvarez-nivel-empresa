@@ -2,6 +2,7 @@
 
 import { SortDirection, SortField, UserFilters, ViewMode } from "../types/user"
 import { SystemUser } from "@/types/usuario"
+import { parseFirebaseDate } from "@/utils/parse-timestamp-date"
 import { useMemo, useState } from "react"
 
 export const useUsuariosDashboard = (usuarios: SystemUser[]) => {
@@ -45,12 +46,12 @@ export const useUsuariosDashboard = (usuarios: SystemUser[]) => {
             const matchesDepartamento = !filters.departamento || user.informacionProfesional?.departamento === filters.departamento
             const matchesCargo = !filters.cargo || user.informacionProfesional?.cargo === filters.cargo
 
-            const creadoEnDate = user.creadoEn.toDate()
+            const creadoEnDate = parseFirebaseDate(user.creadoEn)
             const matchesFechaCreacion =
                 (!filters.fechaCreacionDesde || creadoEnDate >= filters.fechaCreacionDesde) &&
                 (!filters.fechaCreacionHasta || creadoEnDate <= filters.fechaCreacionHasta)
 
-            const ultimoAccesoDate = user.ultimoAcceso?.toDate()
+            const ultimoAccesoDate = parseFirebaseDate(user.ultimoAcceso)
             const matchesUltimoAcceso =
                 (!filters.ultimoAccesoDesde || (ultimoAccesoDate && ultimoAccesoDate >= filters.ultimoAccesoDesde)) &&
                 (!filters.ultimoAccesoHasta || (ultimoAccesoDate && ultimoAccesoDate <= filters.ultimoAccesoHasta))
@@ -74,8 +75,8 @@ export const useUsuariosDashboard = (usuarios: SystemUser[]) => {
 
             // Convert Timestamp fields to Date for comparison
             if (sortField === "creadoEn" || sortField === "ultimoAcceso") {
-                aValue = (aValue as any)?.toDate?.() ?? aValue
-                bValue = (bValue as any)?.toDate?.() ?? bValue
+                aValue = parseFirebaseDate(aValue)
+                bValue = parseFirebaseDate(bValue)
             }
 
             if (sortField === "rol") {

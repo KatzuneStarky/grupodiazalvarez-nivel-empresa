@@ -1,16 +1,13 @@
 "use client"
 
 import { useOrdenConsumoFilters } from "@/modules/logistica/consumo/hooks/use-orden-consumo-filters"
-import { useOrdenesConsumos } from "@/modules/logistica/consumo/hooks/use-ordenes-consumos"
 import OrdenFilters from "@/modules/logistica/consumo/components/orden/orden-filters"
 import OrdenConsumoTable from "@/modules/logistica/consumo/components/main/table"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import OrdenConsumoCard from "@/modules/logistica/consumo/components/main/card"
 import { LayoutGrid, Table2 } from "lucide-react"
-import { parseFirebaseDate } from "@/utils/parse-timestamp-date"
 
 const OrdenConsumoPage = () => {
-    const { ordenesConsumos } = useOrdenesConsumos()
     const {
         filteredOrdenes,
         setFilterEstado,
@@ -38,7 +35,7 @@ const OrdenConsumoPage = () => {
 
     return (
         <div className="container mx-auto py-8 px-6">
-            <OrdenFilters 
+            <OrdenFilters
                 setFilterEstado={setFilterEstado}
                 setSearchTerm={setSearchTerm}
                 setDateRange={setDateRange}
