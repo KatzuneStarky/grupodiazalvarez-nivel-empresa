@@ -1,12 +1,13 @@
 "use client"
 
+import { updateRolPermission, writeRoles } from "@/modules/administracion/actions/roles/write"
 import { RolesSchema, RolesSchemaType } from "@/modules/administracion/schema/roles.schema"
 import NewRolDialog from "@/modules/administracion/components/roles/new-rol-dialog"
-import { updateRolPermission, writeRoles } from "@/modules/administracion/actions/roles/write"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useAllRoles } from "@/modules/administracion/hooks/use-all-roles"
 import { Plus, RefreshCcw, Save, Shield } from "lucide-react"
 import SubmitButton from "@/components/global/submit-button"
+import { ScrollArea } from "@/components/ui/scroll-area"
 import PageTitle from "@/components/custom/page-title"
 import { Separator } from "@/components/ui/separator"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -17,7 +18,6 @@ import { Badge } from "@/components/ui/badge"
 import { useForm } from "react-hook-form"
 import { useState } from "react"
 import { toast } from "sonner"
-import { ScrollArea } from "@/components/ui/scroll-area"
 
 const RolesPage = () => {
     const [selectedRole, setSelectedRole] = useState<RolesUsuario | null>(null)

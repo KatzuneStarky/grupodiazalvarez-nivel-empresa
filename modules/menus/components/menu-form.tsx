@@ -4,151 +4,140 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { useMenusByArea } from "@/modules/menus/hooks/use-menus-by-area"
-import { createAreaMenu } from "@/modules/menus/actions/write"
+import { AreaMenuType } from "@/modules/admin-area/schema/menu.schema"
+import { ICONS } from "@/modules/admin-area/constants/menu-icons"
 import { Alert, AlertTitle } from "@/components/ui/alert"
-import { Menu } from "@/modules/menus/types/menu-sistema"
-import { zodResolver } from "@hookform/resolvers/zod"
+import { Separator } from "@/components/ui/separator"
 import { Check, ChevronsUpDown } from "lucide-react"
-import { useArea } from "@/context/area-context"
-import { ICONS } from "../constants/menu-icons"
 import { Button } from "@/components/ui/button"
+import { UseFormReturn } from "react-hook-form"
 import { RolUsuario } from "@/enum/user-roles"
 import { Input } from "@/components/ui/input"
-import { useRouter } from "next/navigation"
+import { Menu } from "../types/menu-sistema"
 import Icon from "@/components/global/icon"
 import { useEffect, useState } from "react"
-import { useForm } from "react-hook-form"
 import { cn } from "@/lib/utils"
-import { toast } from "sonner"
-import { z } from "zod"
-import { AreaMenuSchema, AreaMenuType } from "../schema/menu.schema"
+import { useIconifySearch } from "@/hooks/use-iconify-search"
 
-const CreateAreaMenuForm = ({
-    areaId,
-    empresaName,
-    menuId
-}: {
-    areaId: string,
-    menuId?: string,
+
+interface MenuFormProps {
+    onSubmit: (data: AreaMenuType) => void
+    form: UseFormReturn<AreaMenuType>
+    submitButton: React.ReactNode
+    isSubmitting: boolean
     empresaName: string
-}) => {
-    const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
-    const [menu, setMenu] = useState<Menu | null>(null)
-    const router = useRouter();
-    const { area } = useArea()
-    const { menus, loading, empresa } = useMenusByArea(area?.id)
+    empresaId: string
+    areaName: string
+    areaId: string
+    menuId: string
+    menuData?: Menu
+}
 
-    const form = useForm<AreaMenuType>({
-        resolver: zodResolver(AreaMenuSchema),
-        defaultValues: {
-            name: "",
-            areaId: areaId,
-            icon: "",
-            link: "",
-            allowedRoles: []
-        },
-    })
-
-    const onSubmit = async (values: AreaMenuType) => {
-        try {
-            setIsSubmitting(true)
-
-            toast.promise(createAreaMenu(empresa?.id ?? "", area?.id ?? "", {
-                areaId: area?.id ?? "",
-                path: values.link,
-                title: values.name,
-                visible: true,
-                icon: values.icon,
-                rolesAllowed: values.allowedRoles as RolUsuario[],
-                subMenus: [],
-            }), {
-                loading: "Creando menú favor de esperar...",
-                success: (result) => {
-                    if (result.success) {
-                        return result.message;
-                    } else {
-                        throw new Error(result.message);
-                    }
-                },
-                error: (error) => {
-                    return error.message || "Error al registrar el menu.";
-                },
-            })
-
-            form.reset()
-            router.refresh()
-        } catch (error) {
-            console.log("Error al crear el menu", error);
-            toast.error("Error al crear el menu", {
-                description: `${error}`
-            })
-        } finally {
-            setIsSubmitting(false)
-        }
-    }
+const MenuForm = ({
+    submitButton,
+    isSubmitting,
+    empresaName,
+    empresaId,
+    onSubmit,
+    areaName,
+    menuData,
+    areaId,
+    menuId,
+    form,
+}: MenuFormProps) => {
+    const [search, setSearch] = useState<string>("");
+    const { results, loading } = useIconifySearch(search);
 
     useEffect(() => {
-        if (menuId && menus.length > 0) {
-            const fetchedMenu = menus.find((menu) => menu.id === menuId) || null;
-
-            if (fetchedMenu) {
-                setMenu(fetchedMenu);
-                form.reset({
-                    name: fetchedMenu.title,
-                    icon: fetchedMenu.icon,
-                    link: fetchedMenu.path,
-                    allowedRoles: fetchedMenu.rolesAllowed,
-                    areaId: area?.id ?? "",
-                });
-            }
+        if (menuId && menuData) {
+            form.setValue('name', menuData.title)
+            form.setValue('link', menuData.path)
+            form.setValue('icon', menuData.icon || "")
+            form.setValue('allowedRoles', menuData.rolesAllowed || [])
         }
-    }, [menuId, menus, form, area?.id]);
+    }, [menuId, menuData, form])
 
     const name = form.watch("name")
     useEffect(() => {
         if (name) {
-            form.setValue('link', `/${empresaName}/${area?.nombre}/${name}`);
+            form.setValue('link', `/${empresaName}/${areaName}/${name}`);
         } else {
-            form.setValue('link', `/${empresaName}/${area?.nombre}`);
+            form.setValue('link', `/${empresaName}/${areaName}`);
         }
-    }, [name, empresaName, area?.nombre, form.setValue]);
+    }, [name, empresaName, areaName, form.setValue]);
 
+    console.log(results);
     return (
         <Form {...form}>
-            <form className="space-y-4" onSubmit={form.handleSubmit(onSubmit)}>
-                {loading && menuId && (
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                {areaName && empresaName && (
                     <Alert className="my-4">
-                        <Icon iconName="line-md:loading-twotone-loop" />
+                        <Icon iconName="line-md:menu-fold-right" />
                         <AlertTitle className="text-center">
-                            Se estan cargando los datos
+                            Menu perteneciente a la empresa <b>{empresaName}</b> y al area <b>{areaName}</b>
                         </AlertTitle>
                     </Alert>
                 )}
+
                 <div className='flex items-center gap-4'>
                     <FormField
                         control={form.control}
                         name="icon"
                         render={({ field }) => (
-                            <FormItem>
+                            <FormItem className="flex flex-col w-full">
                                 <FormLabel>Icono</FormLabel>
-                                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                    <FormControl>
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Seleccione un icono" />
-                                        </SelectTrigger>
-                                    </FormControl>
-                                    <SelectContent>
-                                        {ICONS.map((icon, index) => (
-                                            <SelectItem value={icon.name} key={index}>
-                                                <div className='flex items-center'>
-                                                    <Icon iconName={icon.name || ""} className="mr-2" />
-                                                    {icon.name}
-                                                </div>
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
+                                <Popover>
+                                    <PopoverTrigger asChild>
+                                        <FormControl>
+                                            <Button variant="outline" className="w-full justify-between">
+                                                {field.value ? <div className="flex items-center gap-2">
+                                                    <Icon iconName={field.value} />
+                                                    {field.value}
+                                                </div> : "Seleccionar icono"}
+                                                <ChevronsUpDown className="ml-2 opacity-50" />
+                                            </Button>
+                                        </FormControl>
+                                    </PopoverTrigger>
+                                    <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
+                                        <Command>
+                                            <CommandInput
+                                                placeholder="Buscar icono..."
+                                                onValueChange={(value) => setSearch(value)}
+                                            />
+                                            {loading && <div className="p-4 text-center text-sm">Cargando iconos...</div>}
+                                            {!loading && results.length === 0 && search && (
+                                                <div className="p-4 text-center text-sm">No se encontraron iconos para "{search}"</div>
+                                            )}
+                                            <CommandList>
+                                                <CommandEmpty>No se encontraron resultados.</CommandEmpty>
+                                                <CommandGroup className="max-h-64 overflow-y-auto">
+                                                    {results.map((iconName) => (
+                                                        <CommandItem
+                                                            value={iconName}
+                                                            key={iconName}
+                                                            onSelect={() => {
+                                                                form.setValue("icon", iconName);
+                                                                form.trigger("icon"); // Trigger validation for the icon field
+                                                            }}
+                                                        >
+                                                            <div className="flex items-center gap-2">
+                                                                <Icon iconName={iconName} className="mr-2 h-4 w-4" />
+                                                                {iconName}
+                                                            </div>
+                                                            <Check
+                                                                className={cn(
+                                                                    "ml-auto h-4 w-4",
+                                                                    iconName === field.value ? "opacity-100" : "opacity-0"
+                                                                )}
+                                                            />
+                                                        </CommandItem>
+                                                    ))}
+
+                                                </CommandGroup>
+                                            </CommandList>
+                                        </Command>
+                                    </PopoverContent>
+                                </Popover>
                                 <FormMessage />
                             </FormItem>
                         )}
@@ -249,19 +238,11 @@ const CreateAreaMenuForm = ({
                     )}
                 />
 
-                <Button
-                    type="submit"
-                    className="mt-5 tracking-wide font-semibold bg-red-500
-                                            text-white w-48 py-4 rounded-lg hover:bg-[#991d27] 
-                                            transition-all duration-300 ease-in-out flex items-center 
-                                            justify-center focus:shadow-outline focus:outline-none"
-                    disabled={isSubmitting}
-                >
-                    {menu ? "Actualizar menu" : "Crear menu"}
-                </Button>
+                <Separator className="my-4" />
+                {submitButton}
             </form>
         </Form>
     )
 }
 
-export default CreateAreaMenuForm
+export default MenuForm

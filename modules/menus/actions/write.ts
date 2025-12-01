@@ -294,3 +294,67 @@ export const updateSubMenuOrder = async (
         };
     }
 };
+
+export const updateMenuVisible = async (
+    empresaId: string,
+    areaId: string,
+    menuId: string,
+    visible: boolean
+): Promise<{ success: boolean, message: string, error?: Error }> => {
+    try {
+        if (!empresaId || !areaId || !menuId)
+            throw new Error("Todos los campos son requeridos");
+
+        const menuRef = doc(db, "empresas", empresaId, "areas", areaId, "menus", menuId);
+        const menuSnap = await getDoc(menuRef);
+
+        if (!menuSnap.exists()) throw new Error("Menu no encontrado");
+
+        await updateDoc(menuRef, { visible });
+
+        return {
+            success: true,
+            message: "Visible actualizado con éxito",
+            error: undefined
+        };
+    } catch (error) {
+        console.error("Error actualizando visible del menu:", error);
+        return {
+            success: false,
+            message: "Error al actualizar el visible del menu",
+            error: error as Error
+        };
+    }
+};
+
+export const updateMenuData = async (
+    empresaId: string,
+    areaId: string,
+    menuId: string,
+    menuData: Omit<Menu, "id" | "order" | "visible">
+): Promise<{ success: boolean, message: string, error?: Error }> => {
+    try {
+        if (!empresaId || !areaId || !menuId)
+            throw new Error("Todos los campos son requeridos");
+
+        const menuRef = doc(db, "empresas", empresaId, "areas", areaId, "menus", menuId);
+        const menuSnap = await getDoc(menuRef);
+
+        if (!menuSnap.exists()) throw new Error("Menu no encontrado");
+
+        await updateDoc(menuRef, menuData);
+
+        return {
+            success: true,
+            message: "Menu actualizado con éxito",
+            error: undefined
+        };
+    } catch (error) {
+        console.error("Error actualizando menu:", error);
+        return {
+            success: false,
+            message: "Error al actualizar el menu",
+            error: error as Error
+        };
+    }
+}
