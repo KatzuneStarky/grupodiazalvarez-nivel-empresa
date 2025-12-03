@@ -25,13 +25,11 @@ export const getEquipoById = async (id: string): Promise<EquipoConMantenimientos
                 const mantenimiento = mantenimientoDoc.data() as Mantenimiento;
                 const mantenimientoId = mantenimientoDoc.id;
 
-                // ✅ Subcolección correcta: equipos/{equipoId}/mantenimientos/{mantenimientoId}/mantenimientoData
                 const mantenimientoDataSnapshot = await getDocs(
                     collection(db, "equipos", id, "mantenimientos", mantenimientoId, "mantenimientoData")
                 );
                 const mantenimientoData = mantenimientoDataSnapshot.docs.map((doc) => doc.data() as MantenimientoData);
 
-                // ✅ Subcolección correcta: equipos/{equipoId}/mantenimientos/{mantenimientoId}/evidencia
                 const evidenciasSnapshot = await getDocs(
                     collection(db, "equipos", id, "mantenimientos", mantenimientoId, "evidencia")
                 );
@@ -42,6 +40,7 @@ export const getEquipoById = async (id: string): Promise<EquipoConMantenimientos
                     id: mantenimientoId,
                     mantenimientoData,
                     evidencias,
+                    equipo,
                 };
             })
         );

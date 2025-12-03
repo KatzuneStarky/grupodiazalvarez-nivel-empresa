@@ -1,11 +1,10 @@
 "use client"
 
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { AreaMenuType } from "@/modules/admin-area/schema/menu.schema"
-import { ICONS } from "@/modules/admin-area/constants/menu-icons"
+import { useIconifySearch } from "@/hooks/use-iconify-search"
 import { Alert, AlertTitle } from "@/components/ui/alert"
 import { Separator } from "@/components/ui/separator"
 import { Check, ChevronsUpDown } from "lucide-react"
@@ -17,7 +16,6 @@ import { Menu } from "../types/menu-sistema"
 import Icon from "@/components/global/icon"
 import { useEffect, useState } from "react"
 import { cn } from "@/lib/utils"
-import { useIconifySearch } from "@/hooks/use-iconify-search"
 
 
 interface MenuFormProps {
@@ -70,11 +68,18 @@ const MenuForm = ({
     return (
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                {areaName && empresaName && (
+                {!areaName || !empresaName ? (
                     <Alert className="my-4">
                         <Icon iconName="line-md:menu-fold-right" />
                         <AlertTitle className="text-center">
-                            Menu perteneciente a la empresa <b>{empresaName}</b> y al area <b>{areaName}</b>
+                            <span>Antes de continuar, selecciona una empresa y un area</span>
+                        </AlertTitle>
+                    </Alert>
+                ) : (
+                    <Alert className="my-4">
+                        <Icon iconName="line-md:menu-fold-right" />
+                        <AlertTitle className="text-center">
+                            <span>Menu perteneciente a la empresa <b>{empresaName}</b> y al area <b>{areaName}</b></span>
                         </AlertTitle>
                     </Alert>
                 )}

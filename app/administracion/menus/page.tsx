@@ -1,9 +1,10 @@
 "use client"
 
 import { Building, Building2, Eye, EyeClosed, GripVertical, Link, Shield, Trash2 } from "lucide-react"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { AreaMenuSchema, AreaMenuType } from "@/modules/admin-area/schema/menu.schema"
-import { updateMenuData, updateMenuVisible } from "@/modules/menus/actions/write"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
+import { updateMenuData, updateMenuVisible } from "@/modules/menus/actions/write"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useAllEmpresaData } from "@/hooks/use-all-empresa-data"
 import SubmitButton from "@/components/global/submit-button"
@@ -27,7 +28,8 @@ const MenusPage = () => {
     const [expandedAreaId, setExpandedAreaId] = useState<string | null>(null)
     const [selectedMenu, setSelectedMenu] = useState<Menu | null>(null)
     const [newMenuDialogOpen, setNewMenuDialogOpen] = useState(false)
-    const [isSubmitting, setIsSubmitting] = useState(false)
+    const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
+    const [previewOpen, setPreviewOpen] = useState<boolean>(false)
     const { empresasData } = useAllEmpresaData()
 
     const selectedEmpresa = empresasData?.find((empresa) => empresa.id === expandedCompanyId)
@@ -110,7 +112,7 @@ const MenusPage = () => {
                 icon={<Shield className="text-primary size-12" />}
                 hasActions={true}
                 actions={
-                    <Button>
+                    <Button onClick={() => setNewMenuDialogOpen(!newMenuDialogOpen)}>
                         <Plus />
                         <span className="ml-2">Nuevo menu</span>
                     </Button>
@@ -199,9 +201,9 @@ const MenusPage = () => {
                     <CardHeader>
                         <div className="flex items-center justify-between">
                             <CardTitle>Vista Previa</CardTitle>
-                            <Button variant="outline" size="sm">
+                            <Button variant="outline" size="sm" onClick={() => setPreviewOpen(!previewOpen)}>
                                 <Eye className="mr-2 h-4 w-4" />
-                                Activar
+                                Vista
                             </Button>
                         </div>
                     </CardHeader>
@@ -293,6 +295,67 @@ const MenusPage = () => {
                         </div>
                     </CardContent>
                 </Card>
+
+                <Dialog open={newMenuDialogOpen} onOpenChange={setNewMenuDialogOpen}>
+                    <DialogContent className="max-w-[500px]">
+                        <DialogHeader>
+                            <DialogTitle>Nuevo menu</DialogTitle>
+                        </DialogHeader>
+                        <MenuForm
+                            empresaName={selectedEmpresa?.nombre || ""}
+                            empresaId={selectedEmpresa?.id || ""}
+                            areaName={selectedArea?.nombre || ""}
+                            areaId={selectedArea?.id || ""}
+                            menuId={""}
+                            isSubmitting={isSubmitting}
+                            onSubmit={onSubmit}
+                            form={form}
+                            submitButton={
+                                <SubmitButton
+                                    isSubmiting={isSubmitting}
+                                    loadingText="Creando..."
+                                    text="Crear nuevo menu"
+                                />
+                            }
+                        />
+                    </DialogContent>
+                </Dialog>
+
+                <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
+                    <DialogContent className="max-w-4xl">
+                        <DialogHeader>
+                            <DialogTitle>Vista Previa</DialogTitle>
+                        </DialogHeader>
+
+                        <div className="flex gap-4 h-full">
+                            <div className="w-64 border-r border-border pr-4">
+                                <div className="rounded-lg border border-border bg-card p-3">
+                                    <div className="space-y-1">
+                                        {selectedArea?.menus.map((menu) => {
+                                            return menu.visible ? (
+                                                <button
+                                                    key={menu.id}
+                                                    className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm hover:bg-accent transition-colors text-left"
+                                                >
+                                                    <Icon iconName={menu.icon || ""} className="h-4 w-4" />
+                                                    <span>{menu.title}</span>
+                                                </button>
+                                            ) : null
+                                        })}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="flex-1 flex items-center justify-center">
+                                <div className="text-center space-y-2">
+                                    <div className="text-6xl mb-4">📋</div>
+                                    <h3 className="text-xl font-semibold">Vista previa del menu</h3>
+                                    <p className="text-muted-foreground">Esta es como se mostrara los menus a los usuarios</p>
+                                </div>
+                            </div>
+                        </div>
+                    </DialogContent>
+                </Dialog>
             </div>
         </div >
     )

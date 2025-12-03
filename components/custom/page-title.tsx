@@ -16,6 +16,7 @@ const PageTitle = ({
     actions
 }: PageTitleProps) => {
 
+
     return (
         <div className={cn(
             "flex flex-col gap-4",
@@ -23,9 +24,7 @@ const PageTitle = ({
         )}>
             <div className="flex items-center gap-3">
                 <div className="p-2 bg-primary/10 rounded-lg shrink-0">
-                    <div className="[&>svg]:size-5 sm:[&>svg]:size-6">
-                        {icon}
-                    </div>
+                    {icon}
                 </div>
                 <div className="min-w-0">
                     <h1 className="text-2xl sm:text-3xl font-bold truncate">{title}</h1>
