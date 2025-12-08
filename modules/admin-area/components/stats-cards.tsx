@@ -5,39 +5,55 @@ import { Users, Menu, Shield, Activity } from "lucide-react"
 
 interface StatsCardsProps {
   menuCount: number
+  menuVisibleCount: number
   userCount: number
   activeUsers: number
+  userTrend: number
+  adminCount: number
 }
 
-export function StatsCards({ menuCount, userCount, activeUsers }: StatsCardsProps) {
+export function StatsCards({
+  menuCount,
+  menuVisibleCount,
+  userCount,
+  activeUsers,
+  userTrend,
+  adminCount
+}: StatsCardsProps) {
+  const activeUserPercentage = userCount > 0 ? Math.round((activeUsers / userCount) * 100) : 0;
+
   const stats = [
     {
       title: "Total de menus",
       value: menuCount,
       icon: Menu,
-      description: "Menus activos",
-      trend: "+2 nuevos esta semana",
+      description: "Menus configurados",
+      trend: `${menuVisibleCount} visibles / ${menuCount} total`,
+      trendColor: "text-muted-foreground"
     },
     {
       title: "Total de usuarios",
       value: userCount,
       icon: Users,
       description: "Usuarios en esta area",
-      trend: "+1 nuevo usuario",
+      trend: userTrend > 0 ? `+${userTrend} nuevos esta semana` : "Sin nuevos usuarios esta semana",
+      trendColor: userTrend > 0 ? "text-green-600" : "text-muted-foreground"
     },
     {
       title: "Total de usuarios activos",
       value: activeUsers,
       icon: Activity,
-      description: "Usuarios activos en esta area",
-      trend: `${Math.round((activeUsers / userCount) * 100)}% de usuarios activos`,
+      description: "Usuarios con estado activo",
+      trend: `${activeUserPercentage}% de usuarios activos`,
+      trendColor: activeUserPercentage > 80 ? "text-green-600" : (activeUserPercentage > 50 ? "text-yellow-600" : "text-red-600")
     },
     {
-      title: "Total de roles de administrador",
-      value: 4,
+      title: "Administradores",
+      value: adminCount,
       icon: Shield,
-      description: "Roles disponibles",
-      trend: "Sin cambios",
+      description: "Usuarios con rol admin",
+      trend: "Total en esta área",
+      trendColor: "text-muted-foreground"
     },
   ]
 
@@ -52,7 +68,7 @@ export function StatsCards({ menuCount, userCount, activeUsers }: StatsCardsProp
           <CardContent>
             <div className="text-2xl font-bold">{stat.value}</div>
             <p className="text-xs text-muted-foreground mt-1">{stat.description}</p>
-            <p className="text-xs text-green-600 mt-1">{stat.trend}</p>
+            <p className={`text-xs mt-1 ${stat.trendColor}`}>{stat.trend}</p>
           </CardContent>
         </Card>
       ))}

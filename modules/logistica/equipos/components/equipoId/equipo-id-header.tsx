@@ -1,12 +1,14 @@
 "use client"
 
 import { AlertCircle, CheckCircle2, Edit, FileText, Fuel, Radio, Truck, Wrench, XCircle } from "lucide-react"
+import { useOperadores } from "@/modules/logistica/bdd/operadores/hooks/use-estaciones"
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { EstadoEquipos } from "@/modules/logistica/bdd/equipos/enum/estado-equipos"
 import { Equipo } from "@/modules/logistica/bdd/equipos/types/equipos"
 import { getStatusColor } from "../../constants/colores-equipos"
 import EquipoImageDialog from "./equipo-image-dialog"
 import { Separator } from "@/components/ui/separator"
+import { useAuth } from "@/context/auth-context"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { useRouter } from "next/navigation"
@@ -27,7 +29,11 @@ const EquipoIdHeader = ({
     numMantenimientos,
     url
 }: EquipoIdHeaderProps) => {
+    const { userBdd } = useAuth()
+    const { operadores } = useOperadores()
     const router = useRouter()
+
+    const operadorActual = operadores.find((operador) => operador.idEquipo === equipo?.id)
 
     return (
         <Card className="overflow-hidden border-2">
@@ -64,29 +70,31 @@ const EquipoIdHeader = ({
                                     <span className="text-muted-foreground">ID: {equipo?.id}</span>
                                 </CardDescription>
                             </div>
-                            <div className="flex gap-2 flex-wrap items-center">
-                                <Button size={"sm"} onClick={() => router.push(url || "")}>
-                                    <Edit />
-                                    Editar
-                                </Button>
-                                <Badge variant={equipo?.activo ? "default" : "secondary"} className="h-fit text-sm px-3 py-1.5">
-                                    {equipo?.activo ? (
-                                        <CheckCircle2 className="w-4 h-4 mr-1.5" />
-                                    ) : (
-                                        <XCircle className="w-4 h-4 mr-1.5" />
-                                    )}
-                                    {equipo?.activo ? "Activo" : "Inactivo"}
-                                </Badge>
-                                {equipo?.gpsActivo && (
-                                    <Badge
-                                        variant="outline"
-                                        className="h-fit text-sm px-3 py-1.5 border-green-500/50 bg-green-500/10"
-                                    >
-                                        <Radio className="w-4 h-4 mr-1.5 text-green-600 dark:text-green-400" />
-                                        GPS Activo
+                            {operadorActual ? null : (
+                                <div className="flex gap-2 flex-wrap items-center">
+                                    <Button size={"sm"} onClick={() => router.push(url || "")}>
+                                        <Edit />
+                                        Editar
+                                    </Button>
+                                    <Badge variant={equipo?.activo ? "default" : "secondary"} className="h-fit text-sm px-3 py-1.5">
+                                        {equipo?.activo ? (
+                                            <CheckCircle2 className="w-4 h-4 mr-1.5" />
+                                        ) : (
+                                            <XCircle className="w-4 h-4 mr-1.5" />
+                                        )}
+                                        {equipo?.activo ? "Activo" : "Inactivo"}
                                     </Badge>
-                                )}
-                            </div>
+                                    {equipo?.gpsActivo && (
+                                        <Badge
+                                            variant="outline"
+                                            className="h-fit text-sm px-3 py-1.5 border-green-500/50 bg-green-500/10"
+                                        >
+                                            <Radio className="w-4 h-4 mr-1.5 text-green-600 dark:text-green-400" />
+                                            GPS Activo
+                                        </Badge>
+                                    )}
+                                </div>
+                            )}
                         </div>
 
                         <Separator />

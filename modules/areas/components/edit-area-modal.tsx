@@ -54,10 +54,8 @@ const EditAreaModal = ({
         try {
             setIsLoading(true)
 
-            console.log(data);
-
             toast.promise(
-                updateArea(empresaId, data), {
+                updateArea(empresaId, area.correoContacto || "", data), {
                 loading: "Actualizando el area, favor de esperar...",
                 success: (result) => {
                     if (result.success) {

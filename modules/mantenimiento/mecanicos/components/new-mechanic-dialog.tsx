@@ -2,12 +2,14 @@
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { MecanicoSchema, MecanicoSchemaType } from "../schemas/mecanico.schema"
+import SubmitButton from "@/components/global/submit-button"
+import { EstadoMecanico } from "../../types/mecanico"
 import { zodResolver } from "@hookform/resolvers/zod"
+import { writeMecanico } from "../actions/write"
+import MechanicForm from "./mechanic-form"
 import { useForm } from "react-hook-form"
 import { useState } from "react"
 import { toast } from "sonner"
-import MechanicForm from "./mechanic-form"
-import SubmitButton from "@/components/global/submit-button"
 
 interface NewMechanicDialogProps {
     open: boolean
@@ -25,7 +27,7 @@ const NewMechanicDialog = ({ open, setOpenDialog }: NewMechanicDialogProps) => {
             telefono: "",
             email: "",
             activo: true,
-            estado: "DISPONIBLE"
+            estado: EstadoMecanico.DISPONIBLE
         }
     })
 
@@ -33,6 +35,23 @@ const NewMechanicDialog = ({ open, setOpenDialog }: NewMechanicDialogProps) => {
         try {
             setIsSubmitting(true)
 
+            toast.promise(writeMecanico({
+                activo: true,
+                apellidos: data.apellido,
+                email: data.email,
+                estado: EstadoMecanico.DISPONIBLE,
+                nombre: data.nombre,
+                telefono: data.telefono,
+                historial: [],
+                mantenimientosAsignados: []
+            }), {
+                loading: "Creando mecanico...",
+                success: "Mecanico creado exitosamente",
+                error: "Error al crear el mecanico"
+            })
+
+            form.reset()
+            setOpenDialog(false)
         } catch (error) {
             console.log(error)
             toast.error("Error al crear el mecanico")

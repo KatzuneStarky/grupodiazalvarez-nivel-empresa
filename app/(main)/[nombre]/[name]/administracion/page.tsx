@@ -14,6 +14,8 @@ import { useArea } from "@/context/area-context"
 import { useTime } from "@/context/time-context"
 import { useDate } from "@/context/date-context"
 import { Badge } from "@/components/ui/badge"
+import { RolUsuario } from "@/enum/user-roles"
+import { parseFirebaseDate } from "@/utils/parse-timestamp-date"
 
 const AdministracionPage = () => {
     const { usuarios, loading: userLoading } = useUsuarios()
@@ -27,8 +29,22 @@ const AdministracionPage = () => {
 
     // Derived state (calculated directly)
     const menuCount = menus?.length || 0
+    const menuVisibleCount = menus?.filter(m => m.visible).length || 0
     const userCount = usuariosEmpresActual.length
     const activeUsers = usuariosEmpresActual.filter((u) => u.estado === "activo").length
+
+    // Calculate new users in the last 7 days
+    const oneWeekAgo = new Date();
+    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+    const userTrend = usuariosEmpresActual.filter(u => {
+        if (!parseFirebaseDate(u.creadoEn)) return false;
+        const createdDate = parseFirebaseDate(u.creadoEn);
+        return createdDate >= oneWeekAgo;
+    }).length;
+
+    const adminCount = usuariosEmpresActual.filter(u =>
+        u.rol === RolUsuario.Admin || u.rol === RolUsuario.Super_Admin
+    ).length;
 
     return (
         <div className="min-h-screen">
@@ -89,8 +105,21 @@ const AdministracionPage = () => {
                         </CardContent>
                     </Card>
                 </div>
-                <StatsCards menuCount={menuCount} userCount={userCount} activeUsers={activeUsers} />
-                <QuickActions areaId={area?.id || ""} empresaName={empresa?.nombre || ""} />
+                <StatsCards
+                    menuCount={menuCount}
+                    menuVisibleCount={menuVisibleCount}
+                    userCount={userCount}
+                    activeUsers={activeUsers}
+                    userTrend={userTrend}
+                    adminCount={adminCount}
+                />
+                <QuickActions
+                    areaId={area?.id || ""}
+                    empresaName={empresa?.nombre || ""}
+                    empresaId={empresa?.id || ""}
+                    users={usuariosEmpresActual}
+                    menus={menus || []}
+                />
 
                 <div className="space-y-8">
                     <MenuManagement

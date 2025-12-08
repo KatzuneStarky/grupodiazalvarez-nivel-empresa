@@ -6,7 +6,7 @@ export interface Mantenimiento {
     id: string;
     fecha: Date;
     kmMomento: number;
-    mecanico?: string;
+    mecanicoId?: string;
     notas?: string;
     tipoServicio?: string; // e.g., "Cambio de Aceite", "Revisión General"
     tipoMantenimiento?: 'Preventivo' | 'Correctivo' | 'Predictivo' | 'Emergencia'; // Added more specific type
@@ -14,7 +14,6 @@ export interface Mantenimiento {
     fechaProximo?: Date;
     proximoKm?: number; // Added next km for maintenance
     equipoId?: string;
-    equipo?: Equipo | null;
     Evidencia?: Evidencia[];
     mantenimientoData?: MantenimientoData[];
     createAt: Date;

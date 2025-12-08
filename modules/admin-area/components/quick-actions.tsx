@@ -1,12 +1,47 @@
 "use client"
 
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { exportArea } from "@/functions/excel-export/area/export/export-area"
+import EditAreaModal from "@/modules/areas/components/edit-area-modal"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Menu } from "@/modules/menus/types/menu-sistema"
 import { Cog, Download, Plus, UserPlus } from "lucide-react"
+import InviteUserDialog from "./invite-user-dialog"
 import { Button } from "@/components/ui/button"
 import CreateAreaMenuForm from "./menu-form"
+import { useArea } from "@/context/area-context"
+import { SystemUser } from "@/types/usuario"
+import { AreaInput } from "@/types/area"
+import { toast } from "sonner"
 
-const QuickActions = ({ areaId, empresaName }: { areaId: string, empresaName: string }) => {
+interface QuickActionsProps {
+    areaId: string
+    empresaName: string
+    empresaId: string
+    users: SystemUser[]
+    menus: Menu[]
+}
+
+const QuickActions = ({ areaId, empresaName, empresaId, users, menus }: QuickActionsProps) => {
+    const { area } = useArea()
+
+    const handleExport = () => {
+        if (!area) {
+            toast.error("Datos del área no disponibles")
+            return
+        }
+        try {
+            toast.promise(exportArea(area, menus, users), {
+                loading: "Exportando datos...",
+                success: "Datos exportados correctamente",
+                error: "Error al exportar datos"
+            })
+        } catch (error) {
+            console.error(error)
+            toast.error("Error inesperado al exportar")
+        }
+    }
+
     return (
         <Card>
             <CardHeader>
@@ -44,73 +79,56 @@ const QuickActions = ({ areaId, empresaName }: { areaId: string, empresaName: st
                         </DialogContent>
                     </Dialog>
 
-                    <Dialog>
-                        <DialogTrigger asChild>
-                            <Button variant={"outline"} className="h-auto p-4 flex flex-col items-start space-y-2">
-                                <UserPlus className="h-5 w-5" />
-                                <div className="text-left">
-                                    <div className="font-medium text-sm">Invitar usuario</div>
-                                    <div className="text-xs text-muted-foreground">
-                                        Invita un nuevo usuario a tu área
-                                    </div>
+                    <InviteUserDialog empresaId={empresaId} areaId={areaId}>
+                        <Button variant={"outline"} className="h-auto p-4 flex flex-col items-start space-y-2 w-full">
+                            <UserPlus className="h-5 w-5" />
+                            <div className="text-left">
+                                <div className="font-medium text-sm">Invitar usuario</div>
+                                <div className="text-xs text-muted-foreground">
+                                    Invita un nuevo usuario a tu área
                                 </div>
-                            </Button>
-                        </DialogTrigger>
-                        <DialogContent className="max-w-md">
-                            <DialogHeader>
-                                <DialogTitle>
-                                </DialogTitle>
-                                <DialogDescription>
-                                </DialogDescription>
-                            </DialogHeader>
-                        </DialogContent>
-                    </Dialog>
+                            </div>
+                        </Button>
+                    </InviteUserDialog>
 
-                    <Dialog>
-                        <DialogTrigger asChild>
-                            <Button variant={"outline"} className="h-auto p-4 flex flex-col items-start space-y-2">
-                                <Download className="h-5 w-5" />
-                                <div className="text-left">
-                                    <div className="font-medium text-sm">Exportar datos</div>
-                                    <div className="text-xs text-muted-foreground">
-                                        Exportar datos del area actual
-                                    </div>
-                                </div>
-                            </Button>
-                        </DialogTrigger>
-                        <DialogContent className="max-w-md">
-                            <DialogHeader>
-                                <DialogTitle>
-                                </DialogTitle>
-                                <DialogDescription>
-                                </DialogDescription>
-                            </DialogHeader>
-                        </DialogContent>
-                    </Dialog>
+                    <Button
+                        variant={"outline"}
+                        className="h-auto p-4 flex flex-col items-start space-y-2"
+                        onClick={handleExport}
+                        disabled={!area}
+                    >
+                        <Download className="h-5 w-5" />
+                        <div className="text-left">
+                            <div className="font-medium text-sm">Exportar datos</div>
+                            <div className="text-xs text-muted-foreground">
+                                Exportar todos los datos del area
+                            </div>
+                        </div>
+                    </Button>
 
-                    <Dialog>
-                        <DialogTrigger asChild>
-                            <Button variant={"outline"} className="h-auto p-4 flex flex-col items-start space-y-2">
+                    {area ? (
+                        <EditAreaModal empresaId={empresaId} area={area as unknown as AreaInput}>
+                            <Button variant={"outline"} className="h-auto p-4 flex flex-col items-start space-y-2 w-full">
                                 <Cog className="h-5 w-5" />
                                 <div className="text-left">
                                     <div className="font-medium text-sm">Configurar area</div>
                                     <div className="text-xs text-muted-foreground text-wrap">
-                                        Configuracion del area actual,
-                                        aqui puedes cambiar el nombre,
-                                        la descripcion y la imagen del area.
+                                        Configuracion del area actual
                                     </div>
                                 </div>
                             </Button>
-                        </DialogTrigger>
-                        <DialogContent className="max-w-md">
-                            <DialogHeader>
-                                <DialogTitle>
-                                </DialogTitle>
-                                <DialogDescription>
-                                </DialogDescription>
-                            </DialogHeader>
-                        </DialogContent>
-                    </Dialog>
+                        </EditAreaModal>
+                    ) : (
+                        <Button variant={"outline"} disabled className="h-auto p-4 flex flex-col items-start space-y-2">
+                            <Cog className="h-5 w-5" />
+                            <div className="text-left">
+                                <div className="font-medium text-sm">Configurar area</div>
+                                <div className="text-xs text-muted-foreground">
+                                    Cargando datos...
+                                </div>
+                            </div>
+                        </Button>
+                    )}
                 </div>
             </CardContent>
         </Card>

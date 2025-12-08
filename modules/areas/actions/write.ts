@@ -66,13 +66,13 @@ export async function writeArea(
     }
 }
 
-export const updateArea = async (empresaId: string, area: AreaInput):
+export const updateArea = async (empresaId: string, currentEmail: string, area: AreaInput):
     Promise<{ success: boolean, message: string, error?: Error }> => {
     try {
         const areaRef = collection(db, "empresas", empresaId, "areas");
         const queryData = query(
             areaRef,
-            where("correoContacto", "==", area.correoContacto)
+            where("correoContacto", "==", currentEmail)
         );
         const querySnapshot = await getDocs(queryData);
 
@@ -98,7 +98,7 @@ export const updateArea = async (empresaId: string, area: AreaInput):
         const areas: AreaInput[] = empresaData.areas || [];
 
         const updatedAreas = areas.map((a) =>
-            a.correoContacto === area.correoContacto
+            a.correoContacto === currentEmail
                 ? { ...a, ...area }
                 : a
         );

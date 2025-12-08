@@ -1,6 +1,7 @@
 "use client"
 
 import NewMechanicDialog from "@/modules/mantenimiento/mecanicos/components/new-mechanic-dialog"
+import MechanicCard from "@/modules/mantenimiento/mecanicos/components/mechanic-card"
 import { useMecanicos } from "@/modules/mantenimiento/mecanicos/hooks/use-mecanicos"
 import { useEquipos } from "@/modules/logistica/bdd/equipos/hooks/use-equipos"
 import PageTitle from "@/components/custom/page-title"
@@ -47,18 +48,16 @@ const MecanicosPage = () => {
             <Separator className="my-4" />
 
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                {/**
-                 * {mecanicosFiltrados.map((mecanico) => (
+                {mecanicos.map((mecanico) => (
                     <MechanicCard
                         key={mecanico.id}
                         mecanico={mecanico}
-                        mantenimientos={getMechanicMaintenances(mecanico.id)}
+                        mantenimientos={[]}
                     />
                 ))}
-                 */}
             </div>
 
-            {mecanicosFiltrados.length === 0 && (
+            {mecanicos.length === 0 && (
                 <div className="text-center py-12">
                     <p className="text-muted-foreground text-lg">No se encontraron mecánicos con los filtros seleccionados</p>
                 </div>

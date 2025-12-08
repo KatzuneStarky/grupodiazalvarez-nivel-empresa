@@ -5,10 +5,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { MecanicoSchemaType } from "../schemas/mecanico.schema"
 import { Separator } from "@/components/ui/separator"
 import { UseFormReturn } from "react-hook-form"
+import { Switch } from "@/components/ui/switch"
 import { Mecanico } from "../../types/mecanico"
 import { Input } from "@/components/ui/input"
 import React from "react"
-import { Switch } from "@/components/ui/switch"
 
 interface MechanicFormProps {
     onSubmit: (data: MecanicoSchemaType) => void

@@ -1,3 +1,4 @@
+import { EmpresaAccessWrapper } from '@/components/guards/area-access-wrapper';
 import { EmpresaProvider } from '@/context/empresa-context';
 import React from 'react'
 
@@ -20,7 +21,9 @@ const EmpresaLayout = async ({
 
     return (
         <EmpresaProvider empresaName={decodedName}>
-            {children}
+            <EmpresaAccessWrapper>
+                {children}
+            </EmpresaAccessWrapper>
         </EmpresaProvider>
     );
 };

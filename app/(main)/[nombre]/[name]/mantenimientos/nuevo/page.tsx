@@ -8,6 +8,7 @@ import UploadEvidencia from "@/modules/mantenimiento/mantenimientos/components/u
 import { Camera, Check, CheckCircle2, ChevronsUpDown, Trash, Truck, Wrench } from "lucide-react";
 import { tipoServicio } from "@/modules/mantenimiento/mantenimientos/constants/tipo-servicio";
 import { writeMantenimiento } from "@/modules/mantenimiento/mantenimientos/actions/write";
+import { useMecanicos } from "@/modules/mantenimiento/mecanicos/hooks/use-mecanicos";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useEquipos } from "@/modules/logistica/bdd/equipos/hooks/use-equipos";
 import { DatePickerForm } from "@/components/custom/date-picker-form";
@@ -26,6 +27,7 @@ import { toast } from "sonner";
 const NuevoMantenimientoPage = () => {
     const [mantenimientoId, setMantenimientoId] = useState<string | null>(null);
     const [isSubmiting, setIsSubmiting] = useState<boolean>(false);
+    const { mecanicos } = useMecanicos()
     const { equipos } = useEquipos()
     const router = useRouter()
 
@@ -37,10 +39,13 @@ const NuevoMantenimientoPage = () => {
             fecha: new Date(),
             fechaProximo: new Date(),
             kmMomento: 0,
-            mecanico: "",
+            mecanicoId: "",
             notas: "",
             tipoServicio: "",
             mantenimientoData: [],
+            estado: "Pendiente",
+            tipoMantenimiento: "Preventivo",
+            proximoKm: 0,
         }
     })
 
@@ -201,7 +206,7 @@ const NuevoMantenimientoPage = () => {
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-4">
                         <FormField
                             control={form.control}
-                            name="mecanico"
+                            name="mecanicoId"
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel className="text-sm font-medium">Mecanico</FormLabel>

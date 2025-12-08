@@ -6,6 +6,7 @@ export interface Invitacion {
     rol: RolUsuario,
     empresaId: string,
     empresaName: string,
+    areaId?: string,
     creadaEn: Date,
     expiraEn: Date,
     usada: boolean,

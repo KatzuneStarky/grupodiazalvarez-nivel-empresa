@@ -31,6 +31,7 @@ export const inviteNewUser = async (data: Omit<Invitacion, "id" | "creadaEn" | "
             rol: data.rol,
             empresaId: data.empresaId,
             empresaName: data.empresaName,
+            ...(data.areaId && { areaId: data.areaId }),
             creadaEn: new Date(),
             expiraEn: expirationDate,
             usada: false,
