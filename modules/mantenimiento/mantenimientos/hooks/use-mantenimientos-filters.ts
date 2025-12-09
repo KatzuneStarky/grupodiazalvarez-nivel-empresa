@@ -51,7 +51,7 @@ export const useMantenimientosFilters = () => {
 
             const matchesMecanico =
                 mecFilter === "all" ||
-                (mantenimiento.mecanico ?? "").toLowerCase().includes(mecFilter);
+                (mantenimiento.mecanicoId ?? "").toLowerCase().includes(mecFilter);
 
             const matchesEquipo = equipoId === "all" || mantenimiento.equipoId === equipoId;
 
@@ -63,9 +63,9 @@ export const useMantenimientosFilters = () => {
                 term === "" ||
                 (mantenimiento.notas ?? "").toLowerCase().includes(term) ||
                 (mantenimiento.kmMomento ?? 0).toString().includes(term) ||
-                (mantenimiento.mecanico ?? "").toLowerCase().includes(term) ||
+                (mantenimiento.mecanicoId ?? "").toLowerCase().includes(term) ||
                 (mantenimiento.tipoServicio ?? "").toLowerCase().includes(term) ||
-                (mantenimiento.equipo?.numEconomico ?? "").toLowerCase().includes(term);
+                (mantenimiento.equipoId ?? "").toLowerCase().includes(term);
 
             return matchesTipo && matchesMecanico && matchesEquipo && matchesKm && matchSearch;
         });
@@ -90,7 +90,7 @@ export const useMantenimientosFilters = () => {
         }
     }, [mantenimientos])
 
-    const uniqueMecanicos = [...new Set(mantenimientos.map(m => m.mecanico || ""))];
+    const uniqueMecanicos = [...new Set(mantenimientos.map(m => m.mecanicoId || ""))];
 
     const numEconomicoEquipo = (equipoId: string): string => {
         return equipos.find((e) => e.id === equipoId)?.numEconomico || ""
