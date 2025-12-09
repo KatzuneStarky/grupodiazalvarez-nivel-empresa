@@ -4,8 +4,8 @@ import { useMantenimientosFilters } from "@/modules/mantenimiento/mantenimientos
 import { AlertTriangle, Calendar, CheckCircle, Clock, Edit, Eye, FileText, Gauge, Trash, User, Wrench, WrenchIcon } from "lucide-react"
 import MantenimientoDialog from "@/modules/mantenimiento/mantenimientos/components/mantenimiento-dialog"
 import MantenimientosFilters from "@/modules/mantenimiento/mantenimientos/components/filters"
-import { Mantenimiento } from "@/modules/logistica/bdd/equipos/types/mantenimiento"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Mantenimiento } from "@/modules/logistica/bdd/equipos/types/mantenimiento"
 import { parseFirebaseDate } from "@/utils/parse-timestamp-date"
 import { useDirectLink } from "@/hooks/use-direct-link"
 import { Separator } from "@/components/ui/separator"
@@ -190,13 +190,15 @@ const MantenimientosRegistrosPage = () => {
                                         <span className="font-semibold text-foreground">{mantenimiento.kmMomento.toLocaleString()} km</span>
                                     </div>
 
-                                    {mantenimiento.mecanico && (
+                                    {/**
+                                     * {mantenimiento.mecanico && (
                                         <div className="flex items-center gap-2 text-sm">
                                             <User className="w-4 h-4 text-muted-foreground" />
                                             <span className="font-medium text-muted-foreground">Mecánico:</span>
                                             <span className="font-semibold text-foreground">{mantenimiento.mecanico}</span>
                                         </div>
                                     )}
+                                     */}
 
                                     {mantenimiento.mantenimientoData && mantenimiento.mantenimientoData.length > 0 && (
                                         <div className="flex items-center gap-2 text-sm">

@@ -107,7 +107,7 @@ const MantenimientosTablePage = () => {
                                 <TableCell>{numEconomicoEquipo(m.equipoId || "")}</TableCell>
                                 <TableCell>{format(parseFirebaseDate(m.fecha), "PPP", { locale: es })}</TableCell>
                                 <TableCell>{m.kmMomento}KM</TableCell>
-                                <TableCell>{m.mecanico}</TableCell>
+                                <TableCell>{m.mecanicoId}</TableCell>
                                 <TableCell>{format(parseFirebaseDate(m.fechaProximo), "PPP", { locale: es })}</TableCell>
                                 <TableCell>{m.tipoServicio}</TableCell>
                                 <TableCell>
