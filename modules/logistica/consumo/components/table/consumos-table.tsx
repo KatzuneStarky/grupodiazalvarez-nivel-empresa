@@ -13,7 +13,7 @@ interface ConsumoTableProps {
     setCurrentPage: React.Dispatch<React.SetStateAction<number>>
     handleSort: (field: SortField) => void
     currentData: ConsumoData[]
-    sortIcon: JSX.ElementType
+    sortIcon: React.ElementType
     sortedData: ConsumoData[]
     currentPage: number
     totalPages: number
