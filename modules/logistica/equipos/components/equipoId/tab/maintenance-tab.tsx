@@ -105,7 +105,6 @@ const MaintenanceTab = ({
                         {equipo?.mantenimientos && equipo?.mantenimientos.filter((m) =>
                             !searchTerm ||
                             m.tipoServicio?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                            m.mecanico?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                             m.notas?.toLowerCase().includes(searchTerm.toLowerCase()),
                         )
                             .sort((a, b) => parseFirebaseDate(b.fecha).getTime() - parseFirebaseDate(a.fecha).getTime())
@@ -147,7 +146,8 @@ const MaintenanceTab = ({
                                             </div>
                                         </CardHeader>
                                         <CardContent className="space-y-6 pt-6">
-                                            {mantenimiento.mecanico && (
+                                            {/**
+                                             * {mantenimiento.mecanico && (
                                                 <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50 border">
                                                     <div className="p-2 rounded-lg bg-primary/10">
                                                         <Wrench className="w-5 h-5 text-primary" />
@@ -158,6 +158,7 @@ const MaintenanceTab = ({
                                                     </div>
                                                 </div>
                                             )}
+                                             */}
 
                                             {mantenimiento.notas && (
                                                 <div className="space-y-2">
@@ -236,7 +237,7 @@ const MaintenanceTab = ({
                                                         ))}
                                                     </div>
                                                 </div>
-                                            ): (
+                                            ) : (
                                                 <div>
                                                     <p className="text-sm font-semibold text-muted-foreground uppercase tracking-wide flex items-center gap-2">
                                                         <ImageIcon className="w-4 h-4" />
