@@ -53,11 +53,11 @@ const MantenimientoDialog = ({
                                     </div>
                                 </div>
                                 <div className="space-y-3">
-                                    {selectedRecord.mecanico && (
+                                    {selectedRecord.mecanicoId && (
                                         <div className="flex items-center gap-2">
                                             <User className="w-4 h-4 text-muted-foreground" />
                                             <span className="font-medium">Mecánico:</span>
-                                            <span>{selectedRecord.mecanico}</span>
+                                            <span>{selectedRecord.mecanicoId}</span>
                                         </div>
                                     )}
                                 </div>
