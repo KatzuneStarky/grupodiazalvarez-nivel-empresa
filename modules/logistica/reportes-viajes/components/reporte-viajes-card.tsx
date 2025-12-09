@@ -8,7 +8,7 @@ import { es } from "date-fns/locale"
 import { format } from "date-fns"
 
 interface ReporteViajesCardProps {
-    getStatusBadge: (value: string) => JSX.Element
+    getStatusBadge: (value: string) => React.ReactNode
     report: ReporteViajes
 }
 
