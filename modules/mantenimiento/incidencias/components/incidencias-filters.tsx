@@ -3,6 +3,7 @@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import NuevaIncidenciaDialog from "./nueva-incidencia-dialog"
 import { CalendarIcon, Filter, Search } from "lucide-react"
 import { incidenciaEstadoMap } from "../types/incidencias"
 import { Calendar } from "@/components/ui/calendar"
@@ -18,6 +19,8 @@ interface InicidenciasFiltersProps {
     dateRange?: DateRange
     filterEstado: string
     searchTerm: string
+    operadorId: string
+    equipoId: string
 }
 
 const IncidenciasFilters = ({
@@ -26,7 +29,9 @@ const IncidenciasFilters = ({
     setDateRange,
     filterEstado,
     searchTerm,
+    operadorId,
     dateRange,
+    equipoId,
 }: InicidenciasFiltersProps) => {
     const handleClearFilters = () => {
         setSearchTerm("")
@@ -43,6 +48,10 @@ const IncidenciasFilters = ({
                             <Search className="h-4 w-4" />
                             Búsqueda y Filtros
                         </div>
+                        <NuevaIncidenciaDialog
+                            operadorId={operadorId}
+                            equipoId={equipoId}
+                        />
                     </div>
                 </CardTitle>
             </CardHeader>

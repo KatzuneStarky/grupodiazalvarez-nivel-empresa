@@ -12,18 +12,18 @@ export const useAllOperatorData = () => {
     const [filterEstado, setFilterEstado] = useState<string>("")
     const [searchTerm, setSearchTerm] = useState<string>("")
 
-    const { incidencias } = useIncidencias()
     const { operadores } = useOperadores()
     const { currentUser } = useAuth()
+    const email = currentUser?.email?.toLowerCase()
+    const operadorActual = operadores.find((operador) => operador.email.toLowerCase() === email)
+
+    const { data } = useEquipoDataById(operadorActual?.idEquipo || "")
+    const { incidencias } = useIncidencias(operadorActual?.idEquipo || "")
 
     const incidenciasOrdenadas = useMemo(() => {
         return [...incidencias].sort((a, b) => parseFirebaseDate(a.creadtedAt).getTime() - parseFirebaseDate(b.creadtedAt).getTime());
     }, [incidencias]);
 
-    const email = currentUser?.email?.toLowerCase()
-    const operadorActual = operadores.find((operador) => operador.email.toLowerCase() === email)
-
-    const { data } = useEquipoDataById(operadorActual?.idEquipo || "")
 
     useEffect(() => {
         if (incidencias.length === 0) return;
@@ -46,7 +46,7 @@ export const useAllOperatorData = () => {
             if (dateRange?.to && fecha > endOfDay(dateRange.to)) return false;
 
             const matchEstado =
-                estado === ""
+                estado === "all"
                 || incidencia.estado.toLowerCase().includes(estado)
 
             const matchSearch =
@@ -57,7 +57,7 @@ export const useAllOperatorData = () => {
 
             return matchSearch && matchEstado
         });
-    }, [incidenciasOrdenadas, searchTerm]);
+    }, [incidenciasOrdenadas, searchTerm, filterEstado]);
 
     return {
         mantenimientosData: data.equipo?.mantenimientos,

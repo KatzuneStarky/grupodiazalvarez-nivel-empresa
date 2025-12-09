@@ -93,7 +93,7 @@ const MantenimientosCalendarioPage = () => {
     const handleDateClick = (arg: DateClickArg) => {
         const equipo = selectedGroup !== "all"
             ? filteredEquipos.find(e => e.grupoUnidad === selectedGroup) || null
-            : null            
+            : null
 
         const calendarEvent: CalendarEvent = {
             id: "new",
@@ -328,7 +328,7 @@ const MantenimientosCalendarioPage = () => {
                                             <span className="font-semibold text-foreground">Mecánico Asignado</span>
                                         </div>
                                         <p className="text-lg font-medium text-foreground">
-                                            {selectedEvent?.resource.mantenimiento?.mecanico || "No asignado"}
+                                            {selectedEvent?.resource.mantenimiento?.mecanicoId || "No asignado"}
                                         </p>
                                     </CardContent>
                                 </Card>
