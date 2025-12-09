@@ -84,7 +84,7 @@ const MaintenanceSchedule = ({ maintenanceRecords }: MaintenanceScheduleProps) =
                                         </div>
                                         <div className="flex items-center gap-1.5 text-muted-foreground">
                                             <User className="h-3.5 w-3.5" />
-                                            <span>{record.mecanico}</span>
+                                            <span>{record.mecanicoId}</span>
                                         </div>
                                     </div>
 
