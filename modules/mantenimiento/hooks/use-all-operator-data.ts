@@ -6,6 +6,9 @@ import { endOfDay, isValid, startOfDay } from "date-fns"
 import { useEffect, useMemo, useState } from "react"
 import { useAuth } from "@/context/auth-context"
 import { DateRange } from "react-day-picker"
+import { RolUsuario } from "@/enum/user-roles"
+import { useAllIncidencias } from "../incidencias/hooks/use-all-incidencias"
+import { useEquipos } from "@/modules/logistica/bdd/equipos/hooks/use-equipos"
 
 export const useAllOperatorData = () => {
     const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined)
@@ -13,26 +16,36 @@ export const useAllOperatorData = () => {
     const [searchTerm, setSearchTerm] = useState<string>("")
 
     const { operadores } = useOperadores()
-    const { currentUser } = useAuth()
+    const { equipos } = useEquipos()
+    const { currentUser, userBdd } = useAuth()
     const email = currentUser?.email?.toLowerCase()
     const operadorActual = operadores.find((operador) => operador.email.toLowerCase() === email)
 
+    const isAdmin = userBdd?.rol === RolUsuario.Admin || userBdd?.rol === RolUsuario.Super_Admin
+
     const { data } = useEquipoDataById(operadorActual?.idEquipo || "")
-    const { incidencias } = useIncidencias(operadorActual?.idEquipo || "")
+
+    // Fetch individual operator incidences
+    const { incidencias: operatorIncidencias } = useIncidencias(operadorActual?.idEquipo || "")
+    // Fetch ALL incidences (for admins)
+    const { incidencias: allIncidencias } = useAllIncidencias()
+
+    // Determine which set of incidences to use
+    const activeIncidencias = isAdmin ? allIncidencias : operatorIncidencias
 
     const incidenciasOrdenadas = useMemo(() => {
-        return [...incidencias].sort((a, b) => parseFirebaseDate(a.creadtedAt).getTime() - parseFirebaseDate(b.creadtedAt).getTime());
-    }, [incidencias]);
+        return [...activeIncidencias].sort((a, b) => parseFirebaseDate(a.creadtedAt).getTime() - parseFirebaseDate(b.creadtedAt).getTime());
+    }, [activeIncidencias]);
 
 
     useEffect(() => {
-        if (incidencias.length === 0) return;
-        const fechas = incidencias.map(e => parseFirebaseDate(e.creadtedAt).getTime());
+        if (activeIncidencias.length === 0) return;
+        const fechas = activeIncidencias.map(e => parseFirebaseDate(e.creadtedAt).getTime());
         setDateRange({
             from: new Date(Math.min(...fechas)),
             to: new Date(Math.max(...fechas)),
         });
-    }, [incidencias]);
+    }, [activeIncidencias]);
 
     const filteredIncidencias = useMemo(() => {
         const term = searchTerm.trim().toLowerCase();
@@ -57,7 +70,7 @@ export const useAllOperatorData = () => {
 
             return matchSearch && matchEstado
         });
-    }, [incidenciasOrdenadas, searchTerm, filterEstado]);
+    }, [incidenciasOrdenadas, searchTerm, filterEstado, dateRange]);
 
     return {
         mantenimientosData: data.equipo?.mantenimientos,
@@ -69,9 +82,11 @@ export const useAllOperatorData = () => {
         setSearchTerm,
         setDateRange,
         filterEstado,
-        incidencias,
+        incidencias: activeIncidencias,
         operadores,
+        equipos, // Return all equipments
         searchTerm,
         dateRange,
+        userBdd,
     }
 }

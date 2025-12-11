@@ -1,4 +1,4 @@
-import { IncidenciaSchema } from "../schema/incidencia.schema";
+import { OrdenMantenimiento } from "@/modules/mantenimiento/types/orden-mantenimiento";
 import { Incidencia } from "../types/incidencias";
 import { doc, setDoc } from "firebase/firestore";
 import { db } from "@/firebase/client";
@@ -9,25 +9,6 @@ export const writeIncidencia = async (incidencia: Omit<Incidencia, "id" | "cread
     try {
         const newId = uuidv7()
         const now = new Date()
-
-        {/**
-            const incidenciaSchema = IncidenciaSchema.safeParse(incidencia)
-        if (!incidenciaSchema.success) {
-            throw new Error(incidenciaSchema.error.message);
-        }
-
-        if (!incidencia || Object.keys(incidencia).length === 0) {
-            throw new Error("Los datos de la incidencia no pueden estar vacíos.");
-        } */}
-
-        {/**
-            if (!incidencia.equipoId || !incidencia.operadorId) {
-            return {
-                success: false,
-                message: "Error al escribir la incidencia",
-                error: "No se proporciono el equipoId o el operadorId"
-            }
-        } */}
 
         const incidenciaRef = doc(db, "equipos", equipoId, "incidencias", newId)
         await setDoc(incidenciaRef, {
@@ -49,6 +30,23 @@ export const writeIncidencia = async (incidencia: Omit<Incidencia, "id" | "cread
             })
             await Promise.all(evidenciaWrite)
         }
+
+        const ordenId = uuidv7()
+        const ordenRef = doc(db, "ordenes-mantenimiento", ordenId)
+
+        const ordenData: OrdenMantenimiento = {
+            id: ordenId,
+            incidenciaId: newId,
+            equipoId: equipoId,
+            estado: 'Pendiente',
+            prioridad: incidencia.severidad,
+            descripcionProblema: incidencia.descripcion,
+            fechaCreacion: now,
+            createAt: now,
+            updateAt: now,
+        }
+
+        await setDoc(ordenRef, ordenData)
 
         return {
             success: true,

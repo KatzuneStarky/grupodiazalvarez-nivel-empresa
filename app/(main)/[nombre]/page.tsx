@@ -35,7 +35,6 @@ const MainPage = () => {
                 return
             }
 
-            // Verificar si el usuario pertenece a la empresa
             const userInCompany = empresa.usuarios?.some((u: any) =>
                 (typeof u === 'string' ? u === userBdd.uid : u.uid === userBdd.uid)
             )
@@ -85,6 +84,8 @@ const MainPage = () => {
     }
     const { hours, minutes, seconds } = formatTime(elapsedTime)
 
+    const hasNoCompany = !userBdd?.empresaId
+
     if (loading) return <LoadingState message='Verificando permisos' />
 
     return (
@@ -92,7 +93,58 @@ const MainPage = () => {
             <div className='absolute top-2 right-2'>
                 <AnimatedToggleMode />
             </div>
-            {isValidUser === false && (
+
+            {hasNoCompany ? (
+                <div className="min-h-screen flex items-center justify-center p-4">
+                    <Card className="w-full max-w-lg">
+                        <CardHeader className="text-center space-y-4">
+                            <div className="mx-auto w-16 h-16 bg-yellow-100 dark:bg-yellow-900/20 rounded-full flex items-center justify-center">
+                                <Clock className="w-8 h-8 text-yellow-600 dark:text-yellow-500" />
+                            </div>
+                            <div>
+                                <CardTitle className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                                    Esperando asignación
+                                </CardTitle>
+                                <CardDescription className="text-gray-600 dark:text-gray-400 mt-2">
+                                    Tu cuenta ha sido creada exitosamente, pero aún no tienes una empresa asignada.
+                                    <br />
+                                    Por favor espera a que un administrador te asigne.
+                                </CardDescription>
+                            </div>
+                        </CardHeader>
+
+                        <CardContent className="space-y-6">
+                            <div className="text-center">
+                                <div className="flex items-center justify-center gap-2 mb-2">
+                                    <Clock className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+                                    <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Tiempo en espera</span>
+                                </div>
+                                <div className="font-mono text-3xl font-bold text-gray-900 dark:text-gray-100 tracking-wider">
+                                    {hours}:{minutes}:{seconds}
+                                </div>
+                                <div className="flex justify-center gap-4 mt-2 text-xs text-gray-500 dark:text-gray-400">
+                                    <span>Horas</span>
+                                    <span>Minutos</span>
+                                    <span>Segundos</span>
+                                </div>
+                            </div>
+
+                            <div className="border-t pt-6">
+                                <p className="text-sm text-gray-600 dark:text-gray-300 text-center mb-4">
+                                    Si crees que esto es un error, por favor contacta al soporte técnico.
+                                </p>
+
+                                <Link href="/" className="w-full">
+                                    <Button variant="outline" className="w-full">
+                                        <Home className="w-4 h-4 mr-2" />
+                                        Regresar al inicio
+                                    </Button>
+                                </Link>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </div>
+            ) : isValidUser === false ? (
                 <div className="min-h-screen flex items-center justify-center p-4">
                     <Card className="w-full max-w-lg">
                         <CardHeader className="text-center space-y-4">
@@ -166,7 +218,7 @@ const MainPage = () => {
                         </CardContent>
                     </Card>
                 </div>
-            )}
+            ) : null}
         </div>
     )
 }

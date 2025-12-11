@@ -12,7 +12,14 @@ export const useRedirectUserByCompanyArea = () => {
     const areasHook = useAreasByEmpresa(userBdd?.empresaId || "");
 
     useEffect(() => {
-        if (!userBdd || !empresas || empresas.length === 0) return;
+        if (!userBdd) return;
+
+        if (!userBdd.empresaId) {
+            router.push(`/${userBdd.nombre}`);
+            return;
+        }
+
+        if (!empresas || empresas.length === 0) return;
 
         const empresa = empresas.find(e => e.id === userBdd.empresaId);
         if (!empresa || !areasHook.areas) return;

@@ -21,6 +21,7 @@ interface InicidenciasFiltersProps {
     searchTerm: string
     operadorId: string
     equipoId: string
+    isAdmin: boolean
 }
 
 const IncidenciasFilters = ({
@@ -32,6 +33,7 @@ const IncidenciasFilters = ({
     operadorId,
     dateRange,
     equipoId,
+    isAdmin
 }: InicidenciasFiltersProps) => {
     const handleClearFilters = () => {
         setSearchTerm("")
@@ -48,10 +50,12 @@ const IncidenciasFilters = ({
                             <Search className="h-4 w-4" />
                             Búsqueda y Filtros
                         </div>
-                        <NuevaIncidenciaDialog
-                            operadorId={operadorId}
-                            equipoId={equipoId}
-                        />
+                        {isAdmin ? null : (
+                            <NuevaIncidenciaDialog
+                                operadorId={operadorId}
+                                equipoId={equipoId}
+                            />
+                        )}
                     </div>
                 </CardTitle>
             </CardHeader>

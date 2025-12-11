@@ -2,6 +2,7 @@
 
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { CheckCircle, Shield, User, Mail, Fingerprint, Loader2 } from "lucide-react";
 import { useRedirectUserByCompanyArea } from "@/hooks/use-redirect-user-to-area";
 import { registrationTypes } from "@/modules/auth/constants/registration-types";
 import { UserSchema, UserSchemaType } from "@/modules/auth/schema/user.schema";
@@ -13,18 +14,18 @@ import { estadoUsuario } from "@/modules/auth/enum/estado-usuario";
 import { LoadingState } from "@/components/skeleton/loading-state";
 import { LogoutButton } from "@/components/global/logout-button";
 import useUserRegisterBy from "@/hooks/use-user-register-by";
+import { useRouter, useSearchParams } from "next/navigation";
 import { writeUser } from "@/modules/auth/actions/write";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Controller, useForm } from "react-hook-form";
 import { Separator } from "@/components/ui/separator";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { CheckCircle, Shield } from "lucide-react";
 import { useTime } from "@/context/time-context";
 import { useAuth } from "@/context/auth-context";
 import { Button } from "@/components/ui/button";
 import { RolUsuario } from "@/enum/user-roles";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -138,281 +139,242 @@ const UsuarioPage = () => {
     if (!auth.currentUser) return <LoadingState message='Verificando usuario' />
 
     return (
-        <div className="container mx-auto py-8 px-4">
-            <div className="absolute flex gap-2 top-2 right-2">
-                <AnimatedToggleMode />
-                {auth?.currentUser ? <LogoutButton /> : null}
-            </div>
-
-            <Card className="max-w-4xl mx-auto">
-                <CardHeader>
-                    <CardTitle>Registro de usuario</CardTitle>
-                    <CardDescription>
-                        Complete su información para registrarse en el sistema.
-                    </CardDescription>
+        <div className="h-screen w-full flex items-center justify-center p-4 bg-muted/20">
+            <Card className="w-full max-w-[1600px] h-[90vh] lg:h-[85vh] flex flex-col overflow-hidden shadow-xl border-t-4 border-t-primary">
+                <CardHeader className="border-b bg-card py-4 px-6 shrink-0 flex flex-row items-center justify-between space-y-0">
+                    <div>
+                        <CardTitle className="text-xl">Registro de usuario</CardTitle>
+                        <CardDescription>
+                            Complete su información para registrarse en el sistema.
+                        </CardDescription>
+                    </div>
+                    <div className="flex gap-2">
+                        <AnimatedToggleMode />
+                        {auth?.currentUser ? <LogoutButton /> : null}
+                    </div>
                 </CardHeader>
-                <CardContent>
+
+                <CardContent className="flex-1 p-0 overflow-hidden">
                     <Form {...form}>
-                        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-                            <div className="grid grid-cols-1 gap-4 p-4 bg-muted/50 rounded-lg border">
-                                <div className="space-y-2">
-                                    <Label className="text-sm font-medium text-muted-foreground">Firebase UID</Label>
-                                    <Input value={auth?.currentUser?.uid} disabled className="bg-muted font-mono text-sm" />
-                                    <p className="text-xs text-muted-foreground">
-                                        Este ID esta generado automaticamente por firebase
-                                    </p>
-                                </div>
-                            </div>
-
-                            <div className="space-y-4">
-                                <h3 className="text-lg font-semibold border-b pb-2">Informacion personal</h3>
-
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <FormField
-                                        control={form.control}
-                                        name="email"
-                                        render={({ field }) => (
-                                            <FormItem className="space-y-2 cursor-not-allowed">
-                                                <FormLabel className="text-sm font-medium">
-                                                    Correo electronico
-                                                    <span className="text-destructive ml-1">*</span>
-                                                </FormLabel>
-                                                <FormControl>
-                                                    <Input
-                                                        type="email"
-                                                        placeholder="usuario@correo.com"
-                                                        className="h-10"
-                                                        disabled
-                                                        {...field}
-                                                    />
-                                                </FormControl>
-                                                <FormDescription className="text-xs">
-                                                    Correo electronico que se usara para el inicio de sesion.
-                                                </FormDescription>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-
-                                    <FormField
-                                        control={form.control}
-                                        name="nombre"
-                                        render={({ field }) => (
-                                            <FormItem className="space-y-2">
-                                                <FormLabel className="text-sm font-medium">Full Name</FormLabel>
-                                                <FormControl>
-                                                    <Input placeholder="Nombre..." className="h-10" {...field} />
-                                                </FormControl>
-                                                <FormDescription className="text-xs">
-                                                    Nombre completo del usuario.
-                                                </FormDescription>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                </div>
-
-                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                                    <div className="w-full max-w-md space-y-6 mx-auto">
-                                        <div className="p-6 rounded-lg shadow-md">
-                                            {/**
-                                             * <div className="mb-4 flex flex-wrap gap-2 items-center justify-center">
-                                                <label className="flex items-center space-x-2 text-sm">
-                                                    <input
-                                                        type="checkbox"
-                                                        checked={showFileInfo}
-                                                        onChange={(e) => setShowFileInfo(e.target.checked)}
-                                                        className="rounded border-gray-300 cursor-pointer" />
-                                                    <span>Mostrar detalles de la imagen</span>
-                                                </label>
-
-                                                <label className="flex items-center space-x-2 text-sm">
-                                                    <input
-                                                        type="checkbox"
-                                                        checked={useCamera}
-                                                        onChange={(e) => setUseCamera(e.target.checked)}
-                                                        className="rounded border-gray-300 cursor-pointer" />
-                                                    <span>Usar cámara (móvil)</span>
-                                                </label>
+                        <form onSubmit={form.handleSubmit(onSubmit)} className="h-full flex flex-col lg:grid lg:grid-cols-12 divide-y lg:divide-y-0 lg:divide-x">
+                            {/* Left Column: Personal Info (Sidebar style) */}
+                            <div className="lg:col-span-4 h-full bg-muted/10">
+                                <ScrollArea className="h-full">
+                                    <div className="p-6 space-y-6">
+                                        {/* Image Upload Section */}
+                                        <div className="flex flex-col items-center justify-center space-y-4">
+                                            <div className="relative group">
+                                                <UploadImage
+                                                    path={auth?.currentUser?.uid ? `empleados/${auth.currentUser.uid}` : "empleados"}
+                                                    id={auth?.currentUser?.uid || ""}
+                                                    image={imageUrl}
+                                                    onImageUpload={handleImageUpload}
+                                                    uploadText="Foto de perfil"
+                                                    uploadSubtext=""
+                                                    maxFileSize={5 * 1024 * 1024}
+                                                    showFileName={false}
+                                                    showFileInfo={false}
+                                                    useCamera={useCamera}
+                                                    showFileTypeIcon={false}
+                                                />
                                             </div>
-                                             */}
+                                            <div className="text-center">
+                                                <p className="text-sm font-medium">Foto de Perfil</p>
+                                                <p className="text-xs text-muted-foreground">Requerida para identificación</p>
+                                            </div>
+                                        </div>
 
-                                            <UploadImage
-                                                path={auth?.currentUser?.uid ? `empleados/${auth.currentUser.uid}` : "empleados"}
-                                                id={auth?.currentUser?.uid || ""}
-                                                image={imageUrl}
-                                                onImageUpload={handleImageUpload}
-                                                uploadText="Subir imagen"
-                                                uploadSubtext="JPG, PNG or WebP (max 5MB)"
-                                                maxFileSize={5 * 1024 * 1024}
-                                                showFileName={true}
-                                                showFileInfo={showFileInfo}
-                                                useCamera={useCamera}
-                                                showFileTypeIcon={true}
+                                        <Separator />
+
+                                        {/* Basic Fields */}
+                                        <div className="space-y-4">
+                                            <div className="space-y-2">
+                                                <Label className="text-xs font-semibold text-muted-foreground uppercase flex items-center gap-1">
+                                                    <Fingerprint className="w-3 h-3" /> UID (Firebase)
+                                                </Label>
+                                                <div className="bg-muted p-2.5 rounded-md text-xs font-mono truncate" title={auth?.currentUser?.uid}>
+                                                    {auth?.currentUser?.uid}
+                                                </div>
+                                            </div>
+
+                                            <FormField
+                                                control={form.control}
+                                                name="email"
+                                                render={({ field }) => (
+                                                    <FormItem className="space-y-1">
+                                                        <FormLabel className="text-xs uppercase font-semibold text-muted-foreground flex items-center gap-1">
+                                                            <Mail className="w-3 h-3" /> Correo electrónico
+                                                        </FormLabel>
+                                                        <FormControl>
+                                                            <Input {...field} disabled className="bg-muted text-sm h-9" />
+                                                        </FormControl>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
+
+                                            <FormField
+                                                control={form.control}
+                                                name="nombre"
+                                                render={({ field }) => (
+                                                    <FormItem className="space-y-1">
+                                                        <FormLabel className="text-xs uppercase font-semibold text-muted-foreground flex items-center gap-1">
+                                                            <User className="w-3 h-3" /> Nombre Completo
+                                                        </FormLabel>
+                                                        <FormControl>
+                                                            <Input placeholder="Tu nombre..." {...field} className="h-9" />
+                                                        </FormControl>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
+
+                                            <DatePickerForm<UserSchemaType>
+                                                label="Fecha de nacimiento"
+                                                name="fechaNacimiento"
+                                                disabled={isLoading}
                                             />
                                         </div>
-
-                                        {imageUrl && (
-                                            <div className="p-4 bg-gray-50 rounded-lg">
-                                                <p className="text-sm font-medium dark:text-gray-800">Url de la imagen en base de datos:</p>
-                                                <p className="text-xs text-gray-700 break-all mt-1">{imageUrl}</p>
-                                            </div>
-                                        )}
                                     </div>
+                                </ScrollArea>
+                            </div>
 
-                                    <DatePickerForm<UserSchemaType>
-                                        label="Fecha de nacimiento"
-                                        name="fechaNacimiento"
-                                        disabled={isLoading}
-                                    />
-                                </div>
-
-                                <div className="pt-4 pb-2">
-                                    <Separator />
-                                </div>
-
-                                <Controller
-                                    control={form.control}
-                                    name="tipoRegistro"
-                                    render={({ field }) => (
-                                        <RadioGroup
-                                            className="grid grid-cols-1 lg:grid-cols-2 gap-4"
-                                            value={field.value}
-                                            onValueChange={field.onChange}
-                                        >
-                                            {registrationTypes.map((type) => {
-                                                const Icon = type.icon
-                                                const isSelected =
-                                                    registerProvider === "google.com"
-                                                        ? type.id === isRegisterByGoogle
-                                                        : type.id === isRegisterByEmail
-                                                return (
-                                                    <div key={type.id} className="relative">
-                                                        <RadioGroupItem value={type.id} id={type.id} className="peer sr-only" />
-                                                        <div
-                                                            onClick={() => field.onChange(type.id)}
-                                                            className={cn(
-                                                                "flex flex-col rounded-xl border-2 p-6 cursor-pointer transition-all duration-300",
-                                                                "hover:shadow-lg hover:scale-[1.02] hover:border-primary/50",
-                                                                isSelected
-                                                                    ? "border-primary bg-primary/5 shadow-md"
-                                                                    : "border-muted bg-card hover:bg-accent/50"
-                                                            )}
-                                                        >
-                                                            <div className="flex items-start justify-between mb-4">
-                                                                <div
-                                                                    className={cn(
-                                                                        "p-3 rounded-full transition-colors",
-                                                                        type.bgColor,
-                                                                        type.borderColor,
-                                                                        "border"
-                                                                    )}
-                                                                >
-                                                                    <Icon className={cn("h-6 w-6", type.iconColor)} />
-                                                                </div>
-
-                                                                {isSelected && (
-                                                                    <div className="absolute top-3 right-3 p-1 rounded-full bg-primary">
-                                                                        <CheckCircle className="h-4 w-4 text-primary-foreground" />
-                                                                    </div>
-                                                                )}
-                                                            </div>
-
-                                                            <div className="space-y-3 flex-1">
-                                                                <div className="space-y-1">
-                                                                    <h3 className="font-semibold text-base leading-tight">
-                                                                        {type.title}
-                                                                    </h3>
-                                                                    <p className="text-sm text-muted-foreground">{type.subtitle}</p>
-                                                                </div>
-
-                                                                <p className="text-xs text-muted-foreground leading-relaxed">
-                                                                    {type.description}
-                                                                </p>
-
-                                                                <div className="space-y-1">
-                                                                    {type.features.map((feature, index) => (
-                                                                        <div key={index} className="flex items-center gap-2">
-                                                                            <Shield className="h-3 w-3 text-green-600" />
-                                                                            <span className="text-xs text-muted-foreground">{feature}</span>
-                                                                        </div>
-                                                                    ))}
-                                                                </div>
-                                                            </div>
-
-                                                            <div
-                                                                className={cn(
-                                                                    "mt-4 h-1 rounded-full transition-colors",
-                                                                    isSelected ? "bg-primary" : "bg-muted"
-                                                                )}
-                                                            />
-                                                        </div>
+                            {/* Right Column: Registration Type & System Info */}
+                            <div className="lg:col-span-8 h-full flex flex-col bg-background">
+                                <ScrollArea className="flex-1">
+                                    <div className="p-6 lg:p-8 space-y-8">
+                                        <FormField
+                                            control={form.control}
+                                            name="tipoRegistro"
+                                            render={({ field }) => (
+                                                <FormItem className="space-y-4">
+                                                    <div>
+                                                        <h3 className="text-lg font-semibold flex items-center gap-2">
+                                                            <Shield className="w-5 h-5 text-primary" />
+                                                            Tipo de Registro
+                                                        </h3>
+                                                        <p className="text-sm text-muted-foreground">Selecciona el perfil que mejor describa tu rol en la organización.</p>
                                                     </div>
-                                                )
-                                            })}
-                                        </RadioGroup>
-                                    )}
-                                />
 
-                                <div className="space-y-4">
-                                    <h3 className="text-lg font-semibold border-b pb-2">Informacion en sistema</h3>
+                                                    <FormControl>
+                                                        <RadioGroup
+                                                            className="grid grid-cols-1 xl:grid-cols-2 gap-4"
+                                                            value={field.value}
+                                                            onValueChange={field.onChange}
+                                                        >
+                                                            {registrationTypes.map((type) => {
+                                                                const Icon = type.icon
+                                                                const isSelected =
+                                                                    registerProvider === "google.com"
+                                                                        ? type.id === isRegisterByGoogle
+                                                                        : type.id === isRegisterByEmail
+                                                                return (
+                                                                    <div key={type.id} className="relative">
+                                                                        <RadioGroupItem value={type.id} id={type.id} className="peer sr-only" />
+                                                                        <div
+                                                                            onClick={() => field.onChange(type.id)}
+                                                                            className={cn(
+                                                                                "flex flex-col h-full rounded-xl border-2 p-5 cursor-pointer transition-all duration-300",
+                                                                                "hover:shadow-md hover:border-primary/50 relative overflow-hidden",
+                                                                                isSelected
+                                                                                    ? "border-primary bg-primary/5 shadow-md"
+                                                                                    : "border-muted bg-card hover:bg-accent/50"
+                                                                            )}
+                                                                        >
+                                                                            {isSelected && (
+                                                                                <div className="absolute top-0 right-0 p-2 bg-primary rounded-bl-xl z-10">
+                                                                                    <CheckCircle className="h-4 w-4 text-primary-foreground" />
+                                                                                </div>
+                                                                            )}
+                                                                            <div className="flex items-start gap-4 mb-3">
+                                                                                <div
+                                                                                    className={cn(
+                                                                                        "p-2.5 rounded-lg shrink-0",
+                                                                                        type.bgColor,
+                                                                                        type.borderColor,
+                                                                                        "border"
+                                                                                    )}
+                                                                                >
+                                                                                    <Icon className={cn("h-6 w-6", type.iconColor)} />
+                                                                                </div>
+                                                                                <div>
+                                                                                    <h3 className="font-semibold text-base leading-tight">
+                                                                                        {type.title}
+                                                                                    </h3>
+                                                                                    <p className="text-xs text-muted-foreground mt-1">{type.subtitle}</p>
+                                                                                </div>
+                                                                            </div>
 
-                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-4 bg-muted/30 rounded-lg border">
-                                        <div className="space-y-1">
-                                            <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                                                Creado el
-                                            </Label>
-                                            <p className="text-sm font-mono bg-background px-2 py-1 rounded border">
-                                                {new Date().toLocaleDateString()}
-                                            </p>
-                                            <p className="text-xs text-muted-foreground">
-                                                Hora actual: {formattedTime}
-                                            </p>
-                                        </div>
+                                                                            <div className="space-y-2 mt-auto">
+                                                                                <p className="text-xs text-muted-foreground">
+                                                                                    {type.description}
+                                                                                </p>
+                                                                                <div className="space-y-1 pt-2 border-t border-dashed">
+                                                                                    {type.features.map((feature, index) => (
+                                                                                        <div key={index} className="flex items-center gap-2">
+                                                                                            <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
+                                                                                            <span className="text-[10px] text-muted-foreground uppercase tracking-wide font-medium">{feature}</span>
+                                                                                        </div>
+                                                                                    ))}
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                )
+                                                            })}
+                                                        </RadioGroup>
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
 
-                                        <div className="space-y-1">
-                                            <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                                                Ultima actualizacion
-                                            </Label>
-                                            <p className="text-sm font-mono bg-background px-2 py-1 rounded border">
-                                                Agregado al registrar
-                                            </p>
-                                            <p className="text-xs text-muted-foreground">Auto actualizable</p>
-                                        </div>
+                                        <Separator />
 
-                                        <div className="space-y-1">
-                                            <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                                                Estado del registro
-                                            </Label>
-                                            <div className="flex items-center gap-2">
-                                                <div className="w-2 h-2 rounded-full bg-green-500"></div>
-                                                <p className="text-sm">Nuevo registro</p>
+                                        {/* System Info Block */}
+                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                            <div className="p-4 bg-muted/30 rounded-lg border text-center md:text-left">
+                                                <span className="text-xs font-semibold text-muted-foreground uppercase">Fecha Registro</span>
+                                                <p className="font-mono text-sm mt-1">{new Date().toLocaleDateString()}</p>
                                             </div>
-                                            <p className="text-xs text-muted-foreground">Listo para crear</p>
+                                            <div className="p-4 bg-muted/30 rounded-lg border text-center md:text-left">
+                                                <span className="text-xs font-semibold text-muted-foreground uppercase">Estado</span>
+                                                <div className="flex items-center justify-center md:justify-start gap-2 mt-1">
+                                                    <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                                                    <p className="font-mono text-sm">Nuevo</p>
+                                                </div>
+                                            </div>
+                                            <div className="p-4 bg-muted/30 rounded-lg border text-center md:text-left">
+                                                <span className="text-xs font-semibold text-muted-foreground uppercase">Auto-Sync</span>
+                                                <p className="font-mono text-sm mt-1 text-green-600">Active</p>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
+                                </ScrollArea>
 
-                                <div className="grid grid-cols-1 gap-4 pt-6 border-t">
-                                    <Button
-                                        type="submit"
-                                        className="h-12 text-base font-medium"
-                                        disabled={form.formState.isSubmitting}
-                                    >
-                                        {form.formState.isSubmitting ? (
-                                            <div className="flex items-center gap-2">
-                                                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                                                Registrando usuario...
-                                            </div>
-                                        ) : (
-                                            "Registrar usuario"
-
-                                        )}
-                                    </Button>
-
-                                    <p className="text-xs text-center text-muted-foreground">
-                                        Al registrarse como usuario aceptas que los datos sean correctos
-                                    </p>
+                                {/* Footer / Submit Section */}
+                                <div className="p-6 border-t bg-muted/5 mt-auto shrink-0">
+                                    <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+                                        <p className="text-xs text-muted-foreground text-center md:text-left">
+                                            Al registrarse, acepta los términos y condiciones de la plataforma.
+                                            <br />Sus datos serán procesados de acuerdo a nuestra política de privacidad.
+                                        </p>
+                                        <Button
+                                            type="submit"
+                                            size="lg"
+                                            className="w-full md:w-auto min-w-[200px]"
+                                            disabled={form.formState.isSubmitting}
+                                        >
+                                            {form.formState.isSubmitting ? (
+                                                <>
+                                                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                                    Registrando...
+                                                </>
+                                            ) : (
+                                                "Confirmar Registro"
+                                            )}
+                                        </Button>
+                                    </div>
                                 </div>
                             </div>
                         </form>

@@ -6,14 +6,18 @@ import { useMecanicos } from "@/modules/mantenimiento/mecanicos/hooks/use-mecani
 import { useEquipos } from "@/modules/logistica/bdd/equipos/hooks/use-equipos"
 import PageTitle from "@/components/custom/page-title"
 import { Separator } from "@/components/ui/separator"
+import { useAuth } from "@/context/auth-context"
 import { Button } from "@/components/ui/button"
 import Icon from "@/components/global/icon"
 import { useMemo, useState } from "react"
 
 const MecanicosPage = () => {
     const [openDialog, setOpenDialog] = useState<boolean>(false)
-    const { mecanicos, loading, error } = useMecanicos()
+    const { mecanicos } = useMecanicos()
     const { equipos } = useEquipos()
+    const { currentUser } = useAuth()
+
+    const currentMecanico = mecanicos.find(mecanico => mecanico.email === currentUser?.email)
 
     const equiposConMantenimiento = useMemo(() => {
         return equipos

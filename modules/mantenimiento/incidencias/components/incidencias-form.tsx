@@ -1,26 +1,30 @@
 "use client"
 
-import { incidenciaCategoriaMap, incidenciaEstadoMap, incidenciaSeveridadMap, incidenciaTipoMap } from "../types/incidencias"
-import { MapPin, Loader2, Gauge, Upload, FileImage, FileVideo, File as FileIcon, X } from "lucide-react"
+import { MapPin, Loader2, Gauge, Upload, FileImage, FileVideo, File as FileIcon, X, Info } from "lucide-react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
-import { getDownloadURL, ref as storageRef, uploadBytesResumable } from "firebase/storage"
 import { useOperadores } from "@/modules/logistica/bdd/operadores/hooks/use-estaciones"
-import { EvidenciaSchemaType } from "../../mantenimientos/schemas/mantenimiento.schema"
-import React, { useEffect, useImperativeHandle, forwardRef, useState } from "react"
 import { useEquipos } from "@/modules/logistica/bdd/equipos/hooks/use-equipos"
 import { DatePickerForm } from "@/components/custom/date-picker-form"
 import { IncidenciaSchemaType } from "../schema/incidencia.schema"
+import { incidenciaTipoMap } from "../types/incidencias"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import MapPicker from "@/components/custom/map-picker"
 import { Separator } from "@/components/ui/separator"
 import { Textarea } from "@/components/ui/textarea"
+import React, { useEffect, useState } from "react"
 import { UseFormReturn } from "react-hook-form"
 import { Button } from "@/components/ui/button"
 import { Switch } from "@/components/ui/switch"
 import { Input } from "@/components/ui/input"
-import { storage } from "@/firebase/client"
 import { toast } from "sonner"
+import { cn } from "@/lib/utils"
+
+export interface PendingFile {
+    file: File
+    preview: string
+    id: string
+}
 
 interface IncidenciasFormProps {
     onSubmit: (data: IncidenciaSchemaType) => void
@@ -30,20 +34,29 @@ interface IncidenciasFormProps {
     isSubmitting: boolean
     operadorId: string
     equipoId: string
+    pendingFiles?: PendingFile[]
+    handleFileChange?: (event: React.ChangeEvent<HTMLInputElement>) => void
+    handleRemovePendingFile?: (id: string) => void
+    uploadProgress?: Record<string, number>
 }
 
-export interface IncidenciasFormRef {
-    uploadPendingFiles: () => Promise<EvidenciaSchemaType[]>
-    hasPendingFiles: () => boolean
+// Rules for auto-calculating fields based on Incidencia Tipo
+const incidentRules: Record<string, { severidad: string, categoria: string, operable: boolean }> = {
+    'Mecanica': { severidad: 'Media', categoria: 'Mantenimiento', operable: true },
+    'Electrica': { severidad: 'Media', categoria: 'Mantenimiento', operable: true },
+    'Frenos': { severidad: 'Alta', categoria: 'Seguridad', operable: false },
+    'Motor': { severidad: 'Alta', categoria: 'Mantenimiento', operable: false },
+    'Neumaticos': { severidad: 'Media', categoria: 'Mantenimiento', operable: true },
+    'Transmision': { severidad: 'Alta', categoria: 'Mantenimiento', operable: false },
+    'Fuga': { severidad: 'Media', categoria: 'Mantenimiento', operable: true },
+    'Tanque': { severidad: 'Alta', categoria: 'Combustible', operable: true },
+    'GPS': { severidad: 'Baja', categoria: 'Operativa', operable: true },
+    'Documentacion': { severidad: 'Baja', categoria: 'Documentos', operable: true },
+    'Accidente': { severidad: 'Critica', categoria: 'Seguridad', operable: false },
+    'Otro': { severidad: 'Baja', categoria: 'Operativa', operable: true },
 }
 
-interface PendingFile {
-    file: File
-    preview: string
-    id: string
-}
-
-const IncidenciasForm = forwardRef<IncidenciasFormRef, IncidenciasFormProps>(({
+const IncidenciasForm = ({
     incidenciaId,
     isSubmitting,
     submitButton,
@@ -51,7 +64,11 @@ const IncidenciasForm = forwardRef<IncidenciasFormRef, IncidenciasFormProps>(({
     onSubmit,
     equipoId,
     form,
-}, ref) => {
+    pendingFiles = [],
+    handleFileChange,
+    handleRemovePendingFile,
+    uploadProgress = {}
+}: IncidenciasFormProps) => {
     const [isLoadingLocation, setIsLoadingLocation] = useState(false)
     const [currentLocation, setCurrentLocation] = useState<{ lat: number; lng: number } | undefined>(
         form.getValues("ubicacion") ? {
@@ -59,22 +76,34 @@ const IncidenciasForm = forwardRef<IncidenciasFormRef, IncidenciasFormProps>(({
             lng: form.getValues("ubicacion")?.longitud!
         } : undefined
     )
-    const [pendingFiles, setPendingFiles] = useState<PendingFile[]>([])
-    const [uploadProgress, setUploadProgress] = useState<Record<string, number>>({})
-    const [isUploading, setIsUploading] = useState(false)
     const { operadores } = useOperadores()
     const { equipos } = useEquipos()
 
-    const numEconomico
-        = equipos?.find((equipo) => equipo.id === equipoId)?.numEconomico
+    const numEconomico = equipos?.find((equipo) => equipo.id === equipoId)?.numEconomico
+    const operador = operadores?.find((operador) => operador.id === operadorId)
 
-    const operador
-        = operadores?.find((operador) => operador.id === operadorId)
+    // Watch for changes in Tipo to auto-calculate fields
+    const selectedTipo = form.watch("tipo")
 
+    useEffect(() => {
+        if (selectedTipo && incidentRules[selectedTipo]) {
+            const rule = incidentRules[selectedTipo]
+
+            // We use standard values that match the schema types
+            // Explicitly casting or ensuring they match the expected enum strings
+            form.setValue("severidad", rule.severidad as any)
+            form.setValue("categoria", rule.categoria as any)
+            form.setValue("operable", rule.operable)
+        }
+    }, [selectedTipo, form])
 
     useEffect(() => {
         form.setValue("equipoId", equipoId)
         form.setValue("operadorId", operadorId)
+        // Ensure default state is set if not present
+        if (!form.getValues("estado")) {
+            form.setValue("estado", "Reportada")
+        }
     }, [equipoId, form, operadorId])
 
     const handleGetLocation = () => {
@@ -86,7 +115,6 @@ const IncidenciasForm = forwardRef<IncidenciasFormRef, IncidenciasFormProps>(({
                     setCurrentLocation({ lat: latitude, lng: longitude })
 
                     try {
-                        // Reverse geocoding using Nominatim (OpenStreetMap)
                         const response = await fetch(
                             `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`
                         )
@@ -100,7 +128,6 @@ const IncidenciasForm = forwardRef<IncidenciasFormRef, IncidenciasFormProps>(({
                         })
                     } catch (error) {
                         console.error("Error fetching address:", error)
-                        // Fallback if reverse geocoding fails
                         form.setValue("ubicacion", {
                             latitud: latitude,
                             longitud: longitude,
@@ -144,7 +171,6 @@ const IncidenciasForm = forwardRef<IncidenciasFormRef, IncidenciasFormProps>(({
                 direccionAproximada: address
             })
         } catch (error) {
-            // Fallback
             form.setValue("ubicacion", {
                 latitud: lat,
                 longitud: lng,
@@ -153,105 +179,13 @@ const IncidenciasForm = forwardRef<IncidenciasFormRef, IncidenciasFormProps>(({
         }
     }
 
-    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const files = Array.from(event.target.files || [])
-
-        const newPendingFiles: PendingFile[] = files.map((file) => ({
-            file,
-            preview: file.type.startsWith("image/") ? URL.createObjectURL(file) : "",
-            id: `${file.name}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
-        }))
-
-        setPendingFiles((prev) => [...prev, ...newPendingFiles])
-
-        event.target.value = ""
-    }
-
-    const handleRemovePendingFile = (id: string) => {
-        setPendingFiles((prev) => {
-            const fileToRemove = prev.find((f) => f.id === id)
-            if (fileToRemove?.preview) {
-                URL.revokeObjectURL(fileToRemove.preview)
-            }
-            return prev.filter((f) => f.id !== id)
-        })
-        setUploadProgress((prev) => {
-            const newProgress = { ...prev }
-            delete newProgress[id]
-            return newProgress
-        })
-    }
-
-    const uploadSingleFile = (pendingFile: PendingFile): Promise<EvidenciaSchemaType> => {
-        return new Promise((resolve, reject) => {
-            const path = `incidencias/${operadorId} - ${equipoId}`
-            const fileRef = storageRef(storage, `${path}/${pendingFile.file.name}`)
-            const uploadTask = uploadBytesResumable(fileRef, pendingFile.file)
-
-            uploadTask.on(
-                "state_changed",
-                (snapshot) => {
-                    const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100
-                    setUploadProgress((prev) => ({ ...prev, [pendingFile.id]: progress }))
-                },
-                (error) => {
-                    console.error("Error uploading file:", error)
-                    reject(error)
-                },
-                async () => {
-                    const url = await getDownloadURL(uploadTask.snapshot.ref)
-                    const evidencia: EvidenciaSchemaType = {
-                        nombre: pendingFile.file.name,
-                        ruta: url,
-                        tipo: pendingFile.file.type,
-                    }
-                    resolve(evidencia)
-                }
-            )
-        })
-    }
-
-    const uploadPendingFiles = async (): Promise<EvidenciaSchemaType[]> => {
-        if (pendingFiles.length === 0) return []
-
-        setIsUploading(true)
-        const uploadedEvidencias: EvidenciaSchemaType[] = []
-
-        try {
-            for (const pendingFile of pendingFiles) {
-                const evidencia = await uploadSingleFile(pendingFile)
-                uploadedEvidencias.push(evidencia)
-            }
-
-            // Limpiar previews
-            pendingFiles.forEach((f) => {
-                if (f.preview) URL.revokeObjectURL(f.preview)
-            })
-            setPendingFiles([])
-            setUploadProgress({})
-
-            toast.success(`${uploadedEvidencias.length} archivo(s) subido(s) correctamente`)
-            return uploadedEvidencias
-        } catch (error) {
-            toast.error("Error al subir algunos archivos")
-            throw error
-        } finally {
-            setIsUploading(false)
-        }
-    }
-
-    useImperativeHandle(ref, () => ({
-        uploadPendingFiles,
-        hasPendingFiles: () => pendingFiles.length > 0
-    }))
-
     useEffect(() => {
         return () => {
             pendingFiles.forEach((f) => {
                 if (f.preview) URL.revokeObjectURL(f.preview)
             })
         }
-    }, [])
+    }, [pendingFiles])
 
     const getFileTypeIcon = (tipo: string) => {
         if (tipo.startsWith("image/")) return <FileImage className="h-4 w-4 text-blue-500" />
@@ -261,61 +195,68 @@ const IncidenciasForm = forwardRef<IncidenciasFormRef, IncidenciasFormProps>(({
 
     return (
         <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)}>
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-                    <ScrollArea className="h-[750px] pr-4">
-                        <div className="space-y-4 px-1">
-                            <div className="flex items-center justify-end">
-                                <DatePickerForm
-                                    name="fecha"
-                                    label="Fecha de la incidencia"
-                                    startYear={new Date().getFullYear()}
-                                    endYear={new Date().getFullYear() + 1}
-                                    disabled={isSubmitting}
-                                />
-                            </div>
-                            <h3 className="text-xl text-muted-foreground mt-4">Datos generales</h3>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 h-full">
+                <div className="flex flex-col lg:grid lg:grid-cols-12 gap-4 lg:gap-6 h-full">
+                    <ScrollArea className="order-2 lg:order-1 lg:col-span-5 flex-1 lg:h-full min-h-0 rounded-md border p-4 bg-card/50">
+                        <div className="space-y-6 pr-4 pb-20">
+                            <div className="flex items-center justify-between pb-4 border-b">
                                 <div>
-                                    <p className="text-sm font-medium text-muted-foreground">Número Económico del Equipo:</p>
-                                    <p className="text-base font-semibold">{numEconomico || "N/A"}</p>
+                                    <h3 className="text-lg font-semibold flex items-center gap-2">
+                                        <Info className="h-5 w-5 text-primary" />
+                                        Información General
+                                    </h3>
+                                    <p className="text-sm text-muted-foreground">Detalles del reporte</p>
+                                </div>
+                                <div className="text-right">
+                                    <DatePickerForm
+                                        name="fecha"
+                                        label=""
+                                        startYear={new Date().getFullYear()}
+                                        endYear={new Date().getFullYear() + 1}
+                                        disabled={isSubmitting}
+                                        defaultToNow={true}
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4 text-sm bg-muted/40 p-3 rounded-lg border">
+                                <div>
+                                    <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Equipo</p>
+                                    <p className="font-semibold">{numEconomico || "N/A"}</p>
                                 </div>
                                 <div>
-                                    <p className="text-sm font-medium text-muted-foreground">Operador:</p>
-                                    <p className="text-base font-semibold">
+                                    <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Operador</p>
+                                    <p className="font-semibold truncate">
                                         {operador ? `${operador.nombres} ${operador.apellidos}` : "N/A"}
                                     </p>
                                 </div>
                             </div>
 
-                            <Separator className="my-4" />
-                            <h3 className="text-xl text-muted-foreground mt-4">Datos de la incidencia</h3>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                            <div className="space-y-4">
                                 <FormField
                                     control={form.control}
                                     name="tipo"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel>Tipo</FormLabel>
+                                            <FormLabel>Tipo de Incidencia</FormLabel>
                                             <Select
                                                 onValueChange={(value) => field.onChange(value)}
                                                 defaultValue={field.value}>
                                                 <FormControl>
-                                                    <SelectTrigger className="w-full">
-                                                        <SelectValue
-                                                            placeholder={field.value ? field.value : "Tipo de incidencia"}
-                                                        />
+                                                    <SelectTrigger className="w-full h-11">
+                                                        <SelectValue placeholder="Seleccionar tipo..." />
                                                     </SelectTrigger>
                                                 </FormControl>
-                                                <SelectContent className="z-[999]">
-                                                    {incidenciaTipoMap.map((estado, index) => (
+                                                <SelectContent className="z-[999] max-h-[300px]">
+                                                    {incidenciaTipoMap.map((tipo, index) => (
                                                         <SelectItem
-                                                            value={estado.value}
+                                                            value={tipo.value}
                                                             key={index}
-                                                            className={`text-${estado.color}`}
                                                         >
-                                                            <estado.icon className="ml-2" />
-                                                            {estado.label}
+                                                            <div className="flex items-center gap-2">
+                                                                <tipo.icon className={`h-4 w-4 text-${tipo.color}`} />
+                                                                {tipo.label}
+                                                            </div>
                                                         </SelectItem>
                                                     ))}
                                                 </SelectContent>
@@ -325,119 +266,43 @@ const IncidenciasForm = forwardRef<IncidenciasFormRef, IncidenciasFormProps>(({
                                     )}
                                 />
 
-                                <FormField
-                                    control={form.control}
-                                    name="severidad"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Severidad</FormLabel>
-                                            <Select
-                                                onValueChange={(value) => field.onChange(value)}
-                                                defaultValue={field.value}>
-                                                <FormControl>
-                                                    <SelectTrigger className="w-full">
-                                                        <SelectValue
-                                                            placeholder={field.value ? field.value : "Saeveridad de la incidencia"}
-                                                        />
-                                                    </SelectTrigger>
-                                                </FormControl>
-                                                <SelectContent className="z-[999]">
-                                                    {incidenciaSeveridadMap.map((estado, index) => (
-                                                        <SelectItem
-                                                            value={estado.value}
-                                                            key={index}
-                                                            className={`text-${estado.color}`}
-                                                        >
-                                                            <estado.icon className="ml-2" />
-                                                            {estado.label}
-                                                        </SelectItem>
-                                                    ))}
-                                                </SelectContent>
-                                            </Select>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-
-                                <FormField
-                                    control={form.control}
-                                    name="estado"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Estado</FormLabel>
-                                            <Select
-                                                onValueChange={(value) => field.onChange(value)}
-                                                defaultValue={field.value}>
-                                                <FormControl>
-                                                    <SelectTrigger className="w-full">
-                                                        <SelectValue
-                                                            placeholder={field.value ? field.value : "Estado de la incidencia"}
-                                                        />
-                                                    </SelectTrigger>
-                                                </FormControl>
-                                                <SelectContent className="z-[999]">
-                                                    {incidenciaEstadoMap.map((estado, index) => (
-                                                        <SelectItem
-                                                            value={estado.value}
-                                                            key={index}
-                                                            className={`text-${estado.color}`}
-                                                        >
-                                                            <estado.icon className="ml-2" />
-                                                            {estado.label}
-                                                        </SelectItem>
-                                                    ))}
-                                                </SelectContent>
-                                            </Select>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-
-                                <FormField
-                                    control={form.control}
-                                    name="categoria"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Categoría</FormLabel>
-                                            <Select
-                                                onValueChange={(value) => field.onChange(value)}
-                                                defaultValue={field.value}>
-                                                <FormControl>
-                                                    <SelectTrigger className="w-full">
-                                                        <SelectValue
-                                                            placeholder={field.value ? field.value : "Categoría de la incidencia"}
-                                                        />
-                                                    </SelectTrigger>
-                                                </FormControl>
-                                                <SelectContent className="z-[999]">
-                                                    {incidenciaCategoriaMap.map((categoria, index) => (
-                                                        <SelectItem
-                                                            value={categoria.value}
-                                                            key={index}
-                                                            className={`text-${categoria.color}`}
-                                                        >
-                                                            <categoria.icon className="ml-2" />
-                                                            {categoria.label}
-                                                        </SelectItem>
-                                                    ))}
-                                                </SelectContent>
-                                            </Select>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
+                                <div className="grid grid-cols-2 gap-4">
+                                    <FormField
+                                        control={form.control}
+                                        name="severidad"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel className="text-xs text-muted-foreground">Severidad (Auto)</FormLabel>
+                                                <div className="flex items-center h-10 px-3 rounded-md border bg-muted/50 text-sm font-medium">
+                                                    {field.value || "-"}
+                                                </div>
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={form.control}
+                                        name="categoria"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel className="text-xs text-muted-foreground">Categoría (Auto)</FormLabel>
+                                                <div className="flex items-center h-10 px-3 rounded-md border bg-muted/50 text-sm font-medium">
+                                                    {field.value || "-"}
+                                                </div>
+                                            </FormItem>
+                                        )}
+                                    />
+                                </div>
 
                                 <FormField
                                     control={form.control}
                                     name="descripcion"
                                     render={({ field }) => (
-                                        <FormItem className="w-full col-span-2">
-                                            <FormLabel className="text-sm font-medium">
-                                                Descripción
-                                            </FormLabel>
+                                        <FormItem>
+                                            <FormLabel>Descripción detallada</FormLabel>
                                             <FormControl>
                                                 <Textarea
-                                                    className="h-20 resize-none w-full"
+                                                    placeholder="Describe el problema, ruidos extraños, o circunstancias..."
+                                                    className="h-24 resize-none"
                                                     {...field}
                                                 />
                                             </FormControl>
@@ -447,229 +312,173 @@ const IncidenciasForm = forwardRef<IncidenciasFormRef, IncidenciasFormProps>(({
                                 />
                             </div>
 
-                            <Separator className="my-4" />
-                            <h3 className="text-xl text-muted-foreground mt-4">Datos del Vehículo</h3>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                                <FormField
-                                    control={form.control}
-                                    name="kmActual"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Kilometraje Actual</FormLabel>
-                                            <FormControl>
-                                                <div className="relative">
-                                                    <Gauge className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                                                    <Input type="number" placeholder="0" className="pl-8" {...field} />
-                                                </div>
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                                <FormField
-                                    control={form.control}
-                                    name="nivelCombustible"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Nivel de Combustible (%)</FormLabel>
-                                            <FormControl>
-                                                <Input type="number" min="0" max="100" placeholder="0" {...field} />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                                <FormField
-                                    control={form.control}
-                                    name="velocidadAprox"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Velocidad Aprox. (km/h)</FormLabel>
-                                            <FormControl>
-                                                <Input type="number" placeholder="0" {...field} />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                                <FormField
-                                    control={form.control}
-                                    name="operable"
-                                    render={({ field }) => (
-                                        <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
-                                            <div className="space-y-0.5">
-                                                <FormLabel>¿Es Operable?</FormLabel>
-                                            </div>
-                                            <FormControl>
+                            <Separator />
+
+                            {/* Vehicle Status */}
+                            <div>
+                                <h4 className="text-sm font-semibold mb-3">Estado del Vehículo</h4>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <FormField
+                                        control={form.control}
+                                        name="kmActual"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel className="text-xs">Kilometraje</FormLabel>
+                                                <FormControl>
+                                                    <div className="relative">
+                                                        <Gauge className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                                                        <Input type="number" placeholder="0" className="pl-9 h-9" {...field} />
+                                                    </div>
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={form.control}
+                                        name="nivelCombustible"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel className="text-xs">Combustible %</FormLabel>
+                                                <FormControl>
+                                                    <Input type="number" min="0" max="100" placeholder="0" className="h-9" {...field} />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                </div>
+                                <div className="mt-4 flex items-center justify-between p-3 rounded-lg border bg-muted/20">
+                                    <span className="text-sm font-medium">¿Unidad Operable?</span>
+                                    <FormField
+                                        control={form.control}
+                                        name="operable"
+                                        render={({ field }) => (
+                                            <div className="flex items-center gap-2">
+                                                <span className={cn("text-xs font-medium px-2 py-1 rounded", field.value ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700")}>
+                                                    {field.value ? "OPERABLE" : "NO OPERABLE"}
+                                                </span>
+                                                {/* Hidden Switch just for state binding if needed, or visual only since its read-only */}
                                                 <Switch
                                                     checked={field.value}
-                                                    onCheckedChange={field.onChange}
+                                                    disabled
+                                                    className="opacity-50"
                                                 />
-                                            </FormControl>
-                                        </FormItem>
-                                    )}
-                                />
+                                            </div>
+                                        )}
+                                    />
+                                </div>
                             </div>
 
-                            <Separator className="my-4" />
-                            <h3 className="text-xl text-muted-foreground mt-4">Evidencias</h3>
-                            <p className="text-sm text-muted-foreground">
-                                Los archivos se subirán cuando guardes la incidencia
-                            </p>
-                            <div className="mt-4">
-                                <label className={`block border-2 border-dashed border-gray-300 dark:border-gray-600 p-6 text-center rounded-lg transition-colors ${isSubmitting || isUploading ? "opacity-50 cursor-not-allowed" : "cursor-pointer hover:border-primary"}`}>
+                            <Separator />
+
+                            {/* File Upload Section */}
+                            <div>
+                                <h4 className="text-sm font-semibold mb-3">Evidencias</h4>
+                                <label className={`block border-2 border-dashed border-muted-foreground/25 hover:border-primary/50 transition-colors p-6 text-center rounded-lg cursor-pointer bg-muted/5`}>
                                     <input
                                         type="file"
                                         multiple
                                         className="hidden"
                                         onChange={handleFileChange}
-                                        disabled={isSubmitting || isUploading}
+                                        disabled={isSubmitting}
                                         accept="image/*,video/*,.pdf,.doc,.docx"
                                     />
-                                    <Upload className="h-10 w-10 mx-auto text-muted-foreground mb-2" />
-                                    <p className="text-muted-foreground font-medium">Arrastra o selecciona archivos</p>
-                                    <p className="text-sm text-muted-foreground mt-1">Imágenes, videos o documentos</p>
+                                    <Upload className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
+                                    <p className="text-sm font-medium text-foreground">Click para subir archivos</p>
+                                    <p className="text-xs text-muted-foreground mt-1">Imágenes o videos del incidente</p>
                                 </label>
 
-                                {/* Lista de archivos pendientes */}
                                 {pendingFiles.length > 0 && (
                                     <div className="mt-4 space-y-2">
-                                        <p className="text-sm font-medium text-muted-foreground">
-                                            {pendingFiles.length} archivo(s) pendiente(s)
-                                        </p>
                                         {pendingFiles.map((pendingFile) => {
                                             const progress = uploadProgress[pendingFile.id]
-
                                             return (
-                                                <div
-                                                    key={pendingFile.id}
-                                                    className="flex items-center gap-3 border rounded-lg p-3"
-                                                >
-                                                    {/* Preview de imagen */}
+                                                <div key={pendingFile.id} className="flex items-center gap-3 border rounded-md p-2 bg-background/50 text-sm">
                                                     {pendingFile.preview ? (
-                                                        <div className="h-12 w-12 rounded overflow-hidden flex-shrink-0">
-                                                            <img
-                                                                src={pendingFile.preview}
-                                                                alt={pendingFile.file.name}
-                                                                className="h-full w-full object-cover"
-                                                            />
-                                                        </div>
+                                                        <img src={pendingFile.preview} className="h-10 w-10 object-cover rounded bg-muted" alt="" />
                                                     ) : (
-                                                        <div className="h-12 w-12 rounded bg-muted flex items-center justify-center flex-shrink-0">
+                                                        <div className="h-10 w-10 rounded bg-muted flex items-center justify-center">
                                                             {getFileTypeIcon(pendingFile.file.type)}
                                                         </div>
                                                     )}
-
-                                                    {/* Info del archivo */}
                                                     <div className="flex-1 min-w-0">
-                                                        <p className="text-sm font-medium truncate">{pendingFile.file.name}</p>
-                                                        <p className="text-xs text-muted-foreground">
-                                                            {(pendingFile.file.size / 1024 / 1024).toFixed(2)} MB
-                                                        </p>
-                                                        {/* Barra de progreso durante la subida */}
+                                                        <p className="truncate font-medium">{pendingFile.file.name}</p>
                                                         {progress !== undefined && progress < 100 && (
-                                                            <div className="w-full bg-gray-200 dark:bg-gray-700 h-1.5 rounded overflow-hidden mt-1">
-                                                                <div
-                                                                    className="h-1.5 bg-blue-500 transition-all"
-                                                                    style={{ width: `${progress}%` }}
-                                                                />
+                                                            <div className="h-1 w-full bg-muted rounded-full mt-1 overflow-hidden">
+                                                                <div className="h-full bg-primary transition-all" style={{ width: `${progress}%` }} />
                                                             </div>
                                                         )}
                                                     </div>
-
-                                                    {/* Estado y botón eliminar */}
-                                                    <div className="flex items-center gap-2 flex-shrink-0">
-                                                        {progress !== undefined && progress < 100 && (
-                                                            <Loader2 className="h-4 w-4 animate-spin text-blue-500" />
-                                                        )}
-                                                        {progress === 100 && (
-                                                            <span className="text-xs text-green-500 font-medium">Listo</span>
-                                                        )}
-                                                        {progress === undefined && (
-                                                            <span className="text-xs text-amber-500 font-medium">Pendiente</span>
-                                                        )}
-                                                        <Button
-                                                            type="button"
-                                                            variant="ghost"
-                                                            size="icon"
-                                                            onClick={() => handleRemovePendingFile(pendingFile.id)}
-                                                            disabled={isSubmitting || isUploading}
-                                                            className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950"
-                                                        >
-                                                            <X className="h-4 w-4" />
-                                                        </Button>
-                                                    </div>
+                                                    <Button
+                                                        type="button"
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        className="h-8 w-8 text-destructive hover:bg-destructive/10"
+                                                        onClick={() => handleRemovePendingFile?.(pendingFile.id)}
+                                                    >
+                                                        <X className="h-4 w-4" />
+                                                    </Button>
                                                 </div>
                                             )
                                         })}
                                     </div>
                                 )}
                             </div>
+
+                            <div className="pt-4 border-t sticky bottom-0 bg-background/95 backdrop-blur p-2 -mx-2 -mb-2 mt-4 z-10">
+                                {submitButton}
+                            </div>
                         </div>
                     </ScrollArea>
 
-                    <div className="space-y-4">
-                        <div className="flex items-center justify-between">
-                            <h3 className="text-xl text-muted-foreground">Ubicación</h3>
+                    <div className="order-1 lg:order-2 lg:col-span-7 h-[250px] lg:h-full flex flex-col rounded-md border overflow-hidden relative shrink-0">
+                        <div className="absolute top-4 left-4 right-4 z-[1000] flex justify-between items-start pointer-events-none">
+                            <div className="bg-background/90 backdrop-blur-md border shadow-lg rounded-lg p-3 max-w-sm pointer-events-auto">
+                                <p className="text-xs font-bold text-muted-foreground uppercase mb-1 flex items-center gap-1">
+                                    <MapPin className="h-3 w-3" /> Ubicación Seleccionada
+                                </p>
+                                <p className="text-sm font-medium leading-tight">
+                                    {form.watch("ubicacion.direccionAproximada") || "Selecciona un punto en el mapa..."}
+                                </p>
+                                {currentLocation && (
+                                    <p className="text-xs text-muted-foreground mt-1 font-mono">
+                                        {currentLocation.lat.toFixed(5)}, {currentLocation.lng.toFixed(5)}
+                                    </p>
+                                )}
+                            </div>
+
                             <Button
                                 type="button"
-                                variant="outline"
+                                variant="default"
+                                size="sm"
                                 onClick={handleGetLocation}
                                 disabled={isLoadingLocation}
+                                className="pointer-events-auto shadow-lg"
                             >
                                 {isLoadingLocation ? (
                                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                                 ) : (
                                     <MapPin className="mr-2 h-4 w-4" />
                                 )}
-                                Usar mi ubicación actual
+                                <span className="hidden sm:inline ml-1">Mi Ubicación</span>
                             </Button>
                         </div>
 
-                        <div className="relative border rounded-lg overflow-hidden h-[700px]">
-                            {/* Overlay if no location */}
-                            {!currentLocation && (
-                                <div className="absolute inset-0 z-[1000] bg-background/80 flex flex-col items-center justify-center p-6 text-center backdrop-blur-sm">
-                                    <MapPin className="h-12 w-12 text-muted-foreground mb-4" />
-                                    <h4 className="text-lg font-semibold">Ubicación no disponible</h4>
-                                    <p className="text-muted-foreground max-w-sm">
-                                        Haz clic en "Usar mi ubicación actual" o habilita los permisos de ubicación en tu navegador para seleccionar un punto en el mapa.
-                                    </p>
-                                </div>
-                            )}
-
-                            {/* Address Display */}
-                            {currentLocation && (
-                                <div className="absolute top-4 left-4 right-4 z-[1000]">
-                                    <div className="p-3 mx-12 shadow-lg rounded-lg bg-background/95 border backdrop-blur supports-[backdrop-filter]:bg-background/60">
-                                        <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1">
-                                            Dirección aproximada
-                                        </p>
-                                        <p className="text-sm">
-                                            {form.watch("ubicacion.direccionAproximada") || "Cargando dirección..."}
-                                        </p>
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* Always render map, default center if no location provided yet (or just keep it unavail in UI) */}
-                            <div className="w-full h-full">
-                                <MapPicker
-                                    lat={currentLocation?.lat}
-                                    lng={currentLocation?.lng}
-                                    onLocationSelect={handleLocationSelect}
-                                />
-                            </div>
+                        <div className="flex-1 w-full relative bg-muted/20">
+                            <MapPicker
+                                lat={currentLocation?.lat}
+                                lng={currentLocation?.lng}
+                                onLocationSelect={handleLocationSelect}
+                                className="h-full w-full"
+                            />
                         </div>
                     </div>
                 </div>
-
-                <Separator className="my-4" />
-                {submitButton}
             </form >
         </Form >
     )
-})
+}
 
 IncidenciasForm.displayName = "IncidenciasForm"
 

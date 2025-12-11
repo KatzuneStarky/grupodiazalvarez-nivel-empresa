@@ -1,8 +1,8 @@
 import { FieldValues, Path } from "react-hook-form";
 
 export interface DatePickerProps {
-    startYear?: number
-    endYear?: number
+  startYear?: number
+  endYear?: number
 }
 
 export interface CustomDatePickerProps<T extends FieldValues> extends DatePickerProps {
@@ -10,4 +10,5 @@ export interface CustomDatePickerProps<T extends FieldValues> extends DatePicker
   label: string;
   disabled?: boolean;
   className?: string
+  defaultToNow?: boolean
 }
