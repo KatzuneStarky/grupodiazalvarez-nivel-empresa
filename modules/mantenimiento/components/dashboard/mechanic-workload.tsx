@@ -3,41 +3,57 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip } from "recharts"
 
-const mechanicData = [
-    { name: "Juan G.", active: 4, completed: 12 },
-    { name: "Carlos L.", active: 3, completed: 15 },
-    { name: "Miguel T.", active: 2, completed: 10 },
-    { name: "Pedro R.", active: 5, completed: 8 },
-    { name: "Luis M.", active: 1, completed: 14 },
-]
+interface MechanicWorkloadProps {
+    data: {
+        name: string;
+        active: number;
+        completed: number;
+    }[];
+}
 
-const MechanicWorkload = () => {
+const MechanicWorkload = ({ data }: MechanicWorkloadProps) => {
     return (
         <Card>
             <CardHeader>
-                <CardTitle>Mechanic Workload</CardTitle>
-                <CardDescription>Active vs completed jobs this month</CardDescription>
+                <CardTitle>Carga de Trabajo de Mecánicos</CardTitle>
+                <CardDescription>Trabajos activos vs completados este mes</CardDescription>
             </CardHeader>
             <CardContent>
-                <ResponsiveContainer width="100%" height={200}>
-                    <BarChart data={mechanicData}>
-                        <XAxis dataKey="name" tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
-                        <YAxis tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
-                        <Tooltip />
-                        <Bar dataKey="active" fill="hsl(var(--warning))" radius={[4, 4, 0, 0]} />
-                        <Bar dataKey="completed" fill="hsl(var(--success))" radius={[4, 4, 0, 0]} />
-                    </BarChart>
-                </ResponsiveContainer>
-                <div className="mt-4 flex items-center justify-center gap-4 text-xs">
-                    <div className="flex items-center gap-2">
-                        <div className="h-3 w-3 rounded bg-[hsl(var(--warning))]" />
-                        <span className="text-muted-foreground">Active Jobs</span>
+                {data.length === 0 ? (
+                    <div className="flex items-center justify-center h-[200px] text-sm text-muted-foreground">
+                        No hay datos de carga de trabajo disponibles
                     </div>
-                    <div className="flex items-center gap-2">
-                        <div className="h-3 w-3 rounded bg-[hsl(var(--success))]" />
-                        <span className="text-muted-foreground">Completed</span>
-                    </div>
-                </div>
+                ) : (
+                    <>
+                        <ResponsiveContainer width="100%" height={200}>
+                            <BarChart data={data}>
+                                <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#9ca3af' }} stroke="#6b7280" />
+                                <YAxis tick={{ fontSize: 11, fill: '#9ca3af' }} stroke="#6b7280" />
+                                <Tooltip
+                                    contentStyle={{
+                                        backgroundColor: 'hsl(var(--popover))',
+                                        border: '1px solid hsl(var(--border))',
+                                        borderRadius: '8px',
+                                        color: 'hsl(var(--popover-foreground))'
+                                    }}
+                                    cursor={{ fill: 'rgba(255, 255, 255, 0.05)' }}
+                                />
+                                <Bar dataKey="active" fill="#f59e0b" radius={[4, 4, 0, 0]} name="Activos" />
+                                <Bar dataKey="completed" fill="#10b981" radius={[4, 4, 0, 0]} name="Completados" />
+                            </BarChart>
+                        </ResponsiveContainer>
+                        <div className="mt-4 flex items-center justify-center gap-4 text-xs">
+                            <div className="flex items-center gap-2">
+                                <div className="h-3 w-3 rounded" style={{ backgroundColor: '#f59e0b' }} />
+                                <span className="text-muted-foreground">Trabajos Activos</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <div className="h-3 w-3 rounded" style={{ backgroundColor: '#10b981' }} />
+                                <span className="text-muted-foreground">Completados</span>
+                            </div>
+                        </div>
+                    </>
+                )}
             </CardContent>
         </Card>
     )

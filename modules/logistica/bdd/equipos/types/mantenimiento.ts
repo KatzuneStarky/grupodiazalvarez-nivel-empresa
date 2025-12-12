@@ -14,6 +14,7 @@ export interface Mantenimiento {
     fechaProximo?: Date;
     proximoKm?: number; // Added next km for maintenance
     equipoId?: string;
+    ordenMantenimientoId?: string; // Link to maintenance order
     Evidencia?: Evidencia[];
     mantenimientoData?: MantenimientoData[];
     createAt: Date;

@@ -3,9 +3,9 @@
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { closestCenter, DndContext, DragEndEvent, KeyboardSensor, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { ChevronDown, ChevronRight, Edit, Plus, Trash2 } from "lucide-react";
 import { Menu, SubMenu } from "@/modules/menus/types/menu-sistema";
-import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import SortableSubmenuRow from "./sorteable-item-sub-menu";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -202,6 +202,7 @@ const SorteableItem: React.FC<SortableItemProps> = ({ id, menu, areaId, empresaI
                                                     areaId={areaId}
                                                     empresaId={empresaId}
                                                     empresaName={empresaName}
+                                                    parentTitle={menu.title}
                                                 />
                                             ))}
                                         </SortableContext>

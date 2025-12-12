@@ -3,15 +3,11 @@
 import MainDashboardMantenimiento from "@/modules/mantenimiento/components/dashboard"
 import MainDashboardLogistica from "@/modules/logistica/main"
 import { useArea } from "@/context/area-context"
-import { useAuth } from "@/context/auth-context"
 
 const AreaPage = () => {
-    const { userBdd } = useAuth()
     const { area } = useArea()
 
     const areaName = area?.nombre?.toLowerCase().trim()
-    const userArea = area?.usuarios
-    //const userRol = userBdd?.rol
 
     const dashboards: Record<string, React.ReactNode> = {
         "logistica": <MainDashboardLogistica />,

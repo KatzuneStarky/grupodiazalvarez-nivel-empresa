@@ -1,10 +1,9 @@
 "use client"
 
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { createAreaSubMenu } from "@/modules/menus/actions/write"
+import { createAreaSubMenu, updateSubMenuData } from "@/modules/menus/actions/write"
 import { SubMenu } from "@/modules/menus/types/menu-sistema"
 import { Alert, AlertTitle } from "@/components/ui/alert"
 import { SubMenuSchema } from "../schema/sub-menu.schema"
@@ -13,7 +12,6 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { Check, ChevronsUpDown } from "lucide-react"
 import { useArea } from "@/context/area-context"
 import { Button } from "@/components/ui/button"
-import { ICONS } from "../constants/menu-icons"
 import { RolUsuario } from "@/enum/user-roles"
 import { Input } from "@/components/ui/input"
 import { useRouter } from "next/navigation"
@@ -23,6 +21,9 @@ import { useForm } from "react-hook-form"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 import { z } from "zod"
+import { useIconifySearch } from "@/hooks/use-iconify-search"
+import { doc, getDoc } from "firebase/firestore"
+import { db } from "@/firebase/client"
 
 const SubMenuForm = ({
     menuId,
@@ -36,6 +37,9 @@ const SubMenuForm = ({
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
     const [subMenu, setSubMenu] = useState<SubMenu | null>(null)
     const [loading, setLoading] = useState<boolean>(false)
+
+    const [search, setSearch] = useState<string>("")
+    const { results, loading: iconLoading } = useIconifySearch(search)
 
     const { empresa } = useEmpresa()
     const { area } = useArea()
@@ -52,37 +56,91 @@ const SubMenuForm = ({
         }
     })
 
+    useEffect(() => {
+        const fetchSubMenu = async () => {
+            if (subMenuId && empresa?.id && area?.id && menuId) {
+                setLoading(true)
+                try {
+                    const subMenuRef = doc(db, "empresas", empresa?.id, "areas", area?.id, "menus", menuId, "subMenus", subMenuId)
+                    const snap = await getDoc(subMenuRef)
+                    if (snap.exists()) {
+                        const data = snap.data() as SubMenu
+                        setSubMenu(data)
+                        form.reset({
+                            allowedRoles: data.rolesAllowed || [],
+                            areaId: area.id,
+                            icon: data.icon,
+                            link: data.path,
+                            name: data.title
+                        })
+                    }
+                } catch (error) {
+                    console.error("Error loading submenu", error)
+                    toast.error("Error al cargar los datos del submenu")
+                } finally {
+                    setLoading(false)
+                }
+            }
+        }
+
+        fetchSubMenu()
+    }, [subMenuId, empresa?.id, area?.id, menuId, form])
+
     const onSubmit = async (values: z.infer<typeof SubMenuSchema>) => {
         try {
             setIsSubmitting(true)
 
-            toast.promise(createAreaSubMenu(empresa?.id ?? "", area?.id ?? "", menuId, {
-                areaId: area?.id ?? "",
-                path: values.link,
-                title: values.name,
-                visible: true,
-                icon: values.icon,
-                menuId,
-                rolesAllowed: values.allowedRoles as RolUsuario[],
-            }), {
-                loading: "Creando submenu favor de esperar...",
-                success: (result) => {
-                    if (result.success) {
-                        return result.message;
-                    } else {
-                        throw new Error(result.message);
-                    }
-                },
-                error: (error) => {
-                    return error.message || "Error al registrar el submenu.";
-                },
-            })
+            if (subMenuId && subMenu) {
+                toast.promise(updateSubMenuData(empresa?.id ?? "", area?.id ?? "", menuId, subMenuId, {
+                    areaId: area?.id ?? "",
+                    path: values.link,
+                    title: values.name,
+                    icon: values.icon,
+                    menuId,
+                    rolesAllowed: values.allowedRoles as RolUsuario[],
+                }), {
+                    loading: "Actualizando submenu favor de esperar...",
+                    success: (result) => {
+                        if (result.success) {
+                            return result.message;
+                        } else {
+                            throw new Error(result.message);
+                        }
+                    },
+                    error: (error) => {
+                        return error.message || "Error al actualizar el submenu.";
+                    },
+                })
+            } else {
+                toast.promise(createAreaSubMenu(empresa?.id ?? "", area?.id ?? "", menuId, {
+                    areaId: area?.id ?? "",
+                    path: values.link,
+                    title: values.name,
+                    visible: true,
+                    icon: values.icon,
+                    menuId,
+                    rolesAllowed: values.allowedRoles as RolUsuario[],
+                }), {
+                    loading: "Creando submenu favor de esperar...",
+                    success: (result) => {
+                        if (result.success) {
+                            return result.message;
+                        } else {
+                            throw new Error(result.message);
+                        }
+                    },
+                    error: (error) => {
+                        return error.message || "Error al registrar el submenu.";
+                    },
+                })
 
-            form.reset()
+                form.reset()
+            }
+
             router.refresh()
         } catch (error) {
-            console.log("Error al crear el submenu", error);
-            toast.error("Error al crear el submenu", {
+            console.log("Error al procesar el submenu", error);
+            toast.error("Error al procesar el submenu", {
                 description: `${error}`
             })
         } finally {
@@ -97,7 +155,7 @@ const SubMenuForm = ({
         } else {
             form.setValue('link', `/${empresa?.nombre}/${area?.nombre}/${menuTitle}`);
         }
-    }, [name, empresa?.nombre, area?.nombre, menuTitle, form.setValue]);
+    }, [name, empresa?.nombre, area?.nombre, menuTitle, form]);
 
     return (
         <Form {...form}>
@@ -115,25 +173,61 @@ const SubMenuForm = ({
                         control={form.control}
                         name="icon"
                         render={({ field }) => (
-                            <FormItem>
+                            <FormItem className="flex flex-col w-full">
                                 <FormLabel>Icono</FormLabel>
-                                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                    <FormControl>
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Seleccione un icono" />
-                                        </SelectTrigger>
-                                    </FormControl>
-                                    <SelectContent>
-                                        {ICONS.map((icon, index) => (
-                                            <SelectItem value={icon.name} key={index}>
-                                                <div className='flex items-center'>
-                                                    <Icon iconName={icon.name || ""} className="mr-2" />
-                                                    {icon.name}
-                                                </div>
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
+                                <Popover>
+                                    <PopoverTrigger asChild>
+                                        <FormControl>
+                                            <Button variant="outline" className="w-full justify-between">
+                                                {field.value ? (
+                                                    <div className="flex items-center gap-2">
+                                                        <Icon iconName={field.value} />
+                                                        {field.value}
+                                                    </div>
+                                                ) : "Seleccionar icono"}
+                                                <ChevronsUpDown className="ml-2 opacity-50" />
+                                            </Button>
+                                        </FormControl>
+                                    </PopoverTrigger>
+                                    <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
+                                        <Command>
+                                            <CommandInput
+                                                placeholder="Buscar icono..."
+                                                onValueChange={(value) => setSearch(value)}
+                                            />
+                                            {iconLoading && <div className="p-4 text-center text-sm">Cargando iconos...</div>}
+                                            {!iconLoading && results.length === 0 && search && (
+                                                <div className="p-4 text-center text-sm">No se encontraron iconos para &quot;{search}&quot;</div>
+                                            )}
+                                            <CommandList>
+                                                <CommandEmpty>No se encontraron resultados.</CommandEmpty>
+                                                <CommandGroup className="max-h-64 overflow-y-auto">
+                                                    {results.map((iconName) => (
+                                                        <CommandItem
+                                                            value={iconName}
+                                                            key={iconName}
+                                                            onSelect={() => {
+                                                                form.setValue("icon", iconName);
+                                                                form.trigger("icon");
+                                                            }}
+                                                        >
+                                                            <div className="flex items-center gap-2">
+                                                                <Icon iconName={iconName} className="mr-2 h-4 w-4" />
+                                                                {iconName}
+                                                            </div>
+                                                            <Check
+                                                                className={cn(
+                                                                    "ml-auto h-4 w-4",
+                                                                    iconName === field.value ? "opacity-100" : "opacity-0"
+                                                                )}
+                                                            />
+                                                        </CommandItem>
+                                                    ))}
+                                                </CommandGroup>
+                                            </CommandList>
+                                        </Command>
+                                    </PopoverContent>
+                                </Popover>
                                 <FormMessage />
                             </FormItem>
                         )}
@@ -144,7 +238,7 @@ const SubMenuForm = ({
                         name="name"
                         render={({ field }) => (
                             <FormItem className="w-full">
-                                <FormLabel>Nombre para el menu</FormLabel>
+                                <FormLabel>Nombre para el sub-menu</FormLabel>
                                 <FormControl>
                                     <Input
                                         disabled={isSubmitting}
@@ -162,7 +256,7 @@ const SubMenuForm = ({
                     name="link"
                     render={({ field }) => (
                         <FormItem className="w-full">
-                            <FormLabel>Link del menu</FormLabel>
+                            <FormLabel>Link del sub-menu</FormLabel>
                             <FormControl>
                                 <Input
                                     className="cursor-not-allowed"

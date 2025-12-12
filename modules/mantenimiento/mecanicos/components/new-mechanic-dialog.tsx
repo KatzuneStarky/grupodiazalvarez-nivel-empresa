@@ -31,30 +31,42 @@ const NewMechanicDialog = ({ open, setOpenDialog }: NewMechanicDialogProps) => {
         }
     })
 
-    const onSubmit = (data: MecanicoSchemaType) => {
+    const onSubmit = async (data: MecanicoSchemaType) => {
+        setIsSubmitting(true)
         try {
-            setIsSubmitting(true)
+            const promiseClosure = async () => {
+                const res = await writeMecanico({
+                    activo: true,
+                    apellidos: data.apellido,
+                    email: data.email,
+                    estado: EstadoMecanico.DISPONIBLE,
+                    nombre: data.nombre,
+                    telefono: data.telefono,
+                    historial: [],
+                    mantenimientosAsignados: []
+                })
 
-            toast.promise(writeMecanico({
-                activo: true,
-                apellidos: data.apellido,
-                email: data.email,
-                estado: EstadoMecanico.DISPONIBLE,
-                nombre: data.nombre,
-                telefono: data.telefono,
-                historial: [],
-                mantenimientosAsignados: []
-            }), {
-                loading: "Creando mecanico...",
-                success: "Mecanico creado exitosamente",
-                error: "Error al crear el mecanico"
+                if (!res.success) {
+                    throw new Error(res.message)
+                }
+
+                return res
+            }
+
+            const promise = promiseClosure()
+
+            toast.promise(promise, {
+                loading: "Creando mecánico...",
+                success: "Mecánico creado exitosamente",
+                error: (err) => err instanceof Error ? err.message : "Error al crear el mecánico"
             })
+
+            await promise
 
             form.reset()
             setOpenDialog(false)
         } catch (error) {
-            console.log(error)
-            toast.error("Error al crear el mecanico")
+            console.error(error)
         } finally {
             setIsSubmitting(false)
         }

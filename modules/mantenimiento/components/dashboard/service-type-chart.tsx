@@ -19,33 +19,41 @@ const ServiceTypeChart = ({ data }: ServiceTypeChartProps) => {
                 <CardDescription>Porcentaje de cada tipo de mantenimiento</CardDescription>
             </CardHeader>
             <CardContent>
-                <ResponsiveContainer width="100%" height={200}>
-                    <PieChart>
-                        <Pie
-                            data={data}
-                            cx="50%"
-                            cy="50%"
-                            innerRadius={50}
-                            outerRadius={80}
-                            paddingAngle={2}
-                            dataKey="value"
-                        >
-                            {data.map((entry, index) => (
-                                <Cell key={`cell-${index}`} fill={entry.color} />
+                {data.length === 0 ? (
+                    <div className="flex items-center justify-center h-[200px] text-sm text-muted-foreground">
+                        No hay datos de mantenimiento disponibles
+                    </div>
+                ) : (
+                    <>
+                        <ResponsiveContainer width="100%" height={200}>
+                            <PieChart>
+                                <Pie
+                                    data={data}
+                                    cx="50%"
+                                    cy="50%"
+                                    innerRadius={50}
+                                    outerRadius={80}
+                                    paddingAngle={2}
+                                    dataKey="value"
+                                >
+                                    {data.map((entry, index) => (
+                                        <Cell key={`cell-${index}`} fill={entry.color} />
+                                    ))}
+                                </Pie>
+                                <Tooltip />
+                            </PieChart>
+                        </ResponsiveContainer>
+                        <div className="mt-4 grid grid-cols-2 gap-2">
+                            {data.map((item) => (
+                                <div key={item.name} className="flex items-center gap-2">
+                                    <div className="h-3 w-3 rounded-full" style={{ backgroundColor: item.color }} />
+                                    <span className="text-xs text-muted-foreground">{item.name}</span>
+                                    <span className="ml-auto text-xs font-semibold">{item.value}</span>
+                                </div>
                             ))}
-                        </Pie>
-                        <Tooltip />
-                    </PieChart>
-                </ResponsiveContainer>
-                <div className="mt-4 grid grid-cols-2 gap-2">
-                    {data.map((item) => (
-                        <div key={item.name} className="flex items-center gap-2">
-                            <div className="h-3 w-3 rounded-full" style={{ backgroundColor: item.color }} />
-                            <span className="text-xs text-muted-foreground">{item.name}</span>
-                            <span className="ml-auto text-xs font-semibold">{item.value}</span>
                         </div>
-                    ))}
-                </div>
+                    </>
+                )}
             </CardContent>
         </Card>
     )

@@ -17,7 +17,8 @@ const SortableSubmenuRow: React.FC<{
     areaId: string;
     empresaId: string;
     empresaName: string;
-}> = ({ submenu, parentOrder, areaId, empresaId, empresaName }) => {
+    parentTitle: string;
+}> = ({ submenu, parentOrder, areaId, empresaId, empresaName, parentTitle }) => {
     const {
         attributes,
         listeners,
@@ -83,7 +84,7 @@ const SortableSubmenuRow: React.FC<{
                                     Modifica el submenu de tu área.
                                 </DialogDescription>
                             </DialogHeader>
-                            <SubMenuForm menuId={submenu.menuId} menuTitle={submenu.title} />
+                            <SubMenuForm menuId={submenu.menuId} menuTitle={parentTitle} subMenuId={submenu.id} />
                         </DialogContent>
                     </Dialog>
                     <Button

@@ -254,21 +254,21 @@ const OrdenesMantenimientoPage = () => {
 
     const getPriorityColor = (prioridad: string) => {
         switch (prioridad) {
-            case 'Baja': return "bg-blue-100 text-blue-700 hover:bg-blue-100"
-            case 'Media': return "bg-yellow-100 text-yellow-700 hover:bg-yellow-100"
-            case 'Alta': return "bg-orange-100 text-orange-700 hover:bg-orange-100"
-            case 'Critica': return "bg-red-100 text-red-700 hover:bg-red-100"
-            default: return "bg-gray-100 text-gray-700"
+            case 'Baja': return "bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-500/20 dark:text-blue-300 dark:border-blue-500/30"
+            case 'Media': return "bg-yellow-100 text-yellow-700 border-yellow-200 dark:bg-yellow-500/20 dark:text-yellow-300 dark:border-yellow-500/30"
+            case 'Alta': return "bg-orange-100 text-orange-700 border-orange-200 dark:bg-orange-500/20 dark:text-orange-300 dark:border-orange-500/30"
+            case 'Critica': return "bg-red-100 text-red-700 border-red-200 dark:bg-red-500/20 dark:text-red-300 dark:border-red-500/30"
+            default: return "bg-gray-100 text-gray-700 border-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700"
         }
     }
 
     const getStatusColor = (estado: string) => {
         switch (estado) {
-            case 'Pendiente': return "text-yellow-600 bg-yellow-50 border-yellow-200"
-            case 'En Progreso': return "text-blue-600 bg-blue-50 border-blue-200"
-            case 'Completada': return "text-green-600 bg-green-50 border-green-200"
-            case 'Cancelada': return "text-gray-600 bg-gray-50 border-gray-200"
-            default: return "text-gray-600"
+            case 'Pendiente': return "text-yellow-700 bg-yellow-50 border-yellow-200 dark:text-yellow-400 dark:bg-yellow-500/10 dark:border-yellow-500/20"
+            case 'En Progreso': return "text-blue-700 bg-blue-50 border-blue-200 dark:text-blue-400 dark:bg-blue-500/10 dark:border-blue-500/20"
+            case 'Completada': return "text-green-700 bg-green-50 border-green-200 dark:text-green-400 dark:bg-green-500/10 dark:border-green-500/20"
+            case 'Cancelada': return "text-gray-700 bg-gray-50 border-gray-200 dark:text-gray-400 dark:bg-gray-500/10 dark:border-gray-500/20"
+            default: return "text-gray-600 dark:text-gray-400"
         }
     }
 
@@ -300,48 +300,102 @@ const OrdenesMantenimientoPage = () => {
             }
         }
 
+        const priorityColor = getPriorityColor(orden.prioridad)
+        const statusColor = getStatusColor(orden.estado)
+
+        // Map priority to a tailwind color
+        const getPriorityBorderColor = (p: string) => {
+            switch (p) {
+                case 'Critica': return "border-l-red-500 dark:border-l-red-600"
+                case 'Alta': return "border-l-orange-500 dark:border-l-orange-600"
+                case 'Media': return "border-l-yellow-500 dark:border-l-yellow-600"
+                case 'Baja': return "border-l-blue-500 dark:border-l-blue-600"
+                default: return "border-l-gray-300 dark:border-l-gray-600"
+            }
+        }
+
         return (
-            <Card className={`flex flex-col h-full hover:shadow-md transition-shadow ${isAssignedToMe ? 'border-blue-500/50 dark:border-blue-500/50 bg-blue-50/10' : ''}`}>
-                <CardHeader className="pb-3">
-                    <div className="flex justify-between items-start gap-2">
-                        <Badge variant="outline" className={getStatusColor(orden.estado)}>
+            <Card className={`group relative flex flex-col h-full overflow-hidden transition-all duration-300 hover:shadow-xl border-l-[6px] ${getPriorityBorderColor(orden.prioridad)} ${isAssignedToMe ? 'bg-blue-50/20 border-blue-200 dark:bg-blue-900/10 dark:border-blue-800' : 'hover:border-primary/50 dark:hover:border-primary/50'}`}>
+
+                {/* Background Pattern for visuals */}
+                <div className="absolute top-0 right-0 p-4 opacity-[0.03] dark:opacity-[0.05] group-hover:opacity-[0.07] dark:group-hover:opacity-[0.08] transition-opacity pointer-events-none">
+                    <ClipboardList className="w-24 h-24" />
+                </div>
+
+                <CardHeader className="pb-3 relative z-10">
+                    <div className="flex justify-between items-start gap-2 mb-2">
+                        <Badge variant="outline" className={`${statusColor} font-medium px-2.5 py-0.5 shadow-sm backdrop-blur-sm`}>
                             {orden.estado}
                         </Badge>
-                        <Badge className={getPriorityColor(orden.prioridad)}>
-                            {orden.prioridad}
-                        </Badge>
+                        {orden.prioridad === 'Critica' && (
+                            <Badge variant="destructive" className="animate-pulse shadow-md">
+                                Crítica
+                            </Badge>
+                        )}
+                        {orden.prioridad !== 'Critica' && (
+                            <Badge variant="secondary" className="bg-muted/80 text-muted-foreground hover:bg-muted text-[10px] uppercase tracking-wider dark:bg-muted/50">
+                                {orden.prioridad}
+                            </Badge>
+                        )}
                     </div>
-                    <CardTitle className="text-lg mt-2 flex items-center gap-2">
-                        <Wrench className="h-5 w-5 text-muted-foreground" />
-                        {equipo ? `Unidad ${equipo.numEconomico}` : "Unidad Desconocida"}
-                    </CardTitle>
-                    <CardDescription className="line-clamp-2 min-h-[40px]">
-                        {orden.descripcionProblema}
-                    </CardDescription>
+
+                    <div className="space-y-1">
+                        <CardTitle className="text-lg font-bold flex items-center gap-2 text-foreground/90">
+                            {equipo ? (
+                                <>
+                                    <div className="p-1.5 rounded-md bg-primary/10 text-primary dark:bg-primary/20 dark:text-primary-foreground/90">
+                                        <Wrench className="h-4 w-4" />
+                                    </div>
+                                    <span>Unidad {equipo.numEconomico}</span>
+                                </>
+                            ) : (
+                                <span className="text-muted-foreground">Unidad Desconocida</span>
+                            )}
+                        </CardTitle>
+                        <CardDescription className="line-clamp-2 min-h-[40px] text-sm leading-relaxed pt-1 text-muted-foreground/90 dark:text-muted-foreground">
+                            {orden.descripcionProblema}
+                        </CardDescription>
+                    </div>
                 </CardHeader>
-                <CardContent className="flex-1 pb-3 space-y-4">
-                    <div className="text-sm text-muted-foreground space-y-2">
-                        <div className="flex items-center gap-2">
-                            <Clock className="h-4 w-4" />
+
+                <CardContent className="flex-1 pb-3 space-y-4 relative z-10">
+                    <div className="grid grid-cols-1 gap-2 text-xs text-muted-foreground">
+                        <div className="flex items-center gap-2 bg-muted/40 p-2 rounded border border-muted/50 dark:bg-muted/20 dark:border-border/30">
+                            <Clock className="h-3.5 w-3.5 text-primary/70 dark:text-primary/60" />
+                            <span className="font-medium">
+                                {format(parseFirebaseDate(orden.createAt), "PPP", { locale: es })}
+                            </span>
+                            <span className="text-muted-foreground/60">•</span>
                             <span>
-                                {format(parseFirebaseDate(orden.createAt), "PPP p", { locale: es })}
+                                {format(parseFirebaseDate(orden.createAt), "p", { locale: es })}
                             </span>
                         </div>
                     </div>
 
-                    {assignedMecanico && (
-                        <div className="flex items-center gap-2 text-sm bg-muted/50 p-2 rounded-md">
-                            <User className="h-4 w-4 text-muted-foreground" />
-                            <span className="font-medium truncate">
-                                {isAssignedToMe ? "Asignado a mí" : `${assignedMecanico.nombre} ${assignedMecanico.apellidos}`}
-                            </span>
+                    {assignedMecanico ? (
+                        <div className={`flex items-center gap-3 p-2.5 rounded-lg border transition-colors ${isAssignedToMe ? 'bg-blue-100/40 border-blue-200 text-blue-900 dark:bg-blue-900/30 dark:border-blue-800 dark:text-blue-100' : 'bg-muted/30 border-transparent text-muted-foreground dark:bg-muted/10'}`}>
+                            <div className={`h-8 w-8 rounded-full flex items-center justify-center text-xs font-bold ${isAssignedToMe ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20 dark:bg-blue-500' : 'bg-muted text-muted-foreground dark:bg-secondary dark:text-secondary-foreground'}`}>
+                                {assignedMecanico.nombre.charAt(0)}{assignedMecanico.apellidos.charAt(0)}
+                            </div>
+                            <div className="flex flex-col">
+                                <span className={`text-[10px] uppercase tracking-wider opacity-80 ${isAssignedToMe ? 'dark:text-blue-200' : ''}`}>Asignado a</span>
+                                <span className="font-semibold text-sm truncate max-w-[150px]">
+                                    {isAssignedToMe ? "Mí (Tú)" : `${assignedMecanico.nombre} ${assignedMecanico.apellidos}`}
+                                </span>
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="flex items-center gap-2 p-2.5 rounded-lg border border-dashed border-yellow-300 bg-yellow-50/50 text-yellow-700 dark:border-yellow-700/50 dark:bg-yellow-900/20 dark:text-yellow-400">
+                            <AlertTriangle className="w-4 h-4" />
+                            <span className="text-xs font-medium">Sin asignar</span>
                         </div>
                     )}
                 </CardContent>
-                <CardFooter className="pt-0 flex gap-2">
+
+                <CardFooter className="pt-2 pb-4 relative z-10">
                     {orden.estado === 'Pendiente' ? (
                         <Button
-                            className="w-full bg-blue-600 hover:bg-blue-700"
+                            className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-md hover:shadow-lg transition-all duration-300 dark:from-blue-700 dark:to-indigo-700 dark:hover:from-blue-600 dark:hover:to-indigo-600"
                             onClick={onAccept}
                             disabled={isAccepting || !currentMecanico}
                         >
@@ -354,11 +408,10 @@ const OrdenesMantenimientoPage = () => {
                                 "Aceptar Orden"
                             )}
                         </Button>
-                        // ... (inside OrdenCard)
                     ) : (
                         <Button
                             variant="outline"
-                            className="w-full"
+                            className="w-full border-input hover:bg-accent hover:text-accent-foreground group-hover:border-primary/50 transition-colors dark:hover:bg-primary/10 dark:hover:text-primary-foreground"
                             onClick={() => {
                                 setSelectedOrder(orden)
                                 setDetailsOpen(true)
@@ -372,79 +425,87 @@ const OrdenesMantenimientoPage = () => {
         )
     }
 
+    const EmptyState = ({ message }: { message: string }) => (
+        <div className="col-span-full py-16 flex flex-col items-center justify-center text-center p-8 border-2 border-dashed border-muted-foreground/20 rounded-xl bg-muted/5 hover:bg-muted/10 transition-colors dark:bg-muted/10 dark:border-muted-foreground/10">
+            <div className="bg-muted p-4 rounded-full mb-4 ring-8 ring-muted/30 dark:bg-muted/20 dark:ring-muted/10">
+                <ClipboardList className="w-8 h-8 text-muted-foreground dark:text-muted-foreground/80" />
+            </div>
+            <h3 className="font-semibold text-lg text-foreground mb-1">Sin órdenes</h3>
+            <p className="text-muted-foreground text-sm max-w-sm">{message}</p>
+        </div>
+    )
+
     return (
-        <div className="w-full container mx-auto py-6 px-4 md:px-8 space-y-6">
+        <div className="w-full container mx-auto py-8 px-4 md:px-6 lg:px-8 space-y-8 animate-in fade-in duration-500">
             <PageTitle
                 title="Órdenes de Mantenimiento"
                 description="Gestión y seguimiento de trabajos de taller"
                 icon={<ClipboardList className="h-12 w-12 text-muted-foreground" />}
             />
-            <Separator />
 
-            <div className="flex flex-col lg:flex-row gap-8">
-                {/* Main Content - Orders (Left 2/3) */}
-                <div className="w-full lg:w-2/3 space-y-6">
+            <div className="flex flex-col lg:flex-row gap-8 items-start">
+                <div className="w-full lg:flex-1 space-y-6 min-w-0">
                     <Tabs defaultValue="pendientes" className="w-full">
-                        <TabsList className="grid w-full grid-cols-4">
-                            <TabsTrigger value="pendientes">Pendientes</TabsTrigger>
-                            <TabsTrigger value="en_progreso">En Progreso</TabsTrigger>
-                            <TabsTrigger value="completadas">Completadas</TabsTrigger>
-                            <TabsTrigger value="todas">Todas</TabsTrigger>
+                        <TabsList className="grid w-full grid-cols-4 p-1 bg-muted/60 rounded-xl mb-6">
+                            <TabsTrigger value="pendientes" className="rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all duration-200">
+                                Pendientes
+                            </TabsTrigger>
+                            <TabsTrigger value="en_progreso" className="rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all duration-200">
+                                En Progreso
+                            </TabsTrigger>
+                            <TabsTrigger value="completadas" className="rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all duration-200">
+                                Completadas
+                            </TabsTrigger>
+                            <TabsTrigger value="todas" className="rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all duration-200">
+                                Todas
+                            </TabsTrigger>
                         </TabsList>
 
-                        <div className="mt-6">
-                            {/* Pendientes Content */}
-                            <TabsContent value="pendientes" className="mt-0">
-                                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 gap-4">
-                                    {ordenes.filter(o => o.estado === 'Pendiente').map(orden => (
-                                        <OrdenCard key={orden.id} orden={orden} />
-                                    ))}
-                                    {ordenes.filter(o => o.estado === 'Pendiente').length === 0 && (
-                                        <div className="col-span-full py-12 text-center text-muted-foreground bg-muted/30 rounded-lg border border-dashed">
-                                            No hay órdenes pendientes
-                                        </div>
+                        <div className="min-h-[400px]">
+                            <TabsContent value="pendientes" className="mt-0 focus-visible:outline-none">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                    {ordenes.filter(o => o.estado === 'Pendiente').length > 0 ? (
+                                        ordenes.filter(o => o.estado === 'Pendiente').map(orden => (
+                                            <OrdenCard key={orden.id} orden={orden} />
+                                        ))
+                                    ) : (
+                                        <EmptyState message="No hay órdenes pendientes de aceptación en este momento." />
                                     )}
                                 </div>
                             </TabsContent>
 
-                            {/* En Progreso Content */}
-                            <TabsContent value="en_progreso" className="mt-0">
-                                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 gap-4">
-                                    {ordenes.filter(o => o.estado === 'En Progreso').map(orden => (
-                                        <OrdenCard key={orden.id} orden={orden} />
-                                    ))}
-                                    {ordenes.filter(o => o.estado === 'En Progreso').length === 0 && (
-                                        <div className="col-span-full py-12 text-center text-muted-foreground bg-muted/30 rounded-lg border border-dashed">
-                                            No hay órdenes en progreso
-                                        </div>
+                            <TabsContent value="en_progreso" className="mt-0 focus-visible:outline-none">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                    {ordenes.filter(o => o.estado === 'En Progreso').length > 0 ? (
+                                        ordenes.filter(o => o.estado === 'En Progreso').map(orden => (
+                                            <OrdenCard key={orden.id} orden={orden} />
+                                        ))
+                                    ) : (
+                                        <EmptyState message="No tienes ninguna orden en progreso actualmente." />
                                     )}
                                 </div>
                             </TabsContent>
 
-                            {/* Completadas Content */}
-                            <TabsContent value="completadas" className="mt-0">
-                                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 gap-4">
-                                    {ordenes.filter(o => o.estado === 'Completada').map(orden => (
-                                        <OrdenCard key={orden.id} orden={orden} />
-                                    ))}
-                                    {ordenes.filter(o => o.estado === 'Completada').length === 0 && (
-                                        <div className="col-span-full py-12 text-center text-muted-foreground bg-muted/30 rounded-lg border border-dashed">
-                                            No hay órdenes completadas
-                                        </div>
+                            <TabsContent value="completadas" className="mt-0 focus-visible:outline-none">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                    {ordenes.filter(o => o.estado === 'Completada').length > 0 ? (
+                                        ordenes.filter(o => o.estado === 'Completada').map(orden => (
+                                            <OrdenCard key={orden.id} orden={orden} />
+                                        ))
+                                    ) : (
+                                        <EmptyState message="Aún no has completado ninguna orden de mantenimiento." />
                                     )}
                                 </div>
                             </TabsContent>
 
-                            {/* Todas Content */}
-                            <TabsContent value="todas" className="mt-0">
-                                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 gap-4">
-                                    {ordenes.map(orden => (
-                                        <OrdenCard key={orden.id} orden={orden} />
-                                    ))}
-                                    {ordenes.length === 0 && (
-                                        <div className="col-span-full py-12 text-center text-muted-foreground bg-muted/30 rounded-lg border border-dashed">
-                                            No hay órdenes registradas
-                                        </div>
+                            <TabsContent value="todas" className="mt-0 focus-visible:outline-none">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                    {ordenes.length > 0 ? (
+                                        ordenes.map(orden => (
+                                            <OrdenCard key={orden.id} orden={orden} />
+                                        ))
+                                    ) : (
+                                        <EmptyState message="No se encontraron registros de órdenes en el sistema." />
                                     )}
                                 </div>
                             </TabsContent>
@@ -452,115 +513,87 @@ const OrdenesMantenimientoPage = () => {
                     </Tabs>
                 </div>
 
-                {/* Sidebar - Mechanic Profile (Right 1/3) */}
-                <div className="w-full lg:w-1/3">
+                <div className="w-full lg:w-80 xl:w-96 shrink-0">
                     <div className="sticky top-6 space-y-6">
                         {currentMecanico ? (
-                            <Card className="border-l-4 border-l-blue-500 overflow-hidden">
-                                <CardHeader className="bg-muted/30 pb-4">
-                                    <div className="flex items-center gap-4">
-                                        <div className="h-16 w-16 rounded-full bg-blue-100 flex items-center justify-center border-2 border-white shadow-sm">
-                                            <User className="h-8 w-8 text-blue-600" />
-                                        </div>
-                                        <div>
-                                            <CardTitle className="text-xl">
-                                                {currentMecanico.nombre} {currentMecanico.apellidos}
-                                            </CardTitle>
-                                            <div className="flex items-center gap-2 mt-1">
-                                                <Badge variant={currentMecanico.estado === 'DISPONIBLE' ? 'default' : 'secondary'} className="text-xs">
-                                                    {currentMecanico.estado}
-                                                </Badge>
+                            <Card className="overflow-hidden border-none shadow-lg bg-gradient-to-br from-card to-secondary/10">
+                                <div className="h-24 bg-gradient-to-r from-blue-600 to-indigo-600 relative">
+                                    <div className="absolute -bottom-10 left-6">
+                                        <div className="h-20 w-20 rounded-full bg-background p-1 shadow-xl">
+                                            <div className="h-full w-full rounded-full bg-blue-100 dark:bg-blue-950 flex items-center justify-center overflow-hidden">
+                                                <span className="text-2xl font-bold text-blue-700 dark:text-blue-300">
+                                                    {currentMecanico.nombre.charAt(0)}{currentMecanico.apellidos.charAt(0)}
+                                                </span>
                                             </div>
                                         </div>
                                     </div>
-                                </CardHeader>
-                                <CardContent className="pt-6 space-y-6">
-                                    {/* Contact Info */}
-                                    <div className="space-y-3">
-                                        <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
-                                            Información de Contacto
-                                        </h4>
-                                        <div className="space-y-2">
-                                            <div className="flex items-center gap-3 text-sm">
-                                                <Mail className="h-4 w-4 text-muted-foreground" />
-                                                <span className="truncate">{currentMecanico.email || "Sin email"}</span>
-                                            </div>
-                                            <div className="flex items-center gap-3 text-sm">
-                                                <Phone className="h-4 w-4 text-muted-foreground" />
-                                                <span>{currentMecanico.telefono || "Sin teléfono"}</span>
-                                            </div>
+                                </div>
+                                <CardContent className="pt-12 pb-6 px-6">
+                                    <div>
+                                        <h3 className="font-bold text-xl truncate" title={`${currentMecanico.nombre} ${currentMecanico.apellidos}`}>
+                                            {currentMecanico.nombre} {currentMecanico.apellidos}
+                                        </h3>
+                                        <div className="flex items-center gap-2 mt-1">
+                                            <Badge variant={currentMecanico.estado === 'DISPONIBLE' ? 'default' : 'secondary'} className="text-xs font-normal">
+                                                {currentMecanico.estado}
+                                            </Badge>
                                         </div>
                                     </div>
 
-                                    <Separator />
-
-                                    {/* Stats */}
-                                    <div className="space-y-3">
-                                        <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-2">
-                                            <Activity className="h-4 w-4" />
-                                            Actividad Reciente
-                                        </h4>
-                                        <div className="grid grid-cols-2 gap-4">
-                                            <div className="bg-blue-50 dark:bg-blue-900/10 p-3 rounded-lg border border-blue-100 dark:border-blue-900/20 text-center">
-                                                <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-                                                    {activeOrdersCount}
+                                    <div className="mt-6 space-y-4">
+                                        <div className="p-3 bg-background/50 rounded-lg border shadow-sm space-y-3">
+                                            <div className="flex items-center gap-3 text-sm text-foreground/80">
+                                                <div className="p-1.5 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-md">
+                                                    <Mail className="h-3.5 w-3.5" />
                                                 </div>
-                                                <div className="text-xs text-blue-600/80 dark:text-blue-400/80 font-medium">
-                                                    En Progreso
-                                                </div>
+                                                <span className="truncate flex-1">{currentMecanico.email || "Sin email"}</span>
                                             </div>
-                                            <div className="bg-green-50 dark:bg-green-900/10 p-3 rounded-lg border border-green-100 dark:border-green-900/20 text-center">
-                                                <div className="text-2xl font-bold text-green-600 dark:text-green-400">
-                                                    {completedOrdersCount}
+                                            <div className="flex items-center gap-3 text-sm text-foreground/80">
+                                                <div className="p-1.5 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-md">
+                                                    <Phone className="h-3.5 w-3.5" />
                                                 </div>
-                                                <div className="text-xs text-green-600/80 dark:text-green-400/80 font-medium">
-                                                    Completadas
-                                                </div>
+                                                <span className="flex-1">{currentMecanico.telefono || "Sin teléfono"}</span>
+                                            </div>
+                                        </div>
+
+                                        <div className="grid grid-cols-2 gap-3">
+                                            <div className="flex flex-col items-center justify-center p-3 bg-blue-50/50 dark:bg-blue-900/10 rounded-xl border border-blue-100 dark:border-blue-800 transition-colors">
+                                                <span className="text-2xl font-bold text-blue-600 dark:text-blue-400">{activeOrdersCount}</span>
+                                                <span className="text-[10px] font-medium uppercase tracking-wider text-blue-600/70 dark:text-blue-400/70 mt-1">En curso</span>
+                                            </div>
+                                            <div className="flex flex-col items-center justify-center p-3 bg-green-50/50 dark:bg-green-900/10 rounded-xl border border-green-100 dark:border-green-800 transition-colors">
+                                                <span className="text-2xl font-bold text-green-600 dark:text-green-400">{completedOrdersCount}</span>
+                                                <span className="text-[10px] font-medium uppercase tracking-wider text-green-600/70 dark:text-green-400/70 mt-1">Completados</span>
+                                            </div>
+                                        </div>
+
+                                        <div className="pt-2">
+                                            <div className="flex items-center justify-between text-xs text-muted-foreground border-t pt-3">
+                                                <span className="flex items-center gap-1">
+                                                    <CalendarCheck className="h-3 w-3" />
+                                                    Desde
+                                                </span>
+                                                <span className="font-medium">
+                                                    {currentMecanico.createdAt
+                                                        ? format(parseFirebaseDate(currentMecanico.createdAt), "MMM yyyy", { locale: es })
+                                                        : "N/A"
+                                                    }
+                                                </span>
                                             </div>
                                         </div>
                                     </div>
-
-                                    <Separator />
-
-                                    <div className="pt-2">
-                                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                                            <Briefcase className="h-3 w-3" />
-                                            <span>Mecánico registrado desde:</span>
-                                        </div>
-                                        <div className="mt-1 flex items-center gap-2 text-sm font-medium pl-5">
-                                            <CalendarCheck className="h-3 w-3 text-muted-foreground" />
-                                            {currentMecanico.createdAt
-                                                ? format(parseFirebaseDate(currentMecanico.createdAt), "PPP", { locale: es })
-                                                : "Fecha desconocida"
-                                            }
-                                        </div>
-                                    </div>
-
                                 </CardContent>
-                                <CardFooter className="bg-muted/10">
-                                    <Button variant="outline" className="w-full text-xs h-8">
-                                        Editar Perfil
-                                    </Button>
-                                </CardFooter>
                             </Card>
                         ) : (
-                            <Card className="border-dashed">
-                                <CardContent className="py-10 text-center space-y-4">
-                                    <div className="mx-auto w-12 h-12 bg-muted rounded-full flex items-center justify-center">
-                                        <User className="h-6 w-6 text-muted-foreground" />
-                                    </div>
-                                    <div>
-                                        <p className="font-medium">Perfil no encontrado</p>
-                                        <p className="text-sm text-muted-foreground mt-1">
-                                            No se pudo cargar la información del mecánico actual.
-                                        </p>
-                                    </div>
+                            <Card className="border-dashed bg-muted/40 shadow-none">
+                                <CardContent className="py-12 text-center text-muted-foreground">
+                                    <User className="h-10 w-10 mx-auto mb-3 opacity-20" />
+                                    <p className="font-medium">Perfil no disponible</p>
                                 </CardContent>
                             </Card>
                         )}
                     </div>
                 </div>
-
             </div>
 
             <OrdenDetallesDialog
