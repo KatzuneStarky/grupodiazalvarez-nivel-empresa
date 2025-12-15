@@ -25,6 +25,8 @@ export const MantenimientoSchema = z.object({
     tipoMantenimiento: z.enum(['Preventivo', 'Correctivo', 'Predictivo', 'Emergencia']),
     estado: z.enum(['Pendiente', 'En Progreso', 'Completado', 'Cancelado']),
     equipoId: z.string(),
+    ordenMantenimientoId: z.string().optional(), // Relación con la orden de mantenimiento
+    incidenciaId: z.string().optional(), // Relación con la incidencia original
     mantenimientoData: z.array(MantenimientoDataSchema),
     Evidencia: z.array(EvidenciaSchema),
 });

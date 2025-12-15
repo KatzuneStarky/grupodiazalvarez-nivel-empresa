@@ -1,6 +1,6 @@
 "use client"
 
-import { Activity, Briefcase, CalendarCheck, ClipboardList, Clock, Loader2, Mail, Phone, User, Wrench, AlertTriangle, CheckCircle2, MapPin, Gauge, Image as ImageIcon } from "lucide-react"
+import { Activity, Briefcase, CalendarCheck, ClipboardList, Clock, Loader2, Mail, Phone, User, Wrench, AlertTriangle, CheckCircle2, MapPin, Gauge, Image as ImageIcon, ArrowRight } from "lucide-react"
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
@@ -19,6 +19,7 @@ import { doc, getDoc } from "firebase/firestore"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { useEffect, useState } from "react"
+import { useRouter, useParams } from "next/navigation"
 import { db } from "@/firebase/client"
 import { es } from "date-fns/locale"
 import { format } from "date-fns"
@@ -287,6 +288,8 @@ const OrdenesMantenimientoPage = () => {
 
     const OrdenCard = ({ orden }: { orden: OrdenMantenimiento }) => {
         const [isAccepting, setIsAccepting] = useState(false)
+        const router = useRouter()
+        const params = useParams()
         const equipo = equipos.find(e => e.id === orden.equipoId)
         const assignedMecanico = mecanicos.find(m => m.id === orden.mecanicoId)
         const isAssignedToMe = currentMecanico?.id === orden.mecanicoId
@@ -298,6 +301,19 @@ const OrdenesMantenimientoPage = () => {
             } finally {
                 setIsAccepting(false)
             }
+        }
+
+        const handleCompletarMantenimiento = () => {
+            // Construir la URL con query params para prellenar el formulario
+            const queryParams = new URLSearchParams({
+                ordenId: orden.id,
+                equipoId: orden.equipoId,
+                incidenciaId: orden.incidenciaId,
+                descripcion: orden.descripcionProblema,
+                prioridad: orden.prioridad,
+            });
+
+            router.push(`/${params.nombre}/${params.name}/mantenimientos/nuevo?${queryParams.toString()}`)
         }
 
         const priorityColor = getPriorityColor(orden.prioridad)
@@ -408,6 +424,26 @@ const OrdenesMantenimientoPage = () => {
                                 "Aceptar Orden"
                             )}
                         </Button>
+                    ) : orden.estado === 'En Progreso' && isAssignedToMe ? (
+                        <div className="w-full flex gap-2">
+                            <Button
+                                variant="outline"
+                                className="flex-1 border-input hover:bg-accent hover:text-accent-foreground group-hover:border-primary/50 transition-colors dark:hover:bg-primary/10 dark:hover:text-primary-foreground"
+                                onClick={() => {
+                                    setSelectedOrder(orden)
+                                    setDetailsOpen(true)
+                                }}
+                            >
+                                Ver Detalles
+                            </Button>
+                            <Button
+                                className="flex-1 bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 text-white shadow-md hover:shadow-lg transition-all duration-300 dark:from-emerald-700 dark:to-green-700 dark:hover:from-emerald-600 dark:hover:to-green-600"
+                                onClick={handleCompletarMantenimiento}
+                            >
+                                <CheckCircle2 className="mr-2 h-4 w-4" />
+                                Completar
+                            </Button>
+                        </div>
                     ) : (
                         <Button
                             variant="outline"

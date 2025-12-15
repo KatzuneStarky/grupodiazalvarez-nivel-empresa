@@ -5,8 +5,9 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import UploadEvidencia from "@/modules/mantenimiento/mantenimientos/components/upload-evidencia";
-import { Camera, Check, CheckCircle2, ChevronsUpDown, Trash, Truck, Wrench } from "lucide-react";
+import { Camera, Check, CheckCircle2, ChevronsUpDown, Trash, Truck, Wrench, AlertCircle, Info, User, Mail, Phone, Building2 } from "lucide-react";
 import { tipoServicio } from "@/modules/mantenimiento/mantenimientos/constants/tipo-servicio";
+import { completeOrdenMantenimiento } from "@/modules/mantenimiento/actions/complete-order";
 import { writeMantenimiento } from "@/modules/mantenimiento/mantenimientos/actions/write";
 import { useMecanicos } from "@/modules/mantenimiento/mecanicos/hooks/use-mecanicos";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -19,17 +20,34 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { IconTools } from "@tabler/icons-react";
 import { Input } from "@/components/ui/input";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useAuth } from "@/context/auth-context";
+import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 const NuevoMantenimientoPage = () => {
     const [mantenimientoId, setMantenimientoId] = useState<string | null>(null);
     const [isSubmiting, setIsSubmiting] = useState<boolean>(false);
+    const searchParams = useSearchParams();
+    const { currentUser } = useAuth();
     const { mecanicos } = useMecanicos()
     const { equipos } = useEquipos()
     const router = useRouter()
+
+    // Obtener parámetros de la URL
+    const ordenId = searchParams.get('ordenId');
+    const equipoIdParam = searchParams.get('equipoId');
+    const incidenciaIdParam = searchParams.get('incidenciaId');
+    const descripcionParam = searchParams.get('descripcion');
+    const prioridadParam = searchParams.get('prioridad');
+    const kmActualParam = searchParams.get('kmActual');
+
+    // Buscar el mecánico actual
+    const currentMecanico = mecanicos.find(m => m.email === currentUser?.email);
 
     const form = useForm<MantenimientoSchemaType>({
         resolver: zodResolver(MantenimientoSchema),
@@ -43,29 +61,102 @@ const NuevoMantenimientoPage = () => {
             notas: "",
             tipoServicio: "",
             mantenimientoData: [],
-            estado: "Pendiente",
-            tipoMantenimiento: "Preventivo",
+            estado: "Completado",
+            tipoMantenimiento: "Correctivo",
             proximoKm: 0,
+            ordenMantenimientoId: undefined,
+            incidenciaId: undefined,
         }
     })
+
+    // Prellenar el formulario cuando hay parámetros de URL
+    useEffect(() => {
+        const fetchIncidenciaData = async () => {
+            if (ordenId && equipoIdParam) {
+                // Prellenar equipo
+                form.setValue('equipoId', equipoIdParam);
+
+                // Prellenar mecánico si existe
+                if (currentMecanico) {
+                    form.setValue('mecanicoId', currentMecanico.id);
+                }
+
+                // Prellenar notas con la descripción del problema
+                if (descripcionParam) {
+                    form.setValue('notas', `Problema reportado: ${descripcionParam}\n\nTrabajo realizado:\n`);
+                }
+
+                // Buscar la incidencia para obtener el kilometraje
+                if (incidenciaIdParam && equipoIdParam) {
+                    try {
+                        const { doc, getDoc } = await import('firebase/firestore');
+                        const { db } = await import('@/firebase/client');
+
+                        const incidenciaRef = doc(db, 'equipos', equipoIdParam, 'incidencias', incidenciaIdParam);
+                        const incidenciaSnap = await getDoc(incidenciaRef);
+
+                        if (incidenciaSnap.exists()) {
+                            const incidenciaData = incidenciaSnap.data();
+                            if (incidenciaData.kmActual) {
+                                form.setValue('kmMomento', incidenciaData.kmActual);
+                            }
+                        }
+                    } catch (error) {
+                        console.error('Error fetching incidencia:', error);
+                    }
+                }
+
+                // Guardar referencias
+                form.setValue('ordenMantenimientoId', ordenId);
+                if (incidenciaIdParam) {
+                    form.setValue('incidenciaId', incidenciaIdParam);
+                }
+
+                // Establecer tipo de mantenimiento según prioridad
+                if (prioridadParam === 'Critica') {
+                    form.setValue('tipoMantenimiento', 'Emergencia');
+                } else {
+                    form.setValue('tipoMantenimiento', 'Correctivo');
+                }
+            }
+        };
+
+        fetchIncidenciaData();
+    }, [ordenId, equipoIdParam, incidenciaIdParam, descripcionParam, prioridadParam, currentMecanico, form]);
+
 
     const onSubmit = async (data: MantenimientoSchemaType) => {
         setIsSubmiting(true);
         try {
-            toast.promise(writeMantenimiento(data, data.equipoId), {
-                loading: "Creando mantenimiento, favor de esperar...",
-                success: (result) => {
-                    if (result.success) {
-                        setMantenimientoId(result.id || "");
-                        return result.message;
-                    } else {
-                        throw new Error(result.message);
-                    }
-                },
-                error: (error) => {
-                    return error.message || "Error al registrar el mantenimiento.";
-                },
-            })
+            // Primero crear el mantenimiento
+            const loadingToast = toast.loading(ordenId ? "Completando orden de mantenimiento..." : "Creando mantenimiento, favor de esperar...");
+
+            const result = await writeMantenimiento(data, data.equipoId);
+
+            toast.dismiss(loadingToast);
+
+            if (!result.success) {
+                toast.error(result.message || "Error al registrar el mantenimiento");
+                return;
+            }
+
+            setMantenimientoId(result.id || "");
+            toast.success(result.message);
+
+            // Si viene de una orden, completarla
+            if (ordenId && result.id && currentMecanico) {
+                const completeResult = await completeOrdenMantenimiento(ordenId, currentMecanico.id, result.id);
+
+                if (completeResult.success) {
+                    toast.success("Orden de mantenimiento completada exitosamente", {
+                        description: "El estado de la orden ha sido actualizado a 'Completada'"
+                    });
+                } else {
+                    toast.error("Error al completar la orden", {
+                        description: completeResult.error || "No se pudo actualizar el estado de la orden"
+                    });
+                }
+            }
 
             form.reset()
             router.back()
@@ -94,81 +185,269 @@ const NuevoMantenimientoPage = () => {
                             <Wrench className="h-12 w-12 text-primary" />
                         </div>
                         <div>
-                            <h1 className="text-3xl font-bold">Nuevo registro de mantenimiento</h1>
+                            <h1 className="text-3xl font-bold">
+                                {ordenId ? 'Completar Orden de Mantenimiento' : 'Nuevo registro de mantenimiento'}
+                            </h1>
                             <p className="text-muted-foreground">
-                                Ingrese la información necesaria para generar el nuevo registro de un nuevo mantenimiento.
+                                {ordenId
+                                    ? 'Complete los detalles del trabajo realizado para finalizar la orden'
+                                    : 'Ingrese la información necesaria para generar el nuevo registro de un nuevo mantenimiento.'
+                                }
                             </p>
                         </div>
                     </div>
+
+                    {ordenId && (
+                        <Alert className="mt-4 border-blue-500/50 bg-blue-50/50 dark:bg-blue-950/20">
+                            <Info className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                            <AlertTitle className="text-blue-900 dark:text-blue-100">Completando Orden de Mantenimiento</AlertTitle>
+                            <AlertDescription className="text-blue-800 dark:text-blue-200">
+                                <div className="space-y-1 text-sm">
+                                    <p>Esta orden de mantenimiento se marcará como <strong>Completada</strong> al guardar este registro.</p>
+                                    <p className="text-xs text-blue-700 dark:text-blue-300">
+                                        Orden ID: <code className="bg-blue-100 dark:bg-blue-900/50 px-1 py-0.5 rounded">{ordenId.slice(0, 8)}...</code>
+                                        {incidenciaIdParam && (
+                                            <> | Incidencia ID: <code className="bg-blue-100 dark:bg-blue-900/50 px-1 py-0.5 rounded">{incidenciaIdParam.slice(0, 8)}...</code></>
+                                        )}
+                                    </p>
+                                </div>
+                            </AlertDescription>
+                        </Alert>
+                    )}
+
                     <Separator className="my-4" />
                     <div className="flex items-center gap-2">
                         <div className="p-2 bg-primary/10 rounded-lg">
                             <Truck className="h-4 w-4 text-primary" />
                         </div>
-                        <h1 className="text-muted-foreground">Informacion del equipo</h1>
+                        <h1 className="text-muted-foreground">Información del equipo y mecánico</h1>
                     </div>
-                    <div className="flex items-center gap-4 mt-4">
-                        <FormField
-                            control={form.control}
-                            name="equipoId"
-                            render={({ field }) => (
-                                <FormItem className="flex flex-col">
-                                    <FormLabel>Equipo</FormLabel>
-                                    <Popover>
-                                        <PopoverTrigger disabled={isSubmiting} asChild>
-                                            <FormControl>
-                                                <Button
-                                                    variant="outline"
-                                                    role="combobox"
-                                                    className={cn(
-                                                        "justify-between",
-                                                        !field.value && "text-muted-foreground"
-                                                    )}
-                                                >
-                                                    {field.value
-                                                        ? equipos.find(
-                                                            (equipo) => equipo.id === field.value
-                                                        )?.numEconomico
-                                                        : "Selecciona un equipo"}
-                                                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                                                </Button>
-                                            </FormControl>
-                                        </PopoverTrigger>
-                                        <PopoverContent className="w-[200px] p-0">
-                                            <Command>
-                                                <CommandInput placeholder="Buscar equipo..." />
-                                                <CommandList>
-                                                    <CommandEmpty>No se encontró ningún equipo.</CommandEmpty>
-                                                    <CommandGroup>
-                                                        {equipos.map((equipo) => (
-                                                            <CommandItem
-                                                                value={equipo.numEconomico}
-                                                                key={equipo.numEconomico}
-                                                                onSelect={() => {
-                                                                    form.setValue("equipoId", equipo.id);
-                                                                }}
-                                                            >
-                                                                {equipo.numEconomico}
-                                                                <Check
-                                                                    className={cn(
-                                                                        "ml-auto",
-                                                                        equipo.id === field.value
-                                                                            ? "opacity-100"
-                                                                            : "opacity-0"
-                                                                    )}
-                                                                />
-                                                            </CommandItem>
-                                                        ))}
-                                                    </CommandGroup>
-                                                </CommandList>
-                                            </Command>
-                                        </PopoverContent>
-                                    </Popover>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
 
+                    {/* Tarjetas Informativas */}
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
+                        {/* Tarjeta de Equipo */}
+                        <Card className="overflow-hidden border-2">
+                            <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20 pb-3">
+                                <div className="flex items-center gap-2">
+                                    <div className="p-2 bg-blue-500/10 rounded-lg">
+                                        <Truck className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                                    </div>
+                                    <CardTitle className="text-lg">Equipo</CardTitle>
+                                </div>
+                            </CardHeader>
+                            <CardContent className="pt-4">
+                                <FormField
+                                    control={form.control}
+                                    name="equipoId"
+                                    render={({ field }) => {
+                                        const selectedEquipo = equipos.find(e => e.id === field.value);
+
+                                        return (
+                                            <FormItem className="flex flex-col">
+                                                <Popover>
+                                                    <PopoverTrigger disabled={isSubmiting} asChild>
+                                                        <FormControl>
+                                                            <Button
+                                                                variant="outline"
+                                                                role="combobox"
+                                                                className={cn(
+                                                                    "justify-between h-11",
+                                                                    !field.value && "text-muted-foreground"
+                                                                )}
+                                                            >
+                                                                {field.value
+                                                                    ? equipos.find(
+                                                                        (equipo) => equipo.id === field.value
+                                                                    )?.numEconomico
+                                                                    : "Selecciona un equipo"}
+                                                                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                                            </Button>
+                                                        </FormControl>
+                                                    </PopoverTrigger>
+                                                    <PopoverContent className="w-[280px] p-0">
+                                                        <Command>
+                                                            <CommandInput placeholder="Buscar equipo..." />
+                                                            <CommandList>
+                                                                <CommandEmpty>No se encontró ningún equipo.</CommandEmpty>
+                                                                <CommandGroup>
+                                                                    {equipos.map((equipo) => (
+                                                                        <CommandItem
+                                                                            value={equipo.numEconomico}
+                                                                            key={equipo.numEconomico}
+                                                                            onSelect={() => {
+                                                                                form.setValue("equipoId", equipo.id);
+                                                                            }}
+                                                                        >
+                                                                            {equipo.numEconomico}
+                                                                            <Check
+                                                                                className={cn(
+                                                                                    "ml-auto",
+                                                                                    equipo.id === field.value
+                                                                                        ? "opacity-100"
+                                                                                        : "opacity-0"
+                                                                                )}
+                                                                            />
+                                                                        </CommandItem>
+                                                                    ))}
+                                                                </CommandGroup>
+                                                            </CommandList>
+                                                        </Command>
+                                                    </PopoverContent>
+                                                </Popover>
+                                                <FormMessage />
+
+                                                {/* Información del equipo seleccionado */}
+                                                {selectedEquipo && (
+                                                    <div className="mt-3 p-3 bg-blue-50/50 dark:bg-blue-950/10 rounded-lg border border-blue-200/50 dark:border-blue-800/50 space-y-2">
+                                                        <div className="flex items-center justify-between">
+                                                            <span className="text-sm font-semibold text-blue-900 dark:text-blue-100">
+                                                                Unidad {selectedEquipo.numEconomico}
+                                                            </span>
+                                                            <Badge variant="outline" className="text-xs">
+                                                                {selectedEquipo.tipoUnidad}
+                                                            </Badge>
+                                                        </div>
+                                                        {selectedEquipo.marca && (
+                                                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                                                <Building2 className="h-3 w-3" />
+                                                                <span>{selectedEquipo.marca} {selectedEquipo.modelo}</span>
+                                                            </div>
+                                                        )}
+                                                        {selectedEquipo.placas && (
+                                                            <div className="text-xs text-muted-foreground">
+                                                                Placas: <span className="font-mono font-semibold">{selectedEquipo.placas}</span>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                )}
+                                            </FormItem>
+                                        );
+                                    }}
+                                />
+                            </CardContent>
+                        </Card>
+
+                        {/* Tarjeta de Mecánico */}
+                        <Card className="overflow-hidden border-2">
+                            <CardHeader className="bg-gradient-to-r from-emerald-50 to-green-50 dark:from-emerald-950/20 dark:to-green-950/20 pb-3">
+                                <div className="flex items-center gap-2">
+                                    <div className="p-2 bg-emerald-500/10 rounded-lg">
+                                        <User className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+                                    </div>
+                                    <CardTitle className="text-lg">Mecánico</CardTitle>
+                                </div>
+                            </CardHeader>
+                            <CardContent className="pt-4">
+                                <FormField
+                                    control={form.control}
+                                    name="mecanicoId"
+                                    render={({ field }) => {
+                                        const selectedMecanico = mecanicos.find(m => m.id === field.value);
+
+                                        return (
+                                            <FormItem className="flex flex-col">
+                                                <Popover>
+                                                    <PopoverTrigger disabled={isSubmiting} asChild>
+                                                        <FormControl>
+                                                            <Button
+                                                                variant="outline"
+                                                                role="combobox"
+                                                                className={cn(
+                                                                    "justify-between h-11",
+                                                                    !field.value && "text-muted-foreground"
+                                                                )}
+                                                            >
+                                                                {field.value
+                                                                    ? (() => {
+                                                                        const mecanico = mecanicos.find(m => m.id === field.value);
+                                                                        return mecanico
+                                                                            ? `${mecanico.nombre} ${mecanico.apellidos}`
+                                                                            : "Selecciona un mecánico";
+                                                                    })()
+                                                                    : "Selecciona un mecánico"}
+                                                                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                                            </Button>
+                                                        </FormControl>
+                                                    </PopoverTrigger>
+                                                    <PopoverContent className="w-[320px] p-0">
+                                                        <Command>
+                                                            <CommandInput placeholder="Buscar mecánico..." />
+                                                            <CommandList>
+                                                                <CommandEmpty>No se encontró ningún mecánico.</CommandEmpty>
+                                                                <CommandGroup>
+                                                                    {mecanicos.map((mecanico) => (
+                                                                        <CommandItem
+                                                                            value={`${mecanico.nombre} ${mecanico.apellidos}`}
+                                                                            key={mecanico.id}
+                                                                            onSelect={() => {
+                                                                                form.setValue("mecanicoId", mecanico.id);
+                                                                            }}
+                                                                        >
+                                                                            <div className="flex flex-col flex-1">
+                                                                                <span className="font-medium">
+                                                                                    {mecanico.nombre} {mecanico.apellidos}
+                                                                                </span>
+                                                                                {mecanico.email && (
+                                                                                    <span className="text-xs text-muted-foreground">
+                                                                                        {mecanico.email}
+                                                                                    </span>
+                                                                                )}
+                                                                            </div>
+                                                                            <Check
+                                                                                className={cn(
+                                                                                    "ml-auto",
+                                                                                    mecanico.id === field.value
+                                                                                        ? "opacity-100"
+                                                                                        : "opacity-0"
+                                                                                )}
+                                                                            />
+                                                                        </CommandItem>
+                                                                    ))}
+                                                                </CommandGroup>
+                                                            </CommandList>
+                                                        </Command>
+                                                    </PopoverContent>
+                                                </Popover>
+                                                <FormMessage />
+
+                                                {/* Información del mecánico seleccionado */}
+                                                {selectedMecanico && (
+                                                    <div className="mt-3 p-3 bg-emerald-50/50 dark:bg-emerald-950/10 rounded-lg border border-emerald-200/50 dark:border-emerald-800/50 space-y-2">
+                                                        <div className="flex items-center justify-between">
+                                                            <span className="text-sm font-semibold text-emerald-900 dark:text-emerald-100">
+                                                                {selectedMecanico.nombre} {selectedMecanico.apellidos}
+                                                            </span>
+                                                            <Badge
+                                                                variant={selectedMecanico.estado === 'DISPONIBLE' ? 'default' : 'secondary'}
+                                                                className="text-xs"
+                                                            >
+                                                                {selectedMecanico.estado}
+                                                            </Badge>
+                                                        </div>
+                                                        {selectedMecanico.email && (
+                                                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                                                <Mail className="h-3 w-3" />
+                                                                <span className="truncate">{selectedMecanico.email}</span>
+                                                            </div>
+                                                        )}
+                                                        {selectedMecanico.telefono && (
+                                                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                                                <Phone className="h-3 w-3" />
+                                                                <span>{selectedMecanico.telefono}</span>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                )}
+                                            </FormItem>
+                                        );
+                                    }}
+                                />
+                            </CardContent>
+                        </Card>
+                    </div>
+
+                    {/* Campos adicionales de fecha y kilometraje */}
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
                         <DatePickerForm<MantenimientoSchemaType>
                             label="Fecha de mantenimiento"
                             name="fecha"
@@ -204,15 +483,22 @@ const NuevoMantenimientoPage = () => {
                     </div>
 
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-4">
+                        <DatePickerForm<MantenimientoSchemaType>
+                            label="Proximo mantenimiento"
+                            name="fechaProximo"
+                            disabled={isSubmiting}
+                        />
+
                         <FormField
                             control={form.control}
-                            name="mecanicoId"
+                            name="proximoKm"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel className="text-sm font-medium">Mecanico</FormLabel>
+                                    <FormLabel className="text-sm font-medium">Próximo Km</FormLabel>
                                     <FormControl>
                                         <Input
-                                            placeholder="X Mecanico"
+                                            type="number"
+                                            placeholder="Kilometraje próximo mantenimiento"
                                             className="h-10"
                                             {...field}
                                         />

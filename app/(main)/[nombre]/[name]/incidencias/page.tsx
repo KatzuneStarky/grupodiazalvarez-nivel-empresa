@@ -33,7 +33,7 @@ const IncidenciasPage = () => {
     } = useAllOperatorData()
 
     useEffect(() => {
-        if (userBdd?.rol === RolUsuario.Admin || userBdd?.rol === RolUsuario.Super_Admin) {
+        if (userBdd?.rol === RolUsuario.Admin || userBdd?.rol === RolUsuario.Super_Admin || userBdd?.rol === RolUsuario.Mecanico) {
             setIsAdmin(true)
         }
     }, [userBdd])

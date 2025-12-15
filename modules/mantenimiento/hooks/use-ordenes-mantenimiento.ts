@@ -1,7 +1,7 @@
+import { OrdenMantenimiento } from "@/modules/mantenimiento/types/orden-mantenimiento"
 import { collection, onSnapshot, query, orderBy } from "firebase/firestore"
 import { useEffect, useState } from "react"
 import { db } from "@/firebase/client"
-import { OrdenMantenimiento } from "@/modules/mantenimiento/types/orden-mantenimiento"
 
 export const useOrdenesMantenimiento = () => {
     const [ordenes, setOrdenes] = useState<OrdenMantenimiento[]>([])
